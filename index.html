@@ -3,9 +3,10 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>article list — {{ site.title }}</title>
+<title>{{ site.title }}</title>
 {% include head.meta %}
 
+<!-- 为了方便别人修改，页面的css只用于当前页面 -->
 <style type="text/css">
 html {
 	display: block;
@@ -66,12 +67,13 @@ body {
 	position: absolute;
 	bottom: 0px;
 	padding: 0;
-	color: red;
+	color: Gray;
 	text-align: center;
 }
 .left-aside .copyright p {
 	margin: 0;
-	color: rgba(255, 255, 255, 0.2);
+	color: Gray;
+	/*color: rgba(255, 255, 255, 0.2); */
 }
 .center-aside {
 	margin-left: 25.0%;	/* left-aside */
@@ -218,7 +220,8 @@ a.dark-grey-link, a.dark-grey-link:hover, a.dark-grey-link:visited {
 	color: #717171;
 }
 a.light-white, a.light-white:hover, a.light-white:visited {
-	color: rgba(255, 255, 255, 0.25);
+	/* color: rgba(255, 255, 255, 0.25); */
+	color: Gray;
 }
 a.white, a.white:hover, a.white:visited {
 	color: white;
@@ -364,7 +367,8 @@ a.white, a.white:hover, a.white:visited {
 		<ul class="nostyle article-list">
       <p> Still unclear how to display this page and make the jekyll template work </p>
 			<script id="post-list-fake" type="text/html">
-				<% for(var i = 0; i < posts.length; i++) { %>
+				<% for(var i = 0; i < 1; i++) { %>
+        <p> where is post.length is set  </p>
 				<li class="has-img">
 					<% if ( posts[i].image ) { %>
 						<a class="wrap-img" href="<%= posts[i].url %>">
@@ -406,7 +410,7 @@ a.white, a.white:hover, a.white:visited {
 			<ul id="paginator" class="paginator"></ul>
 		</div>
 	</div>
-  <!--
+
 	<div class="right-aside">
 		<div id="rss-panel" style="display: none;">
 			<a style="float: right;" href="{{ site.base }}/feed.html#qq" target="_blank">
@@ -421,7 +425,7 @@ a.white, a.white:hover, a.white:visited {
 		</div>
 		<div class="ds-thread" data-thread-key="index" data-max-depth="{{ site.duoshuo_max_depth }}" data-title="{{ site.title }}" data-url="{{ site.domain }}{{ page.url }}"></div>
 	</div>
-  -->
+
 </div>
 <div class="footer"></div>
 
@@ -429,7 +433,7 @@ a.white, a.white:hover, a.white:visited {
 <!-- a{% include duoshuo.js %} -->
 
 <!-- baiduTemplatea -->
-<!--
+
 <script type="text/javascript" src="{{ site.baiduTemplate_url }}"></script>
 <script id="post-list" type="text/html">
 	<% for(var i = 0; i < posts.length; i++) { %>
@@ -467,7 +471,6 @@ a.white, a.white:hover, a.white:visited {
 	</li>
 	<% } %>
 </script>
--->
 
 <!-- jQuery -->
 <script type="text/javascript">
@@ -480,7 +483,9 @@ a.white, a.white:hover, a.white:visited {
 
 <script src="{{ site.w3c_url }}js/pagecache.js"></script>
 
-<!-- <script src="{{ site.w3c_url }}js/jquery.duoshuo.js"></script> -->
+<!-- 
+<script src="{{ site.w3c_url }}js/jquery.duoshuo.js"></script>
+-->
 
 <script src="{{ site.w3c_url }}js/jqPaginator.js"></script>
 
