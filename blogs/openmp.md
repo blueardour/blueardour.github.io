@@ -1,0 +1,64 @@
+
+# Caution when use openmp
+
+1.to break an OpenMP parallel for loop. The key is the omp flush directive.
+
+Usage
+
+If list includes a pointer, the pointer is flushed, not the object being referred to by the pointer. If list is not specified, all shared objects are synchronized except those inaccessible with automatic storage duration.
+
+An implied flush directive appears in conjunction with the following directives:
+
+omp barrier
+
+Entry to and exit from omp critical.
+
+Exit from omp parallel.
+
+Exit from omp for.
+
+Exit from omp sections.
+
+Exit from omp single.
+
+refer: [https://www.ibm.com/support/knowledgecenter/SSGH2K_12.1.0/com.ibm.xlc121.aix.doc/compiler_ref/prag_omp_flush.html](https://www.ibm.com/support/knowledgecenter/SSGH2K_12.1.0/com.ibm.xlc121.aix.doc/compiler_ref/prag_omp_flush.html)
+
+2.how to set variable in the for loop
+
+`void fun()
+{
+  int max_its = 100;
+  bool found = false;
+  #pragma omp parallel for schedule(dynamic, 1) shared(found)
+  for(int t = 0; t < max_its; ++t)
+  {
+    if( ! found ) {
+    ...
+    }
+    if(some condition) {
+  #pragma omp atomic
+      found = true; // valid to make threads exit the for?
+    }
+  }
+}`
+
+refer: [https://stackoverflow.com/questions/18825264/decreasing-number-of-iterations-in-openmp-parallel-for](https://stackoverflow.com/questions/18825264/decreasing-number-of-iterations-in-openmp-parallel-for) 
+
+3.limitation to use openmp
+
+A structured block starts with the open { and ends with the closing }. The return is contained within these braces, so this program also violates the OpenMP definition for a structured block, because it has two exits (one at the return and one at the exit through the brace)
+
+OpenMP places the following five restrictions on which loops can be threaded:
+
+a. The loop variable must be of type signed integer. Unsigned integers, such as DWORD's, will not work.
+
+b. The comparison operation must be in the form loop_variable <, <=, >, or >= loop_invariant_integer
+
+c. The third expression or increment portion of the for loop must be either integer addition or integer subtraction and by a loop invariant value.
+
+d. If the comparison operation is < or <=, the loop variable must increment on every iteration, and conversely, if the comparison operation is > or >=, the loop variable must decrement on every iteration.
+
+e. The loop must be a basic block, meaning no jumps from the inside of the loop to the outside are permitted with the exception of the exit statement, which terminates the whole application. If the statements goto or break are used, they must jump within the loop, not outside it. The same goes for exception handling; exceptions must be caught within the loop.
+
+
+refer: [https://stackoverflow.com/questions/17575329/invalid-controlling-predicate-compiler-error-using-openmp](https://stackoverflow.com/questions/17575329/invalid-controlling-predicate-compiler-error-using-openmp)

@@ -1,0 +1,27 @@
+Fully Convolutional Networks for Semantic Segmentation (CVPR2015)
+
+Employ full convolution network in the image segmentation area.
+
+1.Force all FC layer into conv layer to accept arbitrary input image size. Leverage a pixelwise loss.
+
+2.Align the final feature map to the origin image size by upsample. Three method:
+
+  a. shift-and-stitch: In my understanding, each pixel in final feature map is broadcasted to f * f pixels, thus recover the origin size
+  
+  b. filter rarefaction: seems that it avoid downsample for all conv layer
+  
+  c. deconvolution, also named step fraction convolution or transposed conv
+
+3.Training sample
+
+One can take the whole images as input to train the network, also could extract patches from origin images for training.
+Patches could be random size or fix size. Patches style sample help to solver the class imbalance and mitigate the spatial correlation of origin images. However, authors didn't find any help of the patches style sample in increasing the segmenation accuracy or convergence speed.
+
+4.Fusion the high level information into low level information. Upsample(by bilinear interpolation or deconv) the last layer and fuse with uppder layer(by sum)
+
+Useful links:
+1. [https://zhuanlan.zhihu.com/p/37618638](https://zhuanlan.zhihu.com/p/37618638).
+2. [https://zhuanlan.zhihu.com/p/32037333](https://zhuanlan.zhihu.com/p/32037333).
+3. [https://www.jianshu.com/p/937dfd91a7a5](https://www.jianshu.com/p/937dfd91a7a5).
+4. [https://www.twblogs.net/a/5b7c695a2b71770a43dadc0b/zh-cn](https://www.twblogs.net/a/5b7c695a2b71770a43dadc0b/zh-cn).
+
