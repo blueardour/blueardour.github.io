@@ -56,4 +56,7 @@ refer:
 # 4.still error when bundle install because of json version
 to solve: `bundle update json`  and `gem update --system`
 
+# 5.other refer
+a.[https://stackoverflow.com/questions/7092107/rails-could-not-find-a-javascript-runtime](https://stackoverflow.com/questions/7092107/rails-could-not-find-a-javascript-runtime)
 
+b. [https://github.com/Simpleyyt/jekyll-jacman/issues/14](https://github.com/Simpleyyt/jekyll-jacman/issues/14)
