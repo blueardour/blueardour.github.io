@@ -14,7 +14,7 @@ $ `cat Gemfile.lock | grep -A 1 "BUNDLED WITH"`
 BUNDLED WITH
    1.17.3
 
-$ gem install bundler -v '1.17.3'
+$ `gem install bundler -v '1.17.3'`
 
 This bug was fixed in RubyGems 3.0.0 but backports are now being prepared for previous major versions of RubyGems. We’ll let you know when they become available.
 
@@ -54,6 +54,6 @@ refer:
 [https://github.com/rails/rails/issues/27450](https://github.com/rails/rails/issues/27450)
 
 # 4.still error when bundle install because of json version
-to solve: `bundle update json`
+to solve: `bundle update json`  and `gem update --system`
 
 
