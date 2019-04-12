@@ -1,3 +1,10 @@
+# note
+This is a jekyII template forked from [https://github.com/jokinkuang/stepbystep](https://github.com/jokinkuang/stepbystep).
+I focused on many templates, and think they are suitable for different purposes. I prefer the [pintereso-bootstrap-jekyll](https://github.com/blueardour/photo-template-pintereso-bootstrap-jekyll) and [pintereso-bootstrap](https://github.com/blueardour/photo-template-pintereso-bootstrap-jekyll) styles for album, [LessOrMore](https://github.com/blueardour/Blog-LessOrMore) and also this one for blog, [mediumish-theme-jekyll](https://github.com/blueardour/story-mediumish-theme-jekyll) for stories, [mundana-theme-jekyll](https://github.com/blueardour/company-mundana-theme-jekyll) for company production release when neccessary.
+
+The following is from the origin project:
+
+
 # stepbystep  
 A jekyll theme, simple and clear, compatible with PC iPad and Phone (RWD)
 
