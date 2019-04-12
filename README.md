@@ -80,6 +80,8 @@ if you want to visit "www.hello.com" instead of "hello.github.io" then:
 ## Other  
 whoever use this theme please add your site to the [wiki](https://github.com/jokinkuang/stepbystep/wiki)  
 
+--> it seems that I've not gotten familiar with this template. When I finally set down, I should add myself to the wiki
+
 ## Bugs
 see [Release](https://github.com/jokinkuang/stepbystep/releases)
 
