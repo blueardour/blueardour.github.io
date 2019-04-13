@@ -77,7 +77,7 @@ body {
 .center-aside {
   margin-left: 25.0%;	/* left-aside */
   -webkit-margin-start: 25.0%;
-  width: 60.0%;
+  width: 55.0%;
   min-height: 30px;
   float: left;
 }
@@ -85,7 +85,7 @@ body {
 .center-aside .top {
   position: fixed;
   top: 0;
-  width: 75%;
+  width: 55%;
   background-color: white;
   /*background: rgba(255, 0, 0, 0.5);;*/
   border-width: 2px;
@@ -180,7 +180,7 @@ body {
   color: #413838;
 }
 .right-aside {
-  width: 1%;
+  width: 20%;
   float: left;
 }
 
@@ -391,7 +391,7 @@ a.white, a.white:hover, a.white:visited {
               <!--<a class="grey-link" target="_parent" href="<%=posts[i].url%>">阅读 5915</a>-->
               <span>字数 <%= posts[i].words %></span>
               <a class="grey-link post-data" target="_parent" href="<%= posts[i].url %>#comments" data-method="comments" 
-                                                                                                  data-thread-key="<%= posts[i].pid %>" data-text=" · 评论 %s"> · 评论 0</a>
+                data-thread-key="<%= posts[i].pid %>" data-text=" · 评论 %s"> · 评论 0</a>
               <span class="post-data" data-method="likes" data-thread-key="<%= posts[i].pid %>" data-text=" · 喜欢 %s"> · 喜欢 0</span>
               <span class="post-data" data-method="reposts" data-thread-key="<%= posts[i].pid %>" data-text=" · 转发 %s"> · 转发 0</span>
             </div>
@@ -439,48 +439,47 @@ a.white, a.white:hover, a.white:visited {
     <!-- a{% include duoshuo.js %} -->
 
     <!-- baiduTemplatea -->
-
     <script type="text/javascript" src="{{ site.baiduTemplate_url }}"></script>
     <script id="post-list" type="text/html">
       <% for(var i = 0; i < posts.length; i++) { %>
-  <li class="has-img">
-    <% if ( posts[i].image ) { %>
-      <a class="wrap-img" href="<%= posts[i].url %>">
-        <img src="<%= posts[i].image %>" alt="300">
-      </a>
-    <% } %>
-    <div>
-      <p class="list-top">
-        <a class="author-name dark-grey-link" target="_parent" href="{{ site.base }}/aboutme"><%= posts[i].author %></a>
-        <em>&nbsp;·</em>
-        <span class="time" date-time="<%= posts[i].date %>"></span>
-        <!--
-        <% if ( posts[i].pin > 0 ) { %>
-        <span class="pin"><img src="{{ site.images_url }}pin.jpg" alt="pin"></span>
+        <li class="has-img">
+        <% if ( posts[i].image ) { %>
+          <a class="wrap-img" href="<%= posts[i].url %>"> <img src="<%= posts[i].image %>" alt="300"> </a>
         <% } %>
-        -->
-      </p>
-      <h4 class="title">
-        <a target="_parent" href="<%= posts[i].url %>"><%= posts[i].title %></a>
-      </h4>
-      <!--
-      <div class="list-footer">
-        <span>字数 <%= posts[i].words %></span>
-        <a class="grey-link post-data" target="_parent" href="<%= posts[i].url %>#comments"
-          data-method="comments" data-thread-key="<%= posts[i].pid %>" data-text=" · 评论 %s"> · 评论 0</a>
-        <span class="post-data" data-method="likes" data-thread-key="<%= posts[i].pid %>" data-text=" · 喜欢 %s"> · 喜欢 0</span>
-        <span class="post-data" data-method="reposts" data-thread-key="<%= posts[i].pid %>" data-text=" · 转发 %s"> · 转发 0</span>
-      </div>
-      -->
-      <% if ( posts[i].excerpt ) { %>
-      <div class="excerpt">
-        {%comment%}:=表示HTML不转义，baiduTemplate默认的=是HTML转义的，转义后&gt;才会输出">"{%endcomment%}
-        <%:= posts[i].excerpt %>
-      </div>
+
+        <div>
+          <p class="list-top">
+            <a class="author-name dark-grey-link" target="_parent" href="{{ site.base }}/aboutme"><%= posts[i].author %></a>
+            <em>&nbsp;·</em>
+            <span class="time" date-time="<%= posts[i].date %>"></span>
+            <!--
+            <% if ( posts[i].pin > 0 ) { %>
+            <span class="pin"><img src="{{ site.images_url }}pin.jpg" alt="pin"></span>
+            <% } %>
+            -->
+          </p>
+          <h4 class="title">
+            <a target="_parent" href="<%= posts[i].url %>"><%= posts[i].title %></a>
+          </h4>
+          <!--
+          <div class="list-footer">
+            <span>字数 <%= posts[i].words %></span>
+            <a class="grey-link post-data" target="_parent" href="<%= posts[i].url %>#comments"
+              data-method="comments" data-thread-key="<%= posts[i].pid %>" data-text=" · 评论 %s"> · 评论 0</a>
+            <span class="post-data" data-method="likes" data-thread-key="<%= posts[i].pid %>" data-text=" · 喜欢 %s"> · 喜欢 0</span>
+            <span class="post-data" data-method="reposts" data-thread-key="<%= posts[i].pid %>" data-text=" · 转发 %s"> · 转发 0</span>
+          </div>
+          -->
+          <% if ( posts[i].excerpt ) { %>
+          <div class="excerpt">
+            {%comment%}:=表示HTML不转义，baiduTemplate默认的=是HTML转义的，转义后&gt;才会输出">"{%endcomment%}
+            <%:= posts[i].excerpt %>
+          </div>
+          <% } %>
+        </div>
+
+      </li>
       <% } %>
-    </div>
-  </li>
-  <% } %>
     </script>
 
     <!-- jQuery -->

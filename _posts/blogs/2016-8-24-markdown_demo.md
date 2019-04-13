@@ -4,7 +4,7 @@ title: Markdown Demo
 categories: programming
 date: 2016-08-24 12:38:11
 pid: 20160824-123811
-pin: 2
+pin: 1
 # you can override the settings in _config.yml here !!
 ---
 
