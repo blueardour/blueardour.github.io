@@ -17,11 +17,11 @@ I'm very familiar with the bios boot up process, as I ever developed the OS from
 
 [https://wiki.ubuntu.com/UEFI/SecureBoot](https://wiki.ubuntu.com/UEFI/SecureBoot)
 
-# Option meaning in the BISO
-When secure boot is enable in the BISO, there are some options to be choosen, such as 'PK', "MOK". At first I don't know their meaning and also don't know how to configure. Then I found this post useful. [https://zhuanlan.zhihu.com/p/25279889](https://zhuanlan.zhihu.com/p/25279889)
+# Option meaning in the BIOS
+When secure boot is enable in the BIOS, there are some options to be choosen, such as 'PK', "MOK". At first I don't know their meaning and also don't know how to configure. Then I found this post useful. [https://zhuanlan.zhihu.com/p/25279889](https://zhuanlan.zhihu.com/p/25279889)
 
 
-# Relationship bewteen UEFI, BISO and secure boot
+# Relationship bewteen UEFI, BIOS and secure boot
 
 I found these posts useful.
 
