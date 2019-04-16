@@ -4,7 +4,7 @@ title: Secure Boot
 categories: configuration os
 date: 2019-04-16 12:38:11
 pid: 20190416-123811
-pin: 7
+pin: 8
 # you can override the settings in _config.yml here !!
 ---
 
