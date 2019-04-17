@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Secure Boot
-categories: configuration os
+categories: model-compression ai
 date: 2019-04-17 12:38:11
 pid: 20190417-123811
 pin: 9
