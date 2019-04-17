@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Secure Boot
+title: Mobilenet v1
 categories: model-compression ai
 date: 2019-04-17 12:38:11
 pid: 20190417-123811
