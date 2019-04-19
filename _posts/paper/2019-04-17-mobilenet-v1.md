@@ -14,7 +14,7 @@ CNN are broadly employed in the computer vision, NLP and others areas. However, 
 
 Mobilenet v1 is a publication from Google. It designed a new network architecture with less parameters and operations but archive similar accuracy with famous bone networks, such as VGG, Resnet. It now has became a new baseline for network simplifaction. The main idea is to replace normal 3\*3 conv with combination of depth-wise seperate conv and point conv.
 
-# Mobilenet v1
+# [Mobilenet v1](https://arxiv.org/abs/1704.04861)
 
 The network architecture change:
 ![structure](/w3c/images/paper/mobilenet-v1-structure.png "structure")
