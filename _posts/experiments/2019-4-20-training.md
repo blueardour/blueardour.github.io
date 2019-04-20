@@ -11,13 +11,16 @@ pin: 11
 # Training script type
 
 A-task:
+  group-net:
   mobielnet-v1: v1-base3-pretrain
   
 B-task:
+  group-net:
   do the resnet18 experiments again
 
 C-task: 
-  phoenix: pytorch-example/imagenet, estimate the effect of iter_size based on resnet
+  pytorch-example/imagenet:
+  phoenix: estimate the effect of iter_size based on resnet
   archlab: same function but based on mobilenetv2
 
 
