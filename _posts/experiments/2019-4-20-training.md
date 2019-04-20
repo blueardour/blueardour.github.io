@@ -16,7 +16,8 @@ A-task:
   
 B-task:
   group-net:
-  do the resnet18 experiments again
+    paused: mobilenet-v2 pretrain base1 
+    high prority: do the resnet18 experiments again
 
 C-task: 
   pytorch-example/imagenet:
