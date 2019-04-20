@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Structured Binary Neural Networks for Accurate Image Classification and Semantic Segmentation
+title: Training Log
 categories: model-compression ai
 date: 2019-04-20 12:38:11
 pid: 20190420-123811
