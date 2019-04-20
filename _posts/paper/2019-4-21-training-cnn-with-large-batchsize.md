@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Training CNN with large batchsize
-categories: model-compression ai
+categories: traning-trick
 date: 2019-04-21 12:38:11
 pid: 20190421-123811
 pin: 12
