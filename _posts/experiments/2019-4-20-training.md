@@ -16,12 +16,13 @@ A-task:
   
 B-task:
   group-net:
-    paused: mobilenet-v2 pretrain base1 
-    high prority: do the resnet18 experiments again
-
+    mobilenet-v2 pretrain base1
+    
 C-task: 
   pytorch-example/imagenet:
   phoenix: estimate the effect of iter_size based on resnet
   archlab: same function but based on mobilenetv2
 
-
+D-task:
+  group-net:
+    do the resnet18 experiments again
