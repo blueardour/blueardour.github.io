@@ -8,6 +8,9 @@ pin: 3
 # you can override the settings in _config.yml here !!
 ---
 
+# run
+`bundle exec jekyll serve`
+
 # Steps for install
 Follow [https://help.github.com/en/articles/setting-up-your-github-pages-site-locally-with-jekyll](https://help.github.com/en/articles/setting-up-your-github-pages-site-locally-with-jekyll)
 
