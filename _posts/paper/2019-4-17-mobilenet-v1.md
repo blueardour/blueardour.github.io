@@ -18,7 +18,7 @@ Mobilenet v1 is a publication from Google. It designed a new network architectur
 
 [Paper Link](https://arxiv.org/abs/1704.04861)
 
-#[Mobilenet v2](https://blueardour.github.io/2019/04/22/mobilenet-v2.html)
+[Mobilenet v2](https://blueardour.github.io/2019/04/22/mobilenet-v2.html)
 
 
 The network architecture change:
@@ -46,18 +46,18 @@ Performance on Imagenet2012:
 
 
 It could be see that the top1 accuracy on imagenet is 70.6% for mobilenet-v1. If not using the depth-wise + point-wise conv to replace the normal conv, the accuracy is 71.7%. To obtain the accuracy from the paper, it seems the only way is employing the TF framework. I've never see someone to get the same accuacry with Pytorch. The author advised RMSprop optimazier and no weight decay on depth-wise layer:
-![training](/w2c/images/paper/mobilenet-v1-traing-trick.jpg "trick")a
+![training](/w3c/images/paper/mobilenet-v1-traing-trick.jpg "trick")
 
 One of the great work with pytorch framework is [here](https://github.com/marvis/pytorch-mobilenet).
 
-#problem with mobilenet v1
+# problem with mobilenet v1
 The depthwise-conv is easily to get zero gradient during training, so call 'degradation' problem. Mobilenet v2 gives some explain and solution.
 More comparason could be found in this [discussion](https://www.zhihu.com/question/265709710/answer/298245276).
 
-#Blogs
+# Blogs
 The following blogs also give great explain/experiment analysis/comparason of mobilenet v1/v2.
 1.[https://zhuanlan.zhihu.com/p/50045821](https://zhuanlan.zhihu.com/p/50045821)
 2.[https://perper.site/2019/03/04/MobileNet-V2-%E8%AF%A6%E8%A7%A3/](https://perper.site/2019/03/04/MobileNet-V2-%E8%AF%A6%E8%A7%A3/)
 
-#[Mobilenet v2](https://blueardour.github.io/2019/04/22/mobilenet-v2.html)
+[Mobilenet v2](https://blueardour.github.io/2019/04/22/mobilenet-v2.html)
 
