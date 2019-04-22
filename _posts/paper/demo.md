@@ -8,6 +8,8 @@ pin: 7
 # you can override the settings in _config.yml here !!
 ---
 
+[Shift: A Zero FLOP, Zero Parameter Alternative to Spatial Convolutions](https://arxiv.org/pdf/1711.08141.pdf)
+
 > 一个用来测试当前站点的Markdown样式的Demo
 
 ```
