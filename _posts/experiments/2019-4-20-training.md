@@ -26,3 +26,7 @@ C-task:
 D-task:
   group-net:
     do the resnet18 experiments again
+
+E-task:
+  pytorch-example:
+    imagenet-v1, sgd, no weight decay for depth-wise layer, 0.96 decay, nesterov=True
