@@ -11,25 +11,24 @@ pin: 11
 # Training script
 
 A-task:
-  group-net:
-  mobielnet-v1: v1-base3-pretrain
-  
+  pytorch-example: imagenet-v1, sgd, no weight decay for depth-wise layer, 0.95 decay, nesterov=True, 120 epochs
+
 B-task:
-  group-net:
-    mobilenet-v2 pretrain base1
+  group-net: mobilenet-v2 pretrain base1
     
 C-task: 
-  pytorch-example/imagenet:
-  phoenix: estimate the effect of iter_size based on resnet
-  archlab: same function but based on mobilenetv2
+  pytorch-example/imagenet: estimate the effect of iter_size based on resnet
 
 D-task:
-  group-net:
-    do the resnet18 experiments again
+  group-net: do the resnet18 experiments again
 
 E-task:
-  pytorch-example:
-    imagenet-v1, sgd, no weight decay for depth-wise layer, 0.95 decay, nesterov=True, 120 epochs
+
+pending:
+  group-net: mobielnet-v1: v1-base3-pretrain
+
+Archlab:
+  pytorch-example: resetnet18-2.sh, sgd, nesterov=True
 
 # tricks
 ## how to set lr/weight_decay/momentum independently in pytorch
