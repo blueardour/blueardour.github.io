@@ -11,24 +11,24 @@ pin: 11
 # Training script
 
 A-task:
-  pytorch-example: imagenet-v1, sgd, no weight decay for depth-wise layer, 0.95 decay, nesterov=True, 120 epochs
+  pytorch-examples: imagenet-v1, sgd, no weight decay for depth-wise layer, 0.95 decay, nesterov=True, 120 epochs
 
 B-task:
-  group-net: mobilenet-v2 pretrain base1
+  pytorch-examples: imagenet-v2, sgd, no weight decay for depth-wise layer, 0.95 decay, nesterov=True, 120 epochs
     
 C-task: 
-  pytorch-example/imagenet: estimate the effect of iter_size based on resnet
+  pytorch-examples: resnet18, sgd, no weight decay for small parameter, fix_step, 0.3 decay every 10 epochs, nesterov=True, 90 epochs
 
 D-task:
-  group-net: do the resnet18 experiments again
+  > pytorch-examples/imagenet: estimate the effect of iter_size based on resnet
+  > group-net: do the resnet18 experiments again
+  > group-net: mobilenet-v2 pretrain base1
+  > group-net: mobielnet-v1: v1-base3-pretrain
 
 E-task:
 
-pending:
-  group-net: mobielnet-v1: v1-base3-pretrain
-
 Archlab:
-  pytorch-example: resetnet18-2.sh, sgd, nesterov=True
+  > group-net: do the resnet18 experiments again, keyword: pretrain binary, no_decay_small, 90 epoch, decay 0.3 for 10
 
 # tricks
 ## how to set lr/weight_decay/momentum independently in pytorch

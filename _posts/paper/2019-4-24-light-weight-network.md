@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Mobilenet v2
+title: Light weight Networks
 categories: model-compression ai classification
 date: 2019-04-24 12:38:11
 pid: 20190424-123811
