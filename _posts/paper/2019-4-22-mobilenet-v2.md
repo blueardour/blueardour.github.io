@@ -31,37 +31,37 @@ For activations on the CNN network, researchers think the useful information cou
 
 ## Linear Bottlenecks
 The non-linear effect on activation could be show in the following figure.
-![01](/w3c/images/paper/mobilenet-v2-01.png "")
+![A01](/w3c/images/paper/mobilenet-v2-01.png "A01")
 Non-linear could filter some information. If keep enough channel, the useful information could be still keeped after non-linear. Otherwise, the ouput might not map back.
 
 
 ## Inverted Residual Block
 The classical residual block is:  thick-thin-thick. The reverted residual block is: thin-thick-thin. When no thick between the thin, it becomes identify block.
-![02](/w3c/images/paper/mobilenet-v2-02.png "")
+![A02](/w3c/images/paper/mobilenet-v2-02.png "A02")
 
-![03](/w3c/images/paper/mobilenet-v2-03.png "")
+![03](/w3c/images/paper/mobilenet-v2-03.png "A03")
 
 They use a hyperparameter to control the thickness of the block -- the expansion rate. It's the channel multiler against the thin input activation. The paper gives some advise of the chosen of the parameter.
-![10](/w3c/images/paper/mobilenet-v2-10.png "")
+![10](/w3c/images/paper/mobilenet-v2-10.png "A04")
 
 ## mobilenet-v2 structure
 Different from other ones:
-![05](/w3c/images/paper/mobilenet-v2-05.png "")
+![05](/w3c/images/paper/mobilenet-v2-05.png "A05")
 
 Total structure configurtion:
-![04](/w3c/images/paper/mobilenet-v2-04.png "")
+![04](/w3c/images/paper/mobilenet-v2-04.png "A06")
 
 ## imagenet trainning
-![09](/w3c/images/paper/mobilenet-v2-09.png "")
+![09](/w3c/images/paper/mobilenet-v2-09.png "A07")
 
 The performance:
-![08](/w3c/images/paper/mobilenet-v2-08.png "")
+![08](/w3c/images/paper/mobilenet-v2-08.png "A08")
 
 ## some trival on complexity and relu
 
-![06](/w3c/images/paper/mobilenet-v2-06.png "")
+![06](/w3c/images/paper/mobilenet-v2-06.png "A09")
 
-![07](/w3c/images/paper/mobilenet-v2-07.png "")
+![07](/w3c/images/paper/mobilenet-v2-07.png "A10")
 
 # Blogs
 The following blogs also give great explain/experiment analysis/comparason of mobilenet v1/v2.
