@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Model Compression Summary
-categories: model-compression ai quantization
+title: Super resolution
+categories: super-resolution ai cv
 date: 2019-04-30 02:38:59
 pid: 20190430-023859
 pin: 17
