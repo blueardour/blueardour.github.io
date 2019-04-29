@@ -26,7 +26,7 @@ E-task:
   > pytorch-examples/imagenet: estimate the effect of iter_size based on resnet
 
 Archlab:
-  group-net
+  group-net: scale = 0.5 / 1
 
 # tricks
 ## how to set lr/weight_decay/momentum independently in pytorch
