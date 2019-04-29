@@ -20,15 +20,13 @@ C-task:
   pytorch-examples: resnet18, sgd, no weight decay for small parameter, fix_step, 0.3 decay every 10 epochs, nesterov=True, 90 epochs
 
 D-task:
-  > pytorch-examples/imagenet: estimate the effect of iter_size based on resnet
-  > group-net: do the resnet18 experiments again
-  > group-net: mobilenet-v2 pretrain base1
-  > group-net: mobielnet-v1: v1-base3-pretrain
+  group-net
 
 E-task:
+  > pytorch-examples/imagenet: estimate the effect of iter_size based on resnet
 
 Archlab:
-  > group-net: do the resnet18 experiments again, keyword: pretrain binary, no_decay_small, 90 epoch, decay 0.3 for 10
+  group-net
 
 # tricks
 ## how to set lr/weight_decay/momentum independently in pytorch
