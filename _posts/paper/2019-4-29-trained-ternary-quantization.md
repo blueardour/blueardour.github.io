@@ -41,13 +41,13 @@ Overall flow is shown in following figure.
 ![t1](/w3c/images/paper/trained-ternary-1.jpg "z1")
 
 1. First scale the weight into [-1, 1]. (this maybe squeeze many small value to zero if the max value of the weight is big)
-2. quantization assign hyperparameter <delta>.
+2. quantization assign hyperparameter (delta).
 ![t2](/w3c/images/paper/trained-ternary-2.jpg "z2")
 
-The paper has two strategies. One is multiple a scale on the max absolute value of the weight, the other is keep the sparsity of the all layer to be a constant during training. They choose the former one in CIFAR dataset and the later one in the Imagenet dataset.
+3. The paper has two strategies. One is multiple a scale on the max absolute value of the weight, the other is keep the sparsity of the all layer to be a constant during training. They choose the former one in CIFAR dataset and the later one in the Imagenet dataset.
 ![t4](/w3c/images/paper/trained-ternary-4.jpg "z4")
 
-3. Wp, Wl is trainable parameter, updated by gradient during training.
+4. Wp, Wl is trainable parameter, updated by gradient during training.
 ![t3](/w3c/images/paper/trained-ternary-3.jpg "z3")
 
 # Experiment
