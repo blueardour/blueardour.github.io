@@ -22,6 +22,8 @@ Knowledge distill is another kind of model compression method. It employs a redu
 
 ## XNOR-net
 [paper link](https://arxiv.org/abs/1603.05279)
+[Code](https://github.com/allenai/XNOR-Net)
+ECCV 2016
 
 ## Group-net
 [paper link](https://arxiv.org/abs/1811.10413)
@@ -30,11 +32,15 @@ Knowledge distill is another kind of model compression method. It employs a redu
 [paper link](https://arxiv.org/abs/1612.01064)
 [Code](https://github.com/czhu95/ternarynet)
 
-## DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients
-[paper link](https://arxiv.org/pdf/1606.06160)
-
 ## PACT: PARAMETERIZED CLIPPING ACTIVATION FOR QUANTIZED NEURAL NETWORKS
 [paper link](https://arxiv.org/pdf/1805.06085.pdf)
+
+## RELAXED QUANTIZATION FOR DISCRETIZED NEURAL NETWORKS
+[paper link](https://arxiv.org/abs/1810.01875)
+[comment from reviews](https://openreview.net/forum?id=HkxjYoCqKX)
+
+## DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients
+[paper link](https://arxiv.org/pdf/1606.06160)
 
 ## Deep Learning with Low Precision by Half-wave Gaussian Quantization
 [paper link](http://www.svcl.ucsd.edu/publications/conference/2017/cvpr/hwgq.pdf) CVPR-2017
