@@ -1,6 +1,6 @@
 ---
 layout: post
-title: DeRefa-neta \:Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients
+title: DeRefa-net Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients
 categories: model-compression ai quantization
 date: 2019-05-02 09:38:11
 pid: 20190502-093811
