@@ -31,6 +31,18 @@ There are several other similar work, includding the squeezenet, shufflenet, shi
 [All You Need is a Few Shifts: Designing Efficient Convolutional Neural Networks for Image Classification](https://arxiv.org/pdf/1903.05285.pdf)
 [Constructing Fast Network through Deconstruction of Convolution](https://arxiv.org/pdf/1806.07370.pdf)  NIPS2019
 
+# NasNet: Learning Transferable Architectures for Scalable Image Recognition
+[Paper Link](https://arxiv.org/pdf/1707.07012.pdf)
+arXiv '17, Google]
+
+# PVANet: Lightweight Deep Neural Networks for Real-time Object Detection
+NIPS2016 workshop
+[Paper Link](https://arxiv.org/abs/1611.08588)
+[Code](https://github.com/sanghoon/pva-faster-rcnn)
+
+# SqueezeNet
+[Paper Link](https://arxiv.org/pdf/1602.07360v3.pdf)
+
 
 # Blogs
 The following blogs also give great explain/experiment analysis/comparason.
