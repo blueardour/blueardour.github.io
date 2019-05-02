@@ -54,5 +54,14 @@ ECCV 2016
 ## How to Train a Compact Binary Neural Network with High Accuracy?
 [paper link](https://pdfs.semanticscholar.org/34da/1cccce1b57372446febbab829e5676df228f.pdf) AAAI-17
 
+## Incremental Network Quantization: Towards Lossless CNNs with Low-Precision Weights
+ICLR 2017
+[paper link](https://arxiv.org/abs/1702.03044)
 
+## Binarized Neural Networks
+NIPS 2016
+[paper link](https://arxiv.org/abs/1602.02505)
 
+# Towards the Limit of Network Quantization
+
+# The ZipML Framework for Training Models with End-to-End Low Precision: The Cans, the Cannots, and a Little Bit of Deep Learning
