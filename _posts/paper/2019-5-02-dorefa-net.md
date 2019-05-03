@@ -1,6 +1,6 @@
 ---
 layout: post
-title: DeRefa-net Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients
+title: DeRefa-net
 categories: model-compression ai quantization
 date: 2019-05-02 09:38:11
 pid: 20190502-093811
@@ -16,7 +16,7 @@ Quantization means to regress the activation or weight to several discrete set o
 
 Other related papers could be found in [model-compression-summary](https://blueardour.github.io/2019/04/29/model-compression-summary.html)
 
-# DeRefa-net:
+# DeRefa-net
 [paper link](https://arxiv.org/abs/1606.06160)
 
 # Highlight
