@@ -1,6 +1,6 @@
 ---
 layout: post
-title: DeRefa-net
+title: DoRefa-net
 categories: model-compression ai quantization
 date: 2019-05-02 09:38:11
 pid: 20190502-093811
