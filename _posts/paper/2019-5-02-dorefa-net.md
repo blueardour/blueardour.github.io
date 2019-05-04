@@ -23,13 +23,13 @@ Other related papers could be found in [model-compression-summary](https://bluea
 The paper proposes a quantization method with the feature of quantize the activation/weight/gradient at the same time. They try to generalize the binarized network to efficiently trained on resource limited devices. Because they quatizate the activation/weight as well as the gradient, the framework could save computing and runtime memory.
 
 # Quantization of weight
-This paper use the following forward and backward function for quantized weight. Un-like the Xnor-net, it employs constant scale for the binrized weight (In XNor-net, the scale is calculated by the mean of abs of the weight).
+This paper use the following forward and backward function for quantized weight. Unlike the XNor-Net, it employs a constant scale for the binarized weight (In XNor-net, the scale is calculated by the mean of abs of the weight).
 ![t1](/w3c/images/paper/dorafa-1.jpg "z1")
 
 For binary weight:
 ![t2](/w3c/images/paper/dorafa-2.jpg "z2")
 
-For other precision weight:
+For other precision weight (constrained with the tanH function):
 ![t3](/w3c/images/paper/dorafa-3.jpg "z3")
 
 # Quantization of activation
@@ -41,8 +41,8 @@ We could not regress the range of the gradient. Thus, we could not employ the qu
 ![t5](/w3c/images/paper/dorafa-5.jpg "z5")
 
 Besides, an important trick is to add some noise into the quantization function to increase robust.
-![t6](/w3c/images/paper/dorafa-5.jpg "z6")
-![t7](/w3c/images/paper/dorafa-5.jpg "z7")
+![t6](/w3c/images/paper/dorafa-6.jpg "z6")
+![t7](/w3c/images/paper/dorafa-7.jpg "z7")
 
 # Other tricks
 1. do not quantize the first and last layer

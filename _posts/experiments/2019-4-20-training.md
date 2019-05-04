@@ -50,3 +50,10 @@ I've aslo implement the function in pytorch-examples/imagenet project.
 ## realize the L2/L1 norm with the loss function rather than optimazier
 Refer link [https://discuss.pytorch.org/t/how-does-one-implement-weight-regularization-l1-or-l2-manually-without-optimum/7951](https://discuss.pytorch.org/t/how-does-one-implement-weight-regularization-l1-or-l2-manually-without-optimum/7951)
 
+## Batchnorm in SR
+For super-resolution problem, batch_norm is not recommended because it normalizes the intensity level across samples in each batch.
+
+refer discussion [link](https://github.com/twtygqyy/pytorch-vdsr/issues/26)
+
+
+
