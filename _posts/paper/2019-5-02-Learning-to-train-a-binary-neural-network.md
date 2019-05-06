@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Learning to train a binary neural network
-categories: model-compression ai quantization
+categories: model-compression ai quantization training-trick
 date: 2019-05-02 09:08:11
 pid: 20190502-090811
 pin: 22
@@ -21,10 +21,10 @@ Other related papers could be found in [model-compression-summary](https://bluea
 From HPI
 
 # Tricks
-1. add gradient clipping threshold (also read the Dorefa-net to have a more deep insight)
+1. add gradient clipping threshold (also read the Dorefa-net to have a more deep insight). It is a kind of normalization or batchnorm or histogram adjust to the gradient.
 2. add skip connection
 3. From their experience, bottleneck is harmful for binarized network and should be avoid in network structure design.
-4. The forward/backward scale in XNor-net and Dorefa-net seems not useful.
+4. The forward/backward scale in XNor-net and Dorefa-net seems not useful. (they didn't employ PRelu either)
 5. Visualize the histogram/weight when possible
 
 # Thinking

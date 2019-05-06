@@ -20,7 +20,41 @@ Knowledge distill is another kind of model compression method. It employs a redu
 
 # Quantization
 
-# Result Summary
+## Result Summary
+
+Paper | Base | Activation | Weight | Gradient | First Layer | Last Layer | Model Size | Scenario | Dataset | Network | Accuracy | Comment
+----- | ---- | ---------- | ------ | -------  |  ---------  | ---------- | ---------  | -------  | ------- | -------- | ------- |  -----  
+How-train-bnn | - | 2 | 1 | - | N | Y | 232MB -> 7.43MB | cls | imagenet | Alexnet | 46.6/71.1 | adam, lr: 1e-4 
+How-train-bnn | - | 2 | 1 | - | N | Y | 29MB -> 1.23MB | cls | imagenet | NIN-net | 51.4/75.6 | pre-BN ?
+BNN | - | 1 | 1 | - | N | N | - | cls | cifar-10 | - | - | shift BN & pre-BN
+BNN | - | 1 | 1 | - | N | N | - | cls | SVHN | - | - | NIPS2016
+Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | cifar10 | reset20 | 91.13% | asymmetric scale
+Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | cifar10 | reset32 | 92.37% | drop 0.04
+Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | cifar10 | reset44 | 92.98% | drop 0.16
+Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | cifar10 | reset56 | 93.56% | drop 0.36
+Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | imagenet | alexnet | 57.5%/79.7% | fp: 57.2%/80.3%
+Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 66.6%/87.2% | fp: 69.6%/89.2%
+Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 66.6%/87.2% | fp: 69.6%/89.2%
+Dorefa-net | - | 1/2/3/4/8 | 1/2/8 | 2/4/8/32 | N | N | - | cls | SVHN | * | * | better init with FP32 pretrained
+Dorefa-net | - | 1/2/3/4/8 | 1/8 | 6/8/32 | N | N | - | cls | imagenet | alexnet | * | better init with FP32 pretrained
+Dorefa-net | - | 1/2/3/4/8 | 1/8 | 6/8/32 | N | N | - | cls | imagenet | alexnet | * | better init with FP32 pretrained
+Dorefa-net | - | 2 | 1 | 4 | Y | N | - | cls | SVHN | * | * | -
+Dorefa-net | - | 2 | 1 | 4 | N | Y | - | cls | SVHN | * | * | -
+Dorefa-net | - | 2 | 1 | 4 | Y | Y | - | cls | SVHN | * | * | -
+Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 67.5%/88.0% | change structure
+Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet34 | 6x.5%/8x.0% | more complexity
+Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet50 | 6x.5%/8x.0% | -
+Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 6x.5%/8x.0% | change structure
+Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet34 | 6x.5%/8x.0% | more complexity
+Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet50 | 6x.5%/8x.0% | -
+Group-net | 5 | 1 | 1 | 32 | N | N | - | seg | VOC2012 | resnet18/fcn-16s | 67.7 | -
+Group-net | 5 | 1 | 1 | 32 | N | N | - | seg | VOC2012 | resnet18/fcn-32s | 65.1 | -
+Group-net | 1/3/5 | 2/4/32 | 1 | 32 | N | N | - | cls | imagenet | resnet18/50 | * | in appendix
+
+
+## Efficient Super Resolution Using Binarized Neural Network
+[paper link](https://arxiv.org/abs/1812.06378)
+ECCV 2016
 
 ## XNOR-net
 [paper link](https://arxiv.org/abs/1603.05279)
@@ -50,6 +84,10 @@ ECCV 2016
 ## Learning to Train a Binary Neural Network
 [paper link](https://arxiv.org/pdf/1809.10463.pdf)
 
+## ABC-nets: Towards Accurate Binary Convolutional Neural Network
+[paper link](https://arxiv.org/abs/1711.11294)
+[Tensorflow impl](https://github.com/layog/Accurate-Binary-Convolution-Network)
+
 ## Training Competitive Binary Neural Networks from Scratch
 [paper link](https://arxiv.org/pdf/1812.01965.pdf)
 
@@ -60,10 +98,27 @@ ECCV 2016
 ICLR 2017
 [paper link](https://arxiv.org/abs/1702.03044)
 
-## Binarized Neural Networks
+## Binarized Neural Networks: Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1
 NIPS 2016
 [paper link](https://arxiv.org/abs/1602.02505)
+describe the deterministic and stochastic binarization. The former is as following:
+![bnn1](/w3c/images/paper/bnn-02.png "bnn1")
 
-# Towards the Limit of Network Quantization
+stochastic one is:
+![bnn2](/w3c/images/paper/bnn-01.png "bnn2")
 
-# The ZipML Framework for Training Models with End-to-End Low Precision: The Cans, the Cannots, and a Little Bit of Deep Learning
+modify the BN to shift batch norm
+![bnn2](/w3c/images/paper/bnn-02.png "bnn2")
+
+has power consumption data
+![bnn4](/w3c/images/paper/bnn-04.png "bnn4")
+
+develop code on real platform and get 7x times speedup
+
+## Others
+1. BinaryConnect
+2. BinaryNets
+
+### Towards the Limit of Network Quantization
+
+### The ZipML Framework for Training Models with End-to-End Low Precision: The Cans, the Cannots, and a Little Bit of Deep Learning
