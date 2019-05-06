@@ -20,6 +20,8 @@ Knowledge distill is another kind of model compression method. It employs a redu
 
 # Quantization
 
+# Result Summary
+
 ## XNOR-net
 [paper link](https://arxiv.org/abs/1603.05279)
 [Code](https://github.com/allenai/XNOR-Net)
