@@ -21,7 +21,7 @@ Other related papers could be found in [model-compression-summary](https://bluea
 From HPI
 
 # Tricks
-1. add gradient clipping threshold
+1. add gradient clipping threshold (also read the Dorefa-net to have a more deep insight)
 2. add skip connection
 3. From their experience, bottleneck is harmful for binarized network and should be avoid in network structure design.
 4. The forward/backward scale in XNor-net and Dorefa-net seems not useful.
