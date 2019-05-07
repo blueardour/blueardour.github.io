@@ -19,16 +19,17 @@ CNN are broadly employed in the computer vision, NLP and others areas. However, 
  version | Arch          | pretrain FP32 | binary network | base | comment
 -------- | ------------- | ------------- | -------------- | ---- | --
  origin paper | resnet18  | 69.7/89.4 | 64.2/85.6 | 4 | -
- - | resnet18 | 69.7/89.4 | 64.8/85.7 | 5 | - 
- - | resnet34 | 73.2/91.4 | 68.5/88.0 | 5 | -
- - | resnet50 | 76.0/92.9 | 69.5/89.2 | 5 | -
- - | resnet18 | 69.7/89.4 | 67.5/88.0 | 8 | -
- - | resnet34 | 73.2/91.4 | 71.8/90.4 | 8 | -
- - | resnet50 | 76.0/92.9 | 72.8/90.5 | 8 | -
+ ------------ | resnet18 | 69.7/89.4 | 64.8/85.7 | 5 | - 
+ ------------ | resnet34 | 73.2/91.4 | 68.5/88.0 | 5 | -
+ ------------ | resnet50 | 76.0/92.9 | 69.5/89.2 | 5 | -
+ ------------ | resnet18 | 69.7/89.4 | 67.5/88.0 | 8 | -
+ ------------ | resnet34 | 73.2/91.4 | 71.8/90.4 | 8 | -
+ ------------ | resnet50 | 76.0/92.9 | 72.8/90.5 | 8 | -
+-------- | ------------- | ------------- | -------------- | --     
 -------- | ------------- | ------------- | -------------- | --     
 my own | resnet18 | 68.65/87.56  | 62.298/83.392 | 5 | origin code
-my own | resnet18 | 70.94/89.748 | waiting | 5 | revise, sgd with decay
-my own | resnet18 | 69.972/89.08 | waiting | 5 | revise, sgd with no decay
-my own | resnet18 | 69.972/89.08 | waiting | 5 | revise, adam
+------ | resnet18 | 70.94/89.748 | waiting | 5 | revise, sgd with decay
+------ | resnet18 | 69.972/89.08 | waiting | 5 | revise, sgd with no decay
+------ | resnet18 | 69.972/89.08 | waiting | 5 | revise, adam
 
 

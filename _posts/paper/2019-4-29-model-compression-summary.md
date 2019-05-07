@@ -24,32 +24,57 @@ Knowledge distill is another kind of model compression method. It employs a redu
 
 Paper | Base | Activation | Weight | Gradient | First Layer | Last Layer | Model Size | Scenario | Dataset | Network | Accuracy | Comment
 ----- | ---- | ---------- | ------ | -------  |  ---------  | ---------- | ---------  | -------  | ------- | -------- | ------- |  -----  
-How-train-bnn | - | 2 | 1 | - | N | Y | 232MB -> 7.43MB | cls | imagenet | Alexnet | 46.6/71.1 | adam, lr: 1e-4 
-How-train-bnn | - | 2 | 1 | - | N | Y | 29MB -> 1.23MB | cls | imagenet | NIN-net | 51.4/75.6 | pre-BN ?
-BNN | - | 1 | 1 | - | N | N | - | cls | cifar-10 | - | - | shift BN & pre-BN
-BNN | - | 1 | 1 | - | N | N | - | cls | SVHN | - | - | NIPS2016
 Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | cifar10 | reset20 | 91.13% | asymmetric scale
 Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | cifar10 | reset32 | 92.37% | drop 0.04
 Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | cifar10 | reset44 | 92.98% | drop 0.16
 Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | cifar10 | reset56 | 93.56% | drop 0.36
 Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | imagenet | alexnet | 57.5%/79.7% | fp: 57.2%/80.3%
 Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 66.6%/87.2% | fp: 69.6%/89.2%
-Trained Ternary Quantization | - | 32 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 66.6%/87.2% | fp: 69.6%/89.2%
+BC | - | 32 | 1 | - | N | N | - | cls | mnist | - | - | same team with BN/BNN
+BC | - | 32 | 1 | - | N | N | - | cls | SVHN | - | - | same team with BN/BNN
+BC | - | 32 | 1 | - | N | N | - | cls | cifar-10 | - | - | same team with BN/BNN
+BNN | - | 1 | 1 | - | N | N | - | cls | cifar-10 | - | - | shift BN & pre-BN
+BNN | - | 1 | 1 | - | N | N | - | cls | SVHN | - | - | NIPS2016
+BNN | - | 32 | 1 | - | N | N | - | cls | imagenet | alexnet | 35.4/61.0 | seems multi revision
+BNN | - | 1 | 1 | - | N | N | - | cls | imagenet | alexnet | 27.9/50.42 | seems multi revision
+XNor-net(BWN) | - | 32 | 1 | 32 | N | N | - | cls | cifar-10 | same with BC | 90.12 | -
+XNor-net(BWN) | - | 32 | 1 | 32 | N | N | - | cls | cifar-10 | same with BNN | 89.83 | -
+XNor-net(BWN) | - | 32 | 1 | - | N | N | - | cls | imagenet | alexnet | 56.8/79.4 | -
+XNor-net(BWN) | - | 32 | 1 | - | N | N | - | cls | imagenet | resnet18 | 60.8/83.0 | -
+XNor-net(BWN) | - | 32 | 1 | - | N | N | - | cls | imagenet | googlenet | 65.5/86.1 | -
+XNor-net | - | 1 | 1 | 32 | N | N | - | cls | imagenet | Alexnet | 44.2/69.2 | -
+XNor-net | - | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 51.2/73.2 | -
+XNor-net | - | 1 | 1 | 32 | N | N | - | cls | imagenet | Googlenet | - | -
+How-train-bnn | - | 2 | 1 | - | N | Y | 232MB -> 7.43MB | cls | imagenet | Alexnet | 46.6/71.1 | adam, lr: 1e-4 
+How-train-bnn | - | 2 | 1 | - | N | Y | 29MB -> 1.23MB | cls | imagenet | NIN-net | 51.4/75.6 | pre-BN ?
 Dorefa-net | - | 1/2/3/4/8 | 1/2/8 | 2/4/8/32 | N | N | - | cls | SVHN | * | * | better init with FP32 pretrained
 Dorefa-net | - | 1/2/3/4/8 | 1/8 | 6/8/32 | N | N | - | cls | imagenet | alexnet | * | better init with FP32 pretrained
 Dorefa-net | - | 1/2/3/4/8 | 1/8 | 6/8/32 | N | N | - | cls | imagenet | alexnet | * | better init with FP32 pretrained
 Dorefa-net | - | 2 | 1 | 4 | Y | N | - | cls | SVHN | * | * | -
 Dorefa-net | - | 2 | 1 | 4 | N | Y | - | cls | SVHN | * | * | -
 Dorefa-net | - | 2 | 1 | 4 | Y | Y | - | cls | SVHN | * | * | -
-Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 67.5%/88.0% | change structure
-Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet34 | 6x.5%/8x.0% | more complexity
-Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet50 | 6x.5%/8x.0% | -
-Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 6x.5%/8x.0% | change structure
-Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet34 | 6x.5%/8x.0% | more complexity
-Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet50 | 6x.5%/8x.0% | -
+Relax Quant | - | 2 | 2 | - | N | N | - | cls | MNIST/Cifar10 | - | * | -
+Relax Quant | - | 4 | 4 | - | N | N | - | cls | MNIST/Cifar10 | - | * | -
+Relax Quant | - | 8 | 8 | - | N | N | - | cls | MNIST/Cifar10 | - | * | -
+Relax Quant | - | 4/5/6/8 | 4/5/6/8 | - | N | N | - | cls | imagenet | resnet18/mobilenet | * | appendix
+HPI | - | 1 | 1 | - | N | N | 202KB vs 4.4MB | cls | MNIST | LeNet | 99.3 | -
+HPI | - | 1 | 1 | - | N | N | 1.9MB vs 51MB | cls | Cifar-10 | DenseNet21 | 87.1 | -
+HPI | - | 1 | 1 | - | N | N | - | cls | imagenet | alexnet/InceptionBN | * | -
+HPI | - | 1 | 1 | - | N | N | - | cls | imagenet | resnet18 | 42.0/66.2 | -
+HPI | - | 1 | 1 | - | N | N | - | cls | imagenet | resnet26/34/68 | * | -
+HPI | - | 1 | 1 | - | N | N | * | cls | imagenet | densenet21/45 | * | -
+Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet50 | 72.8/90.5 | -
+Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet50 | 69.5/89.2 | -
+Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet34 | 71.8/90.4 | more complexity
+Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet34 | 68.5/88.0 | more complexity
+Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 67.5/88.0 | change structure
+Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 64.8/85.7 | change structure
+Group-net | 4 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 64.2/85.6 | -
+Group-net | 3 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 62.5/84.2 | -
+Group-net | 1 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 55.6/78.6 | -
 Group-net | 5 | 1 | 1 | 32 | N | N | - | seg | VOC2012 | resnet18/fcn-16s | 67.7 | -
 Group-net | 5 | 1 | 1 | 32 | N | N | - | seg | VOC2012 | resnet18/fcn-32s | 65.1 | -
-Group-net | 1/3/5 | 2/4/32 | 1 | 32 | N | N | - | cls | imagenet | resnet18/50 | * | in appendix
+Group-net | 1/3/5 | 2/4/32 | 1 | 32 | N | N | - | cls | imagenet | resnet18/50/Alexnet | * | in appendix
 
 
 ## Efficient Super Resolution Using Binarized Neural Network
@@ -114,6 +139,8 @@ has power consumption data
 ![bnn4](/w3c/images/paper/bnn-04.png "bnn4")
 
 develop code on real platform and get 7x times speedup
+
+## LQ-nets: Learned quantization for highly accurate and compact deep neural networks
 
 ## Others
 1. BinaryConnect
