@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Super resolution
-categories: super-resolution ai cv
+categories: super-resolution ai cv summary
 date: 2019-04-30 02:38:59
 pid: 20190430-023859
 pin: 17

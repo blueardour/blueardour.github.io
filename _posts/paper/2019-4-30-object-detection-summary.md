@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Object detection
-categories: object-detection ai cv
+categories: object-detection ai cv summary
 date: 2019-04-30 02:30:59
 pid: 20190430-023059
 pin: 18

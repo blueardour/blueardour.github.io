@@ -23,6 +23,10 @@ Here I list some interesting work.
 
 Abstract: The stochastic gradient descent (SGD) method and its variants are algorithms of choice for many Deep Learning tasks. These methods operate in a small-batch regime wherein a fraction of the training data, say 32-512 data points, is sampled to compute an approximation to the gradient. It has been observed in practice that when using a larger batch there is a degradation in the quality of the model, as measured by its ability to generalize. We investigate the cause for this generalization drop in the large-batch regime and present numerical evidence that supports the view that large-batch methods tend to converge to sharp minimizers of the training and testing functions - and as is well known, sharp minima lead to poorer generalization. In contrast, small-batch methods consistently converge to flat minimizers, and our experiments support a commonly held view that this is due to the inherent noise in the gradient estimation. We discuss several strategies to attempt to help large-batch methods eliminate this generalization gap.
 
+Comment: The paper is just presenting their points. They think there will be many local minimas which might have the same network accuracy. Different initial weight or different learning rate strategy or differ optimizers might converage to different mimima. However, there are some sharp minima (not good) and some fatten minia (better then former one). Large batch size are more easily trapped in sharp mimina. Small batch size brings more noises, which benefit to skip the sharp minima and converage to fatten minima.
+
+Thinking: The paper makes sense. Consirder increase lr (for example SGDR), small batch size, and most important regression to skip sharp minima? Regression is worth to try.
+
 2.[Large batch size training of neural networks with adversarial training and second-order information](https://arxiv.org/abs/1810.01021) 
 
 Comment: I think the paper is worth to read and redo their experiment.
