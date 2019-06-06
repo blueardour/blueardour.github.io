@@ -46,7 +46,7 @@ However, it also caused certain trouble to install kernel mod, such as nvidia gp
 > 
 > Example:
 > 
-> `openssl req -new -x509 -newkey rsa:2048 -keyout /home/itpropmn07/Nvidia.key -outform DER -out /home/itpropmn07/Nvidia.der -nodes -days 36500 -subj "/CN=Graphics Drivers"`
+> `openssl req -new -x509 -newkey rsa:2048 -keyout /workspace/documents/secure-boot/nvidia.key -outform DER -out /workspace/documents/secure-boot/nvidia.der -nodes -days 36500 -subj "/CN=Graphics Drivers"`
 > 
 > - Step 3: Enroll public key (nvidia.der) to MOK (Machine Owner Key) by entering command:
 > 
@@ -54,7 +54,7 @@ However, it also caused certain trouble to install kernel mod, such as nvidia gp
 > 
 > Example:
 > 
-> `sudo mokutil --import /home/itpropmn07/Nvidia.der`
+> `sudo mokutil --import /workspace/documents/secure-boot/nvidia.der`
 > 
 > --> This command requires you create password for enrolling. Afterwards, reboot your computer, in the next boot, the system will ask you enroll, you enter your password (which you created in this step) to enroll it. Read more: https://sourceware.org/systemtap/wiki/SecureBoot
 > 
@@ -78,7 +78,7 @@ However, it also caused certain trouble to install kernel mod, such as nvidia gp
 > 
 > Example:
 > 
-> `sudo sh ./NVIDIA-Linux-x86_64-390.67.run -s --module-signing-secret-key=/home/itpropmn07/Nvidia.key --module-signing-public-key=/home/itpropmn07/Nvidia.der`
+> `sudo sh ./NVIDIA-Linux-x86_64-390.67.run -s --module-signing-secret-key=/workspace/documents/secure-boot/nvidia.key --module-signing-public-key=/workspace/documents/secure-boot/nvidia.der`
 > 
 > --> Done
 > Read more https://us.download.nvidia.com/XFree86/Linux-x86/319.32/README/installdriver.html

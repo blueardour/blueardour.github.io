@@ -29,6 +29,10 @@ Archlab:
   group-net: scale = 0.5 / 1
 
 # tricks
+
+## which optimizer to choose for CNN training
+Here is a blog gives easy and clear explain: [optimizer的比较](https://zhuanlan.zhihu.com/p/32165402)
+
 ## how to set lr/weight_decay/momentum independently in pytorch
 See the pre-parameter options section from link [https://pytorch.org/docs/stable/optim.html](https://pytorch.org/docs/stable/optim.html)
 
