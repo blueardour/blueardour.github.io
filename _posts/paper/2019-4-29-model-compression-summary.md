@@ -89,17 +89,39 @@ Group-net | 1/3/5 | 2/4/32 | 1 | 32 | N | N | - | cls | imagenet | resnet18/50/A
 
 Generally, '-' means uknown or unavailable. '*' indicates result exists in the paper, however too much of them to fit in the page, so look up the paper when needed.
 
-## Efficient Super Resolution Using Binarized Neural Network
-[paper link](https://arxiv.org/abs/1812.06378)
-ECCV 2016
+## PROXQUANT: QUANTIZED NEURAL NETWORKS VIA PROXIMAL OPERATORS
+ICLR 2019
+[Code available]
+
+## Learning to Quantize Deep Networks byOptimizing Quantization Intervals with Task Loss
+CVPR 2019
+
+## Balanced Quantization: An Effective and Efficient Approach to Quantized Neural Networks
+
+## Bi-Real Net: Enhancing the Performance of 1-bit CNNs with Improved Representational Capability and Advanced Training Algorithm
+ECCV 2018
+
+## Weighted-Entropy-Based Quantization for Deep Neural Networks
+
+## WRPN: Wide Reduced-Precision Networks
+
+## LOSS-AWARE BINARIZATION OF DEEP NETWORKS
+
+## LCNN: Lookup-Based Convolutional Neural Network
 
 ## XNOR-net
 [paper link](https://arxiv.org/abs/1603.05279)
 [Code](https://github.com/allenai/XNOR-Net)
 ECCV 2016
 
+## LQ-nets: Learned quantization for highly accurate and compact deep neural networks
+
 ## Group-net
 [paper link](https://arxiv.org/abs/1811.10413)
+
+## ABC-nets: Towards Accurate Binary Convolutional Neural Network
+[paper link](https://arxiv.org/abs/1711.11294)
+[Tensorflow impl](https://github.com/layog/Accurate-Binary-Convolution-Network)
 
 ## Trained Ternary Quantization
 [paper link](https://arxiv.org/abs/1612.01064)
@@ -108,22 +130,18 @@ ECCV 2016
 ## PACT: PARAMETERIZED CLIPPING ACTIVATION FOR QUANTIZED NEURAL NETWORKS
 [paper link](https://arxiv.org/pdf/1805.06085.pdf)
 
+## DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients
+[paper link](https://arxiv.org/pdf/1606.06160)
+
 ## RELAXED QUANTIZATION FOR DISCRETIZED NEURAL NETWORKS
 [paper link](https://arxiv.org/abs/1810.01875)
 [comment from reviews](https://openreview.net/forum?id=HkxjYoCqKX)
-
-## DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients
-[paper link](https://arxiv.org/pdf/1606.06160)
 
 ## Deep Learning with Low Precision by Half-wave Gaussian Quantization
 [paper link](http://www.svcl.ucsd.edu/publications/conference/2017/cvpr/hwgq.pdf) CVPR-2017
 
 ## Learning to Train a Binary Neural Network
 [paper link](https://arxiv.org/pdf/1809.10463.pdf)
-
-## ABC-nets: Towards Accurate Binary Convolutional Neural Network
-[paper link](https://arxiv.org/abs/1711.11294)
-[Tensorflow impl](https://github.com/layog/Accurate-Binary-Convolution-Network)
 
 ## Training Competitive Binary Neural Networks from Scratch
 [paper link](https://arxiv.org/pdf/1812.01965.pdf)
@@ -152,12 +170,17 @@ has power consumption data
 
 develop code on real platform and get 7x times speedup
 
-## LQ-nets: Learned quantization for highly accurate and compact deep neural networks
+### Towards the Limit of Network Quantization
+
+### The ZipML Framework for Training Models with End-to-End Low Precision: The Cans, the Cannots, and a Little Bit of Deep Learning
+
+## Efficient Super Resolution Using Binarized Neural Network
+[paper link](https://arxiv.org/abs/1812.06378)
+ECCV 2016
 
 ## Others
 1. BinaryConnect
 2. BinaryNets
 
-### Towards the Limit of Network Quantization
 
-### The ZipML Framework for Training Models with End-to-End Low Precision: The Cans, the Cannots, and a Little Bit of Deep Learning
+

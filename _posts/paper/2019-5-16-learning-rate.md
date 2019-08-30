@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Learning Rate in CNN
-categories: training-trick
+categories: training-trick optimization
 date: 2019-05-16 12:38:11
 pid: 20190516-123811
 pin: 26

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Structured Binary Neural Networks for Accurate Image Classification and Semantic Segmentation
-categories: model-compression ai
+categories: model-compression ai quantization
 date: 2019-04-18 12:38:11
 pid: 20190418-123811
 pin: 10
