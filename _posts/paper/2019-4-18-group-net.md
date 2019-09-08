@@ -28,8 +28,8 @@ CNN are broadly employed in the computer vision, NLP and others areas. However, 
 -------- | ------------- | ------------- | -------------- | --     
 -------- | ------------- | ------------- | -------------- | --     
 my own | resnet18 | 68.65/87.56  | 62.298/83.392 | 5 | origin code
------- | resnet18 | 70.94/89.748 | waiting | 5 | revise, sgd with decay
+------ | resnet18 | 70.94/89.748 | 63.772/- | 5 | revise, sgd with decay
 ------ | resnet18 | 69.972/89.08 | waiting | 5 | revise, sgd with no decay
------- | resnet18 | 69.972/89.08 | waiting | 5 | revise, adam
+------ | resnet18 | 69.972/89.08 | 62.49/- | 5 | revise, adam
 
 

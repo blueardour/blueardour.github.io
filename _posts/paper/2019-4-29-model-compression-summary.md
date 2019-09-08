@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Model Compression Summary
-categories: model-compression ai quantization
+categories: model-compression ai quantization summary
 date: 2019-04-29 02:38:59
 pid: 20190429-023859
 pin: 16
@@ -63,6 +63,17 @@ HPI | - | 1 | 1 | - | N | N | - | cls | imagenet | alexnet/InceptionBN | * | -
 HPI | - | 1 | 1 | - | N | N | - | cls | imagenet | resnet18 | 42.0/66.2 | -
 HPI | - | 1 | 1 | - | N | N | - | cls | imagenet | resnet26/34/68 | * | -
 HPI | - | 1 | 1 | - | N | N | * | cls | imagenet | densenet21/45 | * | -
+ABC-net | A1/W5 | 32 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 68.3/87.9 | -
+ABC-net | A1/W(3/2/1) | 32 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | * | -
+ABC-net | A5/W5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 65.0/85.9 | -
+ABC-net | A3/W5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 62.5/84.2 | -
+ABC-net | A1/W5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 54.1/78.1 | -
+ABC-net | A5/W3 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 63.1/84.8 | -
+ABC-net | A3/W3 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 61.0/83.2 | -
+ABC-net | A1/W3 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 49.1/73.8 | -
+ABC-net | A1/W1 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18 | 42.7/67.6 | -
+ABC-net | A(1/3/5)/W(1/3/5) | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet34/50 | * | -
+Bi-Real net | - | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet18/34 | * | -
 Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet50 | 72.8/90.5 | -
 Group-net | 5 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet50 | 69.5/89.2 | -
 Group-net | 8 | 1 | 1 | 32 | N | N | - | cls | imagenet | resnet34 | 71.8/90.4 | more complexity
@@ -76,6 +87,7 @@ Group-net | 5 | 1 | 1 | 32 | N | N | - | seg | VOC2012 | resnet18/fcn-16s | 67.7
 Group-net | 5 | 1 | 1 | 32 | N | N | - | seg | VOC2012 | resnet18/fcn-32s | 65.1 | -
 Group-net | 1/3/5 | 2/4/32 | 1 | 32 | N | N | - | cls | imagenet | resnet18/50/Alexnet | * | in appendix
 
+Generally, '-' means uknown or unavailable. '*' indicates result exists in the paper, however too much of them to fit in the page, so look up the paper when needed.
 
 ## Efficient Super Resolution Using Binarized Neural Network
 [paper link](https://arxiv.org/abs/1812.06378)

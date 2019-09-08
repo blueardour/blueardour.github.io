@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Image segmentation
-categories: segmentation ai cv
+categories: segmentation ai cv summary
 date: 2019-04-30 02:50:59
 pid: 20190430-025059
 pin: 19
@@ -16,6 +16,13 @@ Semantic segmentation only cares about the category and need not to distinguish 
 
 
 # Semantic Segmentation
+
+## FCN: fully convolutional networks for semantic segmentation
+1. Maybe the first one to employ full convolution network in segmentation.
+2. employ pretrain parameters(alexnet, vgg, googlenet) from imagenet classification (parameter initilzation is important)
+3. fuse deeper and coarse information with previous fine-grain, shadow layer
+4. other tricks: deconv instead bilinear upsample, dataset imbalance, dataset augmentation, use sbd dataset
+
 ## Pspnet
 
 ## Deeplab
