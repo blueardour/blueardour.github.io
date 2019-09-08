@@ -12,103 +12,93 @@ pin: 100
 1. archlab:
    2019.7.27 19:49
    #0,1: lqnet-fp-bacs-resnet50-0: 10010/0.78/120 (10.8d) 74.26
-
    2019.8.8 8:58
    #0,1: lqnet-fp-bacs-resnet50-1: 10010/0.43/120 (6d) 75.62
-
    2019.8.14 20:44
    #0,1: lqnet-fp-cbas-resnet50-1: 10010/0.43/120 (6d) 75.336
-
    2019.8.21 17:44
    #0,1: lqnet-fp-bacs-resnet50-2: 10010/0.43/120 (6d) done
+   2019.09.02 13:44
+   #0: alqnet-fp-mobilenet-v1 13345/0.27/120 (5.2d) done
 
-   2019.8.28 14:44
-   #0,1: alqnet-fp-mobilenet-v1 6672/0.3/120 (2.78d)
+   2019.09.08 08:44
+   #0: alqnet-fp-mobilenet-v1 bacs 13345/0.30/120 (5.2d)
+
+   2019.09.06 10:44
+   #1: alqnet-fp-mobilenet-v1 bacs 13345/0.28/120 (5.2d)
 
 2. server:
-   2019.7.21 1:22pm
-   #0,1: 5005/0.5/50 alqnet-2bit finished
-
-   2019.7.23 10:35am
-   #0,1: 5005/0.6/120 alqnet-2bit additional-augment
-
    2019.7.27 14:55
    #0: 10009/0.45/120 alqnet-2bit dali finetune poly (6.3d)
    #1: 10009/0.44/120 alqnet-2bit dali finetune sgdr
-
    2019.8.3 10:40
    #0: 10009/0.34/120 lqnet-2bit dali finetune sgdr done
    #1: 10009/0.98/120 alqnet-3bit dali finetune sgdr (13d) done 
-
    2019.8.8 10:12
    #0: 10009/0.27/120 alqnet-bin dali finetune sgdr (3.7d) done 52.948
-
    2019.8.12 10:43
    #0: 10009/0.52/120 lqnet-3bit dali finetune poly (6.9d) done
-
    2019.8.20 10:24
    #0: 10009/0.52/120 lqnet-3bit dali finetune custom-step (7d) done
-
    2019.8.17 11:24
-   #1: 10009/0.98/120 alqnet-3bit dali finetune custom-step (13d)
-
+   #1: 10009/0.98/120 alqnet-3bit dali finetune custom-step (13d) done
    2019.8.28 10:24
-   #0: 10009/0.29/120 alqnet-2bit dali finetune custom-step (4.1d)
+   #0: 10009/0.29/120 alqnet-2bit dali finetune custom-step (4.1d) done
+
+   2019.9.02 11:24
+   #1: 13345/0.33/120 alqnet-ter-resnet34 dali finetune custom-step (6.2d)
+
+   2019.9.02 11:24
+   #0: 10009/0.55/120 alqnet-3bit-resnet18 dali finetune custom-step adam (7.6d)
 
 3. ubuntu:
-   #0: 10010/0.47/84 alqnet-a32w3
-
    2019.7.26 19:20
    #0: 10010/0.4/120 alqnet-a32w2-finetune-aa (5.6d)
-
    2019.8.2 8:40
    #0: 10010/0.48/120 alqnet-a32w3-finetune-aa (7d)
-
    2019.8.9 11:15
    #0: 10010/0.36/120 alqnet-a32w1-finetune (5d)
-
    2019.8.15 11:28
    #0: 10010/0.46/120 alqnet-a32w3-finetune (7d)
 
-   2019.8.23 09:51
+   2019.9.1 09:51
    #0: 10010/0.46/120 alqnet-a32w3-finetune (7d)
 
 4. anton:
    #0: 10010/0.49/84 lqnet-a2w1
-
    2019.7.26 19:56
    #0: 10010/0.26/120 lqnet-a32w2-finetune-aa-poly (3.6d)
-
    2019.7.31 9:20
    #0: 10010/0.26/120 lqnet-a32w3-finetune-aa-poly (4.2d)
-
    2019.8.5 10:20
    #0: 10010/0.36/120 lqnet-bin-finetune-aa-poly (5d) 53.846
-
    2019.8.10 17:08
    #0: 10010/0.36/120 lqnet-bin-finetune poly (5d) 54.7
-
    2019.8.17 11:43
    #0: 10010/0.52/120 alqnet-ter-finetune sgdr v1 (7d)
-
    2019.8.25 11:43
    #0: 10010/0.75/120 alqnet-2bit-resnet34 custom-step v2 (10.3d)
-   #0: 10010/0.76/76 alqnet-2bit-resnet34 custom-step v2 (?)
+   #0: 10010/0.76/76 alqnet-2bit-resnet34 custom-step v2 (?) done
+
+   2019.9.5 10:33
+   #0: 10009/0.30/120 alqnet-bin dali finetune sgdr (4.2d)
 
 5. level4:
    2019.8.1 09:00
    #0: 10009/0.51/120 lqnet-2bit dali finetune poly (7d)
-
    2019.8.8 10:06 (stopped at 8.12 11:00)
    2019.8.12 11:00  change to new lr policy
    #3: 10009/0.4/115 alqnet-bin dali finetune poly (continue, 5.4d) done 53.856
    #0: 10009/0.35/120 lqnet-bin dali finetune sgdr (4.9d) done 51.122
-
    2019.8.17 19:43
    #1: 10010/0.53/120 alqnet-ter-finetune poly v0 (7d) done
-
    2019.8.21 17:43
-   #0: 10009/0.35/120 lqnet-bin dali finetune custom-step (4.9d)
+   #0: 10009/0.35/120 lqnet-bin dali finetune custom-step (4.9d) done
+   2019.9.5 10:33
+   #0: 10009/0.35/70 lqnet-bin dali finetune custom-step (2.8d) done
+
+   2019.9.8 10:33
+   #1,2: 6672/0.4/150 mobilenet-v2 poly (4.7d)
 
 6. phoenix: 
    2019.7.27 14:55 / 2019.8.5 10:20
@@ -118,11 +108,14 @@ pin: 100
    #1 volta: alqnet-3bit v0 poly (10010 * 0.77 * 120) done
    #2 volta: alqnet-2bit-resnet34 v1 sgdr 70.656 done
    #1 volta: alqnet-fp-mobilenet-v1 done
+   #1 volta: alqnet-ter v2 custom-step 10010/0.73/120 done
+   #2 volta: alqnet-3bit v3 poly       10010/0.87/120 done
+   #1 volta: lqnet-2bit v3 custom-step 10010/0.28/120 done
 
-   #2 volta: alqnet-3bit v3 poly       10010/0.87/120
-   #1 volta: alqnet-ter v2 custom-step 10010/0.73/120
-   #1 volta: lqnet-2bit v3 custom-step 10010/0.28/120
+   #2 volta: fp-mobilenet-v2 5005/0.71/150 (6.2d)
+
    #2 volta: alqnet-3bit resnet50 custom-step 10010/1.40/120 (19.4d)
+   #2 volta: alqnet-2bit resnet50 custom-step 10010/1.40/120 (queue)
    #1 volta: alqnet-3bit resnet34 custom-step 10010/0.79/120 (11.5d)
 
 7. bai:
