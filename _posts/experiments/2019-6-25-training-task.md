@@ -44,12 +44,14 @@ pin: 100
    #1: 10009/0.98/120 alqnet-3bit dali finetune custom-step (13d) done
    2019.8.28 10:24
    #0: 10009/0.29/120 alqnet-2bit dali finetune custom-step (4.1d) done
-
    2019.9.02 11:24
-   #1: 13345/0.33/120 alqnet-ter-resnet34 dali finetune custom-step (6.2d)
+   #1: 13345/0.33/120 alqnet-ter-resnet34 dali finetune custom-step (6.2d) done
 
    2019.9.02 11:24
    #0: 10009/0.55/120 alqnet-3bit-resnet18 dali finetune custom-step adam (7.6d)
+
+   2019.9.09 11:24
+   #1: 13345/0.45/120 lqnet-2bit-resnet34 dali finetune custom-step (8.4d)
 
 3. ubuntu:
    2019.7.26 19:20
@@ -60,9 +62,8 @@ pin: 100
    #0: 10010/0.36/120 alqnet-a32w1-finetune (5d)
    2019.8.15 11:28
    #0: 10010/0.46/120 alqnet-a32w3-finetune (7d)
-
    2019.9.1 09:51
-   #0: 10010/0.46/120 alqnet-a32w3-finetune (7d)
+   #0: 10010/0.46/120 alqnet-a32w3-finetune (7d) done
 
 4. anton:
    #0: 10010/0.49/84 lqnet-a2w1
