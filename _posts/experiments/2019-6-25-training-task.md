@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Training Log
-categories: training-trick
+categories: training-trick experiments quantization
 date: 2019-06-25 12:38:11
 pid: 20190625-123811
 pin: 100
@@ -20,12 +20,14 @@ pin: 100
    #0,1: lqnet-fp-bacs-resnet50-2: 10010/0.43/120 (6d) done
    2019.09.02 13:44
    #0: alqnet-fp-mobilenet-v1 13345/0.27/120 (5.2d) done
+   2019.09.06 10:44
+   #1: alqnet-fp-mobilenet-v1 bacs 13345/0.28/120 (5.2d) done
 
    2019.09.08 08:44
-   #0: alqnet-fp-mobilenet-v1 bacs 13345/0.30/120 (5.2d)
+   #0: alqnet-fp-mobilenet-v1 bacs 13345/0.30/120 (5.2d) (un-finished)
 
-   2019.09.06 10:44
-   #1: alqnet-fp-mobilenet-v1 bacs 13345/0.28/120 (5.2d)
+   2019.09.13 08:44
+   #0,1: resnet34-3bit-alqnet 6672/1.26/120 (11.4d)
 
 2. server:
    2019.7.27 14:55
@@ -46,12 +48,16 @@ pin: 100
    #0: 10009/0.29/120 alqnet-2bit dali finetune custom-step (4.1d) done
    2019.9.02 11:24
    #1: 13345/0.33/120 alqnet-ter-resnet34 dali finetune custom-step (6.2d) done
-
    2019.9.02 11:24
-   #0: 10009/0.55/120 alqnet-3bit-resnet18 dali finetune custom-step adam (7.6d)
-
+   #0: 10009/0.55/120 alqnet-3bit-resnet18 dali finetune custom-step adam (7.6d) done
    2019.9.09 11:24
-   #1: 13345/0.45/120 lqnet-2bit-resnet34 dali finetune custom-step (8.4d)
+   #1: 13345/0.45/120 lqnet-2bit-resnet34 dali finetune custom-step (8.4d) done
+
+   2019.9.10 11:24
+   #1: 13345/0.69/120 lqnet-3bit-resnet34 dali finetune custom-step (12.8d)
+
+   2019.9.20 11:24
+   #0: 6672/0.32/120 cbas resnet18 dali custom-step (3d)
 
 3. ubuntu:
    2019.7.26 19:20
@@ -80,9 +86,11 @@ pin: 100
    2019.8.25 11:43
    #0: 10010/0.75/120 alqnet-2bit-resnet34 custom-step v2 (10.3d)
    #0: 10010/0.76/76 alqnet-2bit-resnet34 custom-step v2 (?) done
-
    2019.9.5 10:33
-   #0: 10009/0.30/120 alqnet-bin dali finetune sgdr (4.2d)
+   #0: 10009/0.30/120 alqnet-bin dali finetune sgdr (4.2d) done
+
+   2019.9.13 14:33
+   #0: 13345/0.40/120 alqnet-bin resnet34 dali finetune custom-step (7.5d)
 
 5. level4:
    2019.8.1 09:00
@@ -97,9 +105,11 @@ pin: 100
    #0: 10009/0.35/120 lqnet-bin dali finetune custom-step (4.9d) done
    2019.9.5 10:33
    #0: 10009/0.35/70 lqnet-bin dali finetune custom-step (2.8d) done
-
    2019.9.8 10:33
-   #1,2: 6672/0.4/150 mobilenet-v2 poly (4.7d)
+   #1,2: 6672/0.4/150 mobilenet-v2 poly (4.7d) done bacs 70.416
+
+   2019.9.18 10:33
+   #1: 10009/0.33/120 resnet18-alqnet-bin custom-step (4.6d)
 
 6. phoenix: 
    2019.7.27 14:55 / 2019.8.5 10:20
@@ -112,19 +122,19 @@ pin: 100
    #1 volta: alqnet-ter v2 custom-step 10010/0.73/120 done
    #2 volta: alqnet-3bit v3 poly       10010/0.87/120 done
    #1 volta: lqnet-2bit v3 custom-step 10010/0.28/120 done
+   #2 volta: fp-mobilenet-v2 5005/0.71/150 (6.2d) done cbas 71.524
 
-   #2 volta: fp-mobilenet-v2 5005/0.71/150 (6.2d)
+   ##2 volta:    lqnet-fp resnet50 custom-step 10010/0.79/120 (cbas)
+   ##2 volta:    lqnet-fp resnet18 custom-step 10010/1.40/120 (bcas)
+
+   #1 volta: alqnet-3bit resnet34 custom-step 10010/0.79/120 (11.5d)
+   #2 volta:    lqnet-fp resnet34 custom-step 10010/0.79/120 (cbas)
+   #2 volta:    lqnet-fp resnet18 custom-step 10010/1.40/120 (bcas)
 
    #2 volta: alqnet-3bit resnet50 custom-step 10010/1.40/120 (19.4d)
    #2 volta: alqnet-2bit resnet50 custom-step 10010/1.40/120 (queue)
-   #1 volta: alqnet-3bit resnet34 custom-step 10010/0.79/120 (11.5d)
-
-7. bai:
-   2019.8.1 16:50
-   #0: 10009/0.3/120 alqnet-bin dali finetune poly (abrupt)
-
-   2019.8.8
-   # test apex
+   #2 volta:  lqnet-3bit resnet50 custom-step 10010/1.40/120 
+   #2 volta:  lqnet-2bit resnet50 custom-step 10010/1.40/120 
 
 # Training Speed Test
 torch.utils.data.dataloader.DataLoader and i7-7800x + 2080ti*2:

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Training History
-categories: training-trick
+categories: training-trick experiments quantization
 date: 2019-04-20 12:38:11
 pid: 20190420-123811
 pin: 11
