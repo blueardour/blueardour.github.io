@@ -10,131 +10,63 @@ pin: 100
 
 # Current Task
 1. archlab:
-   2019.7.27 19:49
-   #0,1: lqnet-fp-bacs-resnet50-0: 10010/0.78/120 (10.8d) 74.26
-   2019.8.8 8:58
-   #0,1: lqnet-fp-bacs-resnet50-1: 10010/0.43/120 (6d) 75.62
-   2019.8.14 20:44
-   #0,1: lqnet-fp-cbas-resnet50-1: 10010/0.43/120 (6d) 75.336
-   2019.8.21 17:44
-   #0,1: lqnet-fp-bacs-resnet50-2: 10010/0.43/120 (6d) done
-   2019.09.02 13:44
-   #0: alqnet-fp-mobilenet-v1 13345/0.27/120 (5.2d) done
-   2019.09.06 10:44
-   #1: alqnet-fp-mobilenet-v1 bacs 13345/0.28/120 (5.2d) done
-
-   2019.09.08 08:44
-   #0: alqnet-fp-mobilenet-v1 bacs 13345/0.30/120 (5.2d) (un-finished)
-
-   2019.09.13 08:44
-   #0,1: resnet34-3bit-alqnet 6672/1.26/120 (11.4d)
-
+   2019.9.29 11:24 
+   #0,1: 6672/0.32/120 resnet34 custom-step alqnet 3bit (expect 2019.10.12) (paused)
+   #2 volta: bireal34 cbsa fp 120*5004*0.4 = 2.8d(on 2019.10.09 3:20pm) (done) 
+   #1 volta: bireal34 bireal   cbsa fp 120*10009*0.50 = 7d (expect 2019.10.30) (done)
+   #1 volta: bireal34 popcount cbsa fp 120*10009*0.48 = 7d (expect 2019.10.30) (done)
+   #1 volta: bireal34 bireal   cbsa fp 120*10009*0.52 = 4.5d s=0.625
+   #1 volta: bireal34 bireal   cbsa fp 120*10009*0.57 = 8.0d s=0.625
+   
 2. server:
-   2019.7.27 14:55
-   #0: 10009/0.45/120 alqnet-2bit dali finetune poly (6.3d)
-   #1: 10009/0.44/120 alqnet-2bit dali finetune sgdr
-   2019.8.3 10:40
-   #0: 10009/0.34/120 lqnet-2bit dali finetune sgdr done
-   #1: 10009/0.98/120 alqnet-3bit dali finetune sgdr (13d) done 
-   2019.8.8 10:12
-   #0: 10009/0.27/120 alqnet-bin dali finetune sgdr (3.7d) done 52.948
-   2019.8.12 10:43
-   #0: 10009/0.52/120 lqnet-3bit dali finetune poly (6.9d) done
-   2019.8.20 10:24
-   #0: 10009/0.52/120 lqnet-3bit dali finetune custom-step (7d) done
-   2019.8.17 11:24
-   #1: 10009/0.98/120 alqnet-3bit dali finetune custom-step (13d) done
-   2019.8.28 10:24
-   #0: 10009/0.29/120 alqnet-2bit dali finetune custom-step (4.1d) done
-   2019.9.02 11:24
-   #1: 13345/0.33/120 alqnet-ter-resnet34 dali finetune custom-step (6.2d) done
-   2019.9.02 11:24
-   #0: 10009/0.55/120 alqnet-3bit-resnet18 dali finetune custom-step adam (7.6d) done
-   2019.9.09 11:24
-   #1: 13345/0.45/120 lqnet-2bit-resnet34 dali finetune custom-step (8.4d) done
+   #1 volta: bireal18 cbsa fp  8007 * 0.22 * 120 (done)
+   #1 volta: bireal18 cbsa ter bireal (done)
+   #1 volta: resnet34 bacs ter sgd-1 10009 * 0.33 * 120 (done)
+   #1 volta: resnet18 bacs ter bireal  (done)
+   #1 volta: resnet18 bacs ter popcount s=0.25 (done)
+   #1 volta: resnet34 bacs ter bireal (done)
+   #1 volta: resnet18 bacs ter popcount s=0.618 (done)
+   #1 volta: resnet18 bacs fp group-net group-norm=2 (done)
+   #1 volta: resnet18 bacs ter popcount s=0.5 stratch (done)
+   #1 volta: mobilenet v1 bacs ter popcount depth-skip s=0.5
+   #1 volta: resnet18 bacs ter popcount s=0.625 (done)
+   #1 volta: resnet34 bacs ter bireal s=0.625 
 
-   2019.9.10 11:24
-   #1: 13345/0.69/120 lqnet-3bit-resnet34 dali finetune custom-step (12.8d)
-
-   2019.9.20 11:24
-   #0: 6672/0.32/120 cbas resnet18 dali custom-step (3d)
-
-3. ubuntu:
-   2019.7.26 19:20
-   #0: 10010/0.4/120 alqnet-a32w2-finetune-aa (5.6d)
-   2019.8.2 8:40
-   #0: 10010/0.48/120 alqnet-a32w3-finetune-aa (7d)
-   2019.8.9 11:15
-   #0: 10010/0.36/120 alqnet-a32w1-finetune (5d)
-   2019.8.15 11:28
-   #0: 10010/0.46/120 alqnet-a32w3-finetune (7d)
-   2019.9.1 09:51
-   #0: 10010/0.46/120 alqnet-a32w3-finetune (7d) done
+3. centos:
+   #1 volta: resnet18 bacs fp group-net group-norm=4
+   #1 volta: resnet18 bacs fp group-net group-norm=8 (stopped) (resumed from dali)
 
 4. anton:
-   #0: 10010/0.49/84 lqnet-a2w1
-   2019.7.26 19:56
-   #0: 10010/0.26/120 lqnet-a32w2-finetune-aa-poly (3.6d)
-   2019.7.31 9:20
-   #0: 10010/0.26/120 lqnet-a32w3-finetune-aa-poly (4.2d)
-   2019.8.5 10:20
-   #0: 10010/0.36/120 lqnet-bin-finetune-aa-poly (5d) 53.846
-   2019.8.10 17:08
-   #0: 10010/0.36/120 lqnet-bin-finetune poly (5d) 54.7
-   2019.8.17 11:43
-   #0: 10010/0.52/120 alqnet-ter-finetune sgdr v1 (7d)
-   2019.8.25 11:43
-   #0: 10010/0.75/120 alqnet-2bit-resnet34 custom-step v2 (10.3d)
-   #0: 10010/0.76/76 alqnet-2bit-resnet34 custom-step v2 (?) done
-   2019.9.5 10:33
-   #0: 10009/0.30/120 alqnet-bin dali finetune sgdr (4.2d) done
-
-   2019.9.13 14:33
-   #0: 13345/0.40/120 alqnet-bin resnet34 dali finetune custom-step (7.5d)
+   #1 volta: bireal18 cbsa fp  8007 * 0.22 * 120 =  (done)
+   #1 volta: resnet18 bacs 2bit alqnet quant-group: -8 (expect: 10.17) (done)
+   #1 volta: resnet18 bacs ter popcount s=0.75(done)
+   #1 volta: resnet18 bacs ter popcount s=0.50(done)
+   #1 volta: resnet18 bacs ter popcount s=0.5 finetune wt-group=1 (done)
+   #1 volta: resnet18 bacs ter bireal s=0.625
 
 5. level4:
-   2019.8.1 09:00
-   #0: 10009/0.51/120 lqnet-2bit dali finetune poly (7d)
-   2019.8.8 10:06 (stopped at 8.12 11:00)
-   2019.8.12 11:00  change to new lr policy
-   #3: 10009/0.4/115 alqnet-bin dali finetune poly (continue, 5.4d) done 53.856
-   #0: 10009/0.35/120 lqnet-bin dali finetune sgdr (4.9d) done 51.122
-   2019.8.17 19:43
-   #1: 10010/0.53/120 alqnet-ter-finetune poly v0 (7d) done
-   2019.8.21 17:43
-   #0: 10009/0.35/120 lqnet-bin dali finetune custom-step (4.9d) done
-   2019.9.5 10:33
-   #0: 10009/0.35/70 lqnet-bin dali finetune custom-step (2.8d) done
-   2019.9.8 10:33
-   #1,2: 6672/0.4/150 mobilenet-v2 poly (4.7d) done bacs 70.416
-
-   2019.9.18 10:33
-   #1: 10009/0.33/120 resnet18-alqnet-bin custom-step (4.6d)
+   #1 volta: bireal18 cbsa ter popcount (done)
+   #1 volta: mobilenet v1 bacs fp depth-skip (13345 * 0.39 * 120 = 7.3d) (done)
+   #1 volta: resnet18 bacs ter popcount s=0.5 stratch wt-group=1 (done)
+   #1 volta: bireal18 cbsa ter bireal s=0.625
 
 6. phoenix: 
-   2019.7.27 14:55 / 2019.8.5 10:20
-   #2 volta: alqnet-fp-resnet34 (done)
-   #1 volta: alqnet-fp-mobilenet-v1 (69.8, done)
-   #1 volta: lqnet-3bit v1 sgdr  (10010 * 1 * 120) done
-   #1 volta: alqnet-3bit v0 poly (10010 * 0.77 * 120) done
-   #2 volta: alqnet-2bit-resnet34 v1 sgdr 70.656 done
-   #1 volta: alqnet-fp-mobilenet-v1 done
-   #1 volta: alqnet-ter v2 custom-step 10010/0.73/120 done
-   #2 volta: alqnet-3bit v3 poly       10010/0.87/120 done
-   #1 volta: lqnet-2bit v3 custom-step 10010/0.28/120 done
-   #2 volta: fp-mobilenet-v2 5005/0.71/150 (6.2d) done cbas 71.524
+   #2 volta: mobilenet v2 bacs fp (done)
+   #2 volta: mobilenet v1 cbas 2bit (stopped for bad performance)
+   #1 volta: mobilenet v1 bacs 2bit alqnet (stopped for bad performance)
+   #1 volta: resnet18 bacs 2bit alqnet quant-group: -64 (paused as disk too slow, decide to cancel task)
+   #1 volta: resnet18 bacs 2bit alqnet quant-group: -1 (stopped, as result is Nan) (Nan is not out of expection, as only ks*ks data participate the quantization)
+   #2 volta: resnet34 cbsa fp (paused as gpu too slow) (task is re-submitted on archlab)
 
-   ##2 volta:    lqnet-fp resnet50 custom-step 10010/0.79/120 (cbas)
-   ##2 volta:    lqnet-fp resnet18 custom-step 10010/1.40/120 (bcas)
+   cp:
+   #2 volta: resnet50 bacs ter popcount s=0.5 finetune
 
-   #1 volta: alqnet-3bit resnet34 custom-step 10010/0.79/120 (11.5d)
-   #2 volta:    lqnet-fp resnet34 custom-step 10010/0.79/120 (cbas)
-   #2 volta:    lqnet-fp resnet18 custom-step 10010/1.40/120 (bcas)
+   bohan:
 
-   #2 volta: alqnet-3bit resnet50 custom-step 10010/1.40/120 (19.4d)
-   #2 volta: alqnet-2bit resnet50 custom-step 10010/1.40/120 (queue)
-   #2 volta:  lqnet-3bit resnet50 custom-step 10010/1.40/120 
-   #2 volta:  lqnet-2bit resnet50 custom-step 10010/1.40/120 
+   liangyi:
+   #1 volta: mobilenet v1 cbas fp depth-skip (done)
+   #2 volta: resnet34 bacs ter popcount s=0.625 (5005 * 0.35 * 120) (done)
+   #2 volta: resnet50 bacs ter popcount s=0.625 finetune
 
 # Training Speed Test
 torch.utils.data.dataloader.DataLoader and i7-7800x + 2080ti*2:

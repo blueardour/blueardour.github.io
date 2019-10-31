@@ -1,3 +1,3 @@
-bundle exec jekyll serve -H $IP
+bundle exec jekyll serve -H $IP --trace
 
 
