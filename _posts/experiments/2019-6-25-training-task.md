@@ -10,15 +10,27 @@ pin: 100
 
 # Current Task
 1. archlab:
+2. server:
+   #0 volta: resnet18 bacs 2bit group-norm quant-group=8
+   #1 volta: resnet18 bacs 2bit quant-group=8
+3. centos:
+4. anton:
+5. level4:
+6. phoenix: 
+   liangyi:
+   #2 volta: resnet18 bacs fp popcount alpha=2 
+
+
+# history Task
+1. archlab:
    2019.9.29 11:24 
    #0,1: 6672/0.32/120 resnet34 custom-step alqnet 3bit (expect 2019.10.12) (paused)
    #2 volta: bireal34 cbsa fp 120*5004*0.4 = 2.8d(on 2019.10.09 3:20pm) (done) 
    #1 volta: bireal34 bireal   cbsa fp 120*10009*0.50 = 7d (expect 2019.10.30) (done)
    #1 volta: bireal34 popcount cbsa fp 120*10009*0.48 = 7d (expect 2019.10.30) (done)
-   #1 volta: bireal34 bireal   cbsa fp 120*10009*0.52 = 4.5d s=0.625
-   #1 volta: bireal34 bireal   cbsa fp 120*10009*0.57 = 8.0d s=0.625
+   #1 volta: bireal34 bireal   cbsa fp 120*10009*0.52 = 4.5d s=0.625 (done)
+   #1 volta: bireal34 popcount cbsa fp 120*10009*0.50 s=0.625  expect 11.12 (stopped)
    
-2. server:
    #1 volta: bireal18 cbsa fp  8007 * 0.22 * 120 (done)
    #1 volta: bireal18 cbsa ter bireal (done)
    #1 volta: resnet34 bacs ter sgd-1 10009 * 0.33 * 120 (done)
@@ -28,13 +40,14 @@ pin: 100
    #1 volta: resnet18 bacs ter popcount s=0.618 (done)
    #1 volta: resnet18 bacs fp group-net group-norm=2 (done)
    #1 volta: resnet18 bacs ter popcount s=0.5 stratch (done)
-   #1 volta: mobilenet v1 bacs ter popcount depth-skip s=0.5
+   #1 volta: mobilenet v1 bacs ter popcount depth-skip s=0.5 done
    #1 volta: resnet18 bacs ter popcount s=0.625 (done)
-   #1 volta: resnet34 bacs ter bireal s=0.625 
+   #1 volta: resnet34 bacs ter bireal s=0.625 (done)
 
 3. centos:
-   #1 volta: resnet18 bacs fp group-net group-norm=4
-   #1 volta: resnet18 bacs fp group-net group-norm=8 (stopped) (resumed from dali)
+   #1 volta: resnet18 bacs fp group-net group-norm=4 sgd-2 (done)
+   #1 volta: resnet18 bacs fp group-net group-norm=8 sgd-2 (done)
+   #1 volta: resnet18 bacs fp group-net group-norm=4 sgd-1 (done)
 
 4. anton:
    #1 volta: bireal18 cbsa fp  8007 * 0.22 * 120 =  (done)
@@ -42,13 +55,15 @@ pin: 100
    #1 volta: resnet18 bacs ter popcount s=0.75(done)
    #1 volta: resnet18 bacs ter popcount s=0.50(done)
    #1 volta: resnet18 bacs ter popcount s=0.5 finetune wt-group=1 (done)
-   #1 volta: resnet18 bacs ter bireal s=0.625
+   #1 volta: resnet18 bacs ter bireal s=0.625 (done)
+   #1 volta: resnet18 bacs a32w2 bireal s=0.625 (done)
 
 5. level4:
    #1 volta: bireal18 cbsa ter popcount (done)
    #1 volta: mobilenet v1 bacs fp depth-skip (13345 * 0.39 * 120 = 7.3d) (done)
    #1 volta: resnet18 bacs ter popcount s=0.5 stratch wt-group=1 (done)
-   #1 volta: bireal18 cbsa ter bireal s=0.625
+   #1 volta: bireal18 cbsa ter popcount s=0.625 (120-49) * 10009 * 0.31 (expect before 11.04) (done)
+   #1 volta: bireal18 cbsa ter bireal s=0.625 (expect 11.09)
 
 6. phoenix: 
    #2 volta: mobilenet v2 bacs fp (done)
@@ -59,14 +74,14 @@ pin: 100
    #2 volta: resnet34 cbsa fp (paused as gpu too slow) (task is re-submitted on archlab)
 
    cp:
-   #2 volta: resnet50 bacs ter popcount s=0.5 finetune
+   #2 volta: resnet50 bacs ter popcount s=0.5 finetune (done)
 
    bohan:
 
    liangyi:
    #1 volta: mobilenet v1 cbas fp depth-skip (done)
    #2 volta: resnet34 bacs ter popcount s=0.625 (5005 * 0.35 * 120) (done)
-   #2 volta: resnet50 bacs ter popcount s=0.625 finetune
+   #2 volta: resnet50 bacs ter popcount s=0.625 finetune (done)
 
 # Training Speed Test
 torch.utils.data.dataloader.DataLoader and i7-7800x + 2080ti*2:
