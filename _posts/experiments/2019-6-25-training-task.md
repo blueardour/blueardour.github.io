@@ -9,17 +9,193 @@ pin: 100
 ---
 
 # Current Task
-1. archlab:
 2. server:
-   #0 volta: resnet18 bacs 2bit group-norm quant-group=8
-   #1 volta: resnet18 bacs 2bit quant-group=8
-3. centos:
-4. anton:
-5. level4:
-6. phoenix: 
-   liangyi:
-   #2 volta: resnet18 bacs fp popcount alpha=2 
+   #2 volta: AdelaideDet blendmask coco R18-FPN-1x-fp16 det-resnet18 (done)
+   #2 volta: AdelaideDet blendmask coco 550-FPN-1x-fp16 det-resnet50 (done)
+   #2 volta: AdelaideDet blendmask coco 550-FPN-3x-fp16 det-resnet50 (done)
+   #2 volta: AdelaideDet blendmask coco 550-FPN-1x-fp16-FPN-BN det-resnet18 (done)
+   #2 volta: popcount-net r18 hoqr bcas fp32 sgd-0 (done)
+   #1 volta: resnet18 hoqr++ xnor++ finetune bin bcas adam-0 and sgd-9 (done)
+   #1 volta: det-resnet18 dorefa tet 3bit fcos sgd-9 O1 fp16 wt-mean-var (stop)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-9 O1 fp16 wt-var wtet (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-9 O1 fp16 wt-non wtet (done)
+   #2 volta: AdelaideDet fcos coco R18-FPN-1x-FPN-BN-fp16-input det-resnet18 (done)
+   #2 volta: AdelaideDet fcos coco R18-FPN-1x-FPN-BN-fp16 det-resnet18 round2 (done)
+   #1 volta: SR EDSR baseline 2x
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-9 O1 fp16 wt-var wtet static-bn
 
+
+4. anton:
+   #1 volta: popcount-net r18 hoqr bacs fp32 sgd-0 (done)
+   #1 volta: resnet18 hoqr++ xnor++ finetune bin bacs adam-0 and sgd-9 (done)
+   #1 volta: resnet18 dorefa tet bin bacs sgd-9 O1 fp16 wt-var
+   #1 volta: resnet18 dorefa tet bin bacs sgd-9 O1 fp16 wt-var wtet
+
+5. level4:
+   #1 volta: det-resnet50 popcount ter fcos sgd-3 FP16 wt-adaptive mean-var
+
+6. phoenix:
+   chenp:
+   #2 voltap: AdelaideDet fcos R18-FPN-1x-FPN-BN fp16 dorefa tet 2bit double-init backbone-only (done)
+   #2 voltap: AdelaideDet fcos R18-FPN-1x-FPN-BN fp16 popcount ter double-init backbone-only (done)
+   #2 voltap: AdelaideDet fcos R18-FPN-1x-FPN-BN fp16 dorefa tet 2bit double-init backbone-fpn (done)
+   #2 voltaM: AdelaideDet fcos R18-FPN-1x-FPN-BN fp16 popcount bs=32 double-init backbone-only (done)
+   #2 voltap: AdelaideDet fcos R18-FPN-1x-FPN-BN fp16 dorefa tet 2bit double-init all (done)
+   #4 kepler: AdelaideDet retina-net R18-FPN-1x-FPN-BN-Head-GN det-resnet18 FP32 (done)
+   #2 voltap: AdelaideDet fcos R18-FPN-1x-FPN-BN fp16 popcount double-init all (done)
+   #2 voltap: AdelaideDet fcos R18-FPN-1x-FPN-BN det-resnet18 fp16 dorefa tet 2bit lr=2.5e-3 double-init all (done)
+   #2 voltaM: AdelaideDet retina R18-FPN-1x-FPN-BN fp16 dorefa tet 2bit double-init all (done, error in config, mAP=8)
+   #1 voltaM: det-resnet50 dorefa tet 2bit fcos sgd-9 O1 fp16 wt-mean-var (stop) 
+   #1 voltaM: det-resnet50 dorefa tet 3bit fcos sgd-9 O1 fp16 wt-mean-var (stop)
+   #2 volta: AdelaideDet fcos coco R18-FPN-1x-FPN-BN-fp16 det-resnet18 round3
+   #1 volta: det-resnet18 dorefa tet 3bit fcos sgd-9 O1 fp16 wt-var wtet
+   #1 volta: SR EDSR paper 2x
+
+   bohan:
+   #1 voltap: det-resnet18 dorefa tet 2bit wt-var wtet sgd-9 O1 fp16 (done)
+   #1 voltap: det-resnet34 dorefa tet 2bit wt-var wtet sgd-9 O1 fp16 (done)
+   #2 voltap: det-resnet50 dorefa tet 2bit wt-var wtet sgd-9 O1 fp16
+   #2 voltap: det-resnet50 dorefa tet 3bit wt-var wtet sgd-9 O1 fp16
+   #2 voltap: AdelaideDet fcos R18-FPN-1x-FPN-BN fp16 dorefa tet 2bit double-init all wtet
+
+# 2020.02.07
+1. archlab:
+
+2. server:
+   #1 volta: det-resnet34 dorefa tet 2bit fcos sgd-9 O1 fp16 wt-mean-var (done)
+   #1 volta: det-resnet18 dorefa tet 2bit fcos sgd-9 O1 fp16 wt-mean-var (done)
+   #1 volta: resnet18 non-uniform baseline lqnet bacs 2bit sgd-1 O0 fp32 wt-mean-var epoch24 65.226 (done)
+   #1 volta: resnet18 non-uniform baseline lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 (done) 
+   #1 volta: resnet18 non-uniform loop2    lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 (done)
+   #1 volta: resnet18 non-uniform FixWithGrad lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 round2 (done)
+   #1 volta: resnet18 non-uniform FixWithGrad lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 round4 (done)
+   #1 volta: resnet18 spatial lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 quant-group 4 (done)
+   #1 volta: resnet18 spatial lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 quant-group 8 (done)
+   #2 volta: AdelaideDet fcos coco R18-FPN-1x-Full-BN-fp16 det-resnet18 FP16 O1 (done)
+   #2 volta: AdelaideDet retina-net coco R18-FPN-1x-fp16 det-resnet18 FP16 O1 (done)
+   #2 volta: AdelaideDet fcos coco R18-FPN-1x-fp16 det-resnet18 FP16 O1 (done)
+   #2 volta: AdelaideDet mask-rcnn coco R18-FPN-1x-fp16 det-resnet18 FP16 O1 (done)
+
+3. centos:
+
+4. anton:
+   #1 volta: resnet18 non-uniform FixWithGrad lqnet bacs 2bit sgd-1 O0 fp32 wt-mean-var epoch24 (done)
+   #1 volta: resnet18 non-uniform FixWithGrad lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 (done)
+   #1 volta: resnet18 non-uniform FixWithGrad lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 round3 (done)
+   #1 volta: resnet18 non-uniform FixWithGrad lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 round5 (done)
+   #1 volta: resnet18 non-uniform FixWithGrad lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 round6 (done)
+   #1 volta: resnet18 spatial-8 lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 (done)
+
+5. level4:
+   #1 volta: det-resnet34 popcount ter fcos sgd-3 FP16 wt-adaptive mean-var (done)
+   #1 volta: resnet18 lqnet bacs sgd-1 FP32 fm-quant-group=8 spatial stratch (done)
+
+6. phoenix:
+   chenp:
+   #2 voltap: AdelaideDet fcos coco R34-FPN-1x det-resnet34 (done)
+   #4 kepler: AdelaideDet fcos coco R18-FPN-1x det-resnet18 (done)
+   #4 kepler: AdelaideDet fcos coco R18-FPN-1x det-resnet18 popcount backbone only ter (done)
+   #1 voltap: resnet18 non-uniform gradscale lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 (done)
+   #4 kepler: AdelaideDet fcos coco R18-FPN-1x det-resnet18 popcount backbone only ter lr 1e-3 (done)
+   #1 voltap: resnet18 non-uniform gradslope lqnet bacs 2bit sgd-4 O0 fp32 wt-mean-var epoch30 (done)
+   #2 voltaM: resnet18 dorefa tet 2bit bacs sgd-9 O1 fp16 wt-mean-var bs 1024 (done)
+   #2 voltap: AdelaideDet retina-net coco R50-FPN-1x MSRA-R50 O1 fp16 (done)
+
+   bohan:
+   #2 voltaM: AdelaideDet fcos coco R18-FPN-1x-FPN-BN det-resnet18 (done)
+   #2 voltaM: AdelaideDet fcos coco R18-FPN-1x-Full-BN det-resnet18(done)
+   #2 voltaM: AdelaideDet fcos coco R18-FPN-1x-FPN-BN det-resnet18 ter backbone only popcount
+   #2 voltaM: AdelaideDet fcos coco R18-FPN-1x-Full-BN det-resnet18 ter backbone only popcount
+
+# 2020.01.18
+1. archlab:
+   #0 volta: fixup origin project r18, expect 2019.12.01 (done)
+   #0 volta: mobilenet-v1 lqnet 2bit point-wise-only cbas  2019.12.11 (done)
+   #0 volta: mobilenet-v1 lqnet 2bit point-wise-only cbas  sgd-1 (done)
+   #1 volta: adaptive lqnet r18 [mean-fm] bacs 2bit lr-1 expect: 2020.01.05 (done)
+   #1 volta: adaptive lqnet r18 bacs fp16 fix fix-pooling patch-stem singleconv sgd-1 (done)
+   #1 volta: dorefa tet r18 bacs 2bit fix fix-pooling patch-stem singleconv sgd-4 (done)
+   #2 volta: resnet50 popcount ter fcos sgd-3 FP16 wt-adaptive mean-var (move from level4)
+
+2. server:
+   #0,1 volta: R50 coco R-50-aux-3x.yaml bs=8 (done)
+   #0,1 volta: fixup popcount r50 2019.11.29 (done)
+   #1 volta: resnet18 pact a4w1 bacs adam-0 2019.12.06 (done)
+   #0 volta: resnet18 dorefa a4w1 bacs sgd-2 2019.12.06(done)
+   #0,1 volta: R18 adaptive lqnet 4bit bacs bs=256 sgd-2 (done)
+   #0 volta: R18 adaptive lqnet 2bit bacs loop2 debug (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-5 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs fix-pooling patch-stem wd:1e-4 sgd-4 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs fix-pooling patch-stem wd:2e-5 sgd-4 (move to anton)
+   #2 volta: AdelaideDet coco fcos-R-50-1x.yaml bs=8 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-8 wd:2e-5 mixup:0.7 epoch:60 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs fix-pooling patch-stem wd:1e-4 mixup:0.7 epoch:90 sgd-7 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-9 wd:2e-5 epoch:40 O1 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-9 O1 fp16 grad-type: bug-A (divergence)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-9 O1 fp16 grad-type: bug-B (div zero error)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-9 O1 fp16 grad-type: none (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-9 O1 fp16 grad-type: none scale5-fan (done)
+
+3. centos:
+   #0 volta: resnet18 dorefa a4w1 bacs sgd-3 90\*10010\*0.44  (done)
+   #0 volta: fixup popcount r18 no mixup (done)
+   #1 volta: resnet18 lqnet adaptive [fm-min] bacs 2bit lr-1 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-4 O1 fp16 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-4 grad-scale fan-scale2 O1 fp16 (not converage)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-4 grad-scale mean-fan-scale2 O1 fp16 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-9 O1 fp16 grad-type: none scale2-fan
+
+4. anton:
+   #0 volta: R50 coco 550-R-50-aux-3x.yaml  bs=8 (done)
+   #1 volta: mobilenet-v1 dorefa 4bit cbas adam 0 2019.12.09 (done)
+   #1 volta: resnet18 lqnet adaptive [wt-mean-var] bacs 2bit lr-1 (done)
+   #1 volta: resnet18 lqnet adaptive [enhance-info] bacs fp32 sgd-0 (done)
+   #1 volta: resnet18 lqnet adaptive [enhance-info] bacs 2bit sgd-6 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs fix-pooling patch-stem wd:2e-5 sgd-4 (done)
+   #1 volta: resnet18 popcount ter fcos sgd-3 FP16 (done)
+   #3 volta: resnet18 dorefa tet 2bit bacs sgd-4 grad-scale mean-fan-scale1 O1 fp16 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-4 O1 fp16 full-gradient (done)
+   #0 volta: resnet18 popcount ter bacs sgd-3 FP16 wt-adaptive mean-var s=0.625 (done)
+   #0 volta: resnet18 popcount ter bacs sgd-1 FP16 wt-adaptive mean-var s=0.625 (done)
+
+5. level4:
+   #3 volta: resnet18 dorefa tet 2bit bacs sgd-4 grad-scale fan-scale1 O1 fp16 (stopped, not converage)
+   #0 volta: resnet18 popcount ter fcos sgd-3 FP16 wt-adaptive mean-var (done)
+   #0 volta: resnet18 popcount ter fcos sgd-3 FP16 wt-adaptive mean-var s=0.625 (done)
+   #1 volta: resnet34 popcount ter fcos sgd-3 FP16 wt-adaptive mean-var
+
+6. phoenix:
+
+   chenp:
+   #2 volta: lqnet mobilenetv1 fg=8 pto 2bit cbas (done)
+   #1 acvts: lqnet mobilenetv1 fg8wg8 dpo 2bit cbas (done)
+   #1 acvts: lqnet mobilenetv1 fg1wg1 dpo 2bit cbas (done)
+   #1 volta: fixup popcount r18 with mixup (done)
+   #1 volta: mobilenetv1 fp cbas gn16 (done)
+   #1 volta: mobilenetv1 fp cbas gn8 (done)
+   #1 volta: adaptive lqnet r18 [fm-mean] bacs 2bit lr-1 (done)
+   #1 volta: lqnet mobilenetv1 fg1wg1 dpo pt 2bit cbas sgd-0 clr(c) (done)
+   #1 volta: lqnet mobilenetv1 fg1wg1 dpo pt 2bit cbas sgd-1 (b) (done)
+   #1 volta: lqnet mobilenetv1 fg1wg1 dpo pt 2bit cbas directly(a) (done)
+   #4 volta: FCOS fcos-imprv-R-50-FPN-1x (give up, switch to detectron)
+   #2 volta: AdelaideDet retina coco R50-FPN-1x (done)
+   #2 volta: AdelaideDet coco fcos-R-50-1x.yaml bs=16 (done) 25GB per GPU = 50GB GPU memory
+   #2 volta: AdelaideDet retina coco R50-FPN-1x-round2 det-resnet50 (done)
+   #2 volta: AdelaideDet retina coco R50-FPN-1x-round3 det-resnet50 (done)
+   #2 volta: AdelaideDet retina coco R18-FPN-1x-round2 det-resnet18 14GB per GPU = 28GB GPU memory (done)
+
+   liangyi:
+   #1 volta: resnet18 lqnet adaptive [wt-mean] bacs 2bit lr-1 (done)
+   #0 volta: resnet18 dorefa 2bit bacs sgd-4 (done)
+   #1 volta: resnet18 dorefa tet 2bit bacs sgd-4 O0 fp32 (done)
+   #2 volta: AdelaideDet coco retina-R-18-1x.yaml bs=16 (done)
+
+   bohan:
+   #1 volta: resnet18 lqnet adaptive [fm-var] bacs 2bit lr-1 (done)
+   #2 volta: AdelaideDet coco retina-R-34-1x.yaml bs=16 (done)
+   #2 volta: AdelaideDet coco retina-R-34-1x.yaml bs=32 round2 lr=0.04 (done)
+   #2 volta: AdelaideDet coco retina-R-34-1x.yaml bs=16 round3 (done) 16GB per GPU = 32GB GPU memory
+   #2 volta: AdelaideDet coco retina-R-34-1x.yaml bs=16 round4 (done)
 
 # history Task
 1. archlab:
@@ -31,6 +207,7 @@ pin: 100
    #1 volta: bireal34 bireal   cbsa fp 120*10009*0.52 = 4.5d s=0.625 (done)
    #1 volta: bireal34 popcount cbsa fp 120*10009*0.50 s=0.625  expect 11.12 (stopped)
    
+2. server:
    #1 volta: bireal18 cbsa fp  8007 * 0.22 * 120 (done)
    #1 volta: bireal18 cbsa ter bireal (done)
    #1 volta: resnet34 bacs ter sgd-1 10009 * 0.33 * 120 (done)
@@ -43,6 +220,10 @@ pin: 100
    #1 volta: mobilenet v1 bacs ter popcount depth-skip s=0.5 done
    #1 volta: resnet18 bacs ter popcount s=0.625 (done)
    #1 volta: resnet34 bacs ter bireal s=0.625 (done)
+   #0 volta: resnet18 bacs 2bit group-norm quant-group=8
+   #1 volta: resnet18 bacs 2bit quant-group=8
+   #0 volta: resnet18 bacs ter fp16 popcount s=0.625 (done) 
+   #1 volta: resnet34 bacs ter fp16 popcount s=0.625 (done)
 
 3. centos:
    #1 volta: resnet18 bacs fp group-net group-norm=4 sgd-2 (done)
@@ -82,6 +263,12 @@ pin: 100
    #1 volta: mobilenet v1 cbas fp depth-skip (done)
    #2 volta: resnet34 bacs ter popcount s=0.625 (5005 * 0.35 * 120) (done)
    #2 volta: resnet50 bacs ter popcount s=0.625 finetune (done)
+   #2 volta: resnet18 bacs fp popcount alpha=2 (done)
+   #2 volta: resnet18 bacs ter popcount alpha=2 
+   #2 volta: Fixup R50
+
+# CMD:
+python tools.py --keyword update,raw,imagenet,origin,preBN,bacs --model resnet18 --pretrained weights/resnet18/dali-dorefa-stratch-fp-bacs_0-model_best.pth.tar --new weights/resnet18/cls_r18.pth --case backbone.bottom_up.
 
 # Training Speed Test
 torch.utils.data.dataloader.DataLoader and i7-7800x + 2080ti*2:

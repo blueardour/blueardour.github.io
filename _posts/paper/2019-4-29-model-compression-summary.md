@@ -182,5 +182,13 @@ ECCV 2016
 1. BinaryConnect
 2. BinaryNets
 
+# keywords
+1. relaxed quantization for discretized neural networks: stochastic rounding, MNIST, CIFAR 10, Imagenet, Gumbel, Resnet-18, Mobilenet
+2. Towards the limit of network quantization: hessian-weighted, k-means, adam to get hessian, gradient
+3. Regularizing activation distribution for training binarized deep networks: regalarization, robust,, degeneration, saturation, mismatch,
+4. ProxQuant: STE, lazy projection, LSTM
+5. Extremely low bit neural network: Squeeze the last bit out with ADMM: ADMM, extragradient, VOC, SSD, detection
+6. Learning low precision deep neural networks throught regularization: super resolution, sr
+7. QIL: CIFAR100, imagenet, transoform, gradually decrease the bit-width, KAIST
 
 

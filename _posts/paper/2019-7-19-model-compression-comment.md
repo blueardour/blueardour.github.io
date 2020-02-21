@@ -61,3 +61,6 @@ Loss aware weight quantization of deep network
 7. Quantize networks without BN? By Fixup, the BN layer might be reduced from the network.
 8. finetune low bit network with limited training data or even no data
 9. how to deal with pad?
+10. refer ProxQuant   Q'(x) = a * x + (1-a) * Q(x)
+11. mobilnet-v1/2 non-uniform encoder vs  increase the channel number
+12. tanh 'quantization network' in CVPR 2019.
