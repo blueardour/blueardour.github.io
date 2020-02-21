@@ -54,9 +54,9 @@ pin: 100
    bohan:
    #1 voltap: det-resnet18 dorefa tet 2bit wt-var wtet sgd-9 O1 fp16 (done)
    #1 voltap: det-resnet34 dorefa tet 2bit wt-var wtet sgd-9 O1 fp16 (done)
+   #2 voltap: AdelaideDet fcos R18-FPN-1x-FPN-BN fp16 dorefa tet 2bit double-init all wtet (done)
    #2 voltap: det-resnet50 dorefa tet 2bit wt-var wtet sgd-9 O1 fp16
    #2 voltap: det-resnet50 dorefa tet 3bit wt-var wtet sgd-9 O1 fp16
-   #2 voltap: AdelaideDet fcos R18-FPN-1x-FPN-BN fp16 dorefa tet 2bit double-init all wtet
 
 # 2020.02.07
 1. archlab:

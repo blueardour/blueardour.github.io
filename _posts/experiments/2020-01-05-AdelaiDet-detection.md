@@ -40,7 +40,8 @@ Paper | Dataset | Network | Bit(A/W/G) | Paper report | My Accuracy | Comment
  FCOS       | COCO | det-R18 | 2/2/32 | - | 32.549 | 1x FPN-BN fp16 dorefa-tet backbone-only
  FCOS       | COCO | det-R18 | 2/2/32 | - | 31.786 | 1x FPN-BN fp16 dorefa-tet backbone-fpn
  FCOS       | COCO | det-R18 | 2/2/32 | - | 30.333 | 1x FPN-BN fp16 dorefa-tet whole
- FCOS       | COCO | det-R18 | 2/2/32 | - | 26.334 | 1x FPN-BN fp16 dorefa-tet whole le=2.5e-3
+ FCOS       | COCO | det-R18 | 2/2/32 | - | 26.334 | 1x FPN-BN fp16 dorefa-tet whole lr=2.5e-3
+ FCOS       | COCO | det-R18 | 2/2/32 | - | 31.981 | 1x FPN-BN fp16 dorefa-tet whole wtet
  FCOS       | COCO | det-R18 | ter/ter/32 | - | 26.494 | 1x, bias on , pocount backbone only
  FCOS       | COCO | det-R18 | ter/ter/32 | - | 26.149 | 1x, bias off, pocount backbone only
  FCOS       | COCO | det-R18 | ter/ter/32 | - | 19.657 | 1x, bias off, pocount backbone only, lr=1e-3

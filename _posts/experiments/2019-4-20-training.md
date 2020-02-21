@@ -87,10 +87,15 @@ Dorefa-TET | imagenet | resnet18 | 2/2/32 | - | 66.442 | bacs, wt-var, sgd-7, fi
 Dorefa-TET | imagenet | resnet18 | 2/2/32 | - | 66.802 | bacs, wt-var, sgd-4, fix-arch2 singleconv
 Dorefa-TET | imagenet | det-r18 | 2/2/32 | - | 65.504 | wt-mean-var {1}, sgd-9, FP16 O1 wd2e-5
 Dorefa-TET | imagenet | det-r34 | 2/2/32 | - | 69.858 | wt-mean-var {1}, sgd-9, FP16 O1 wd2e-5
+Dorefa-TET | imagenet | det-r18 | 2/2/32 | - | 67.306 | wt-var, sgd-9, FP16 O1 wd2e-5, wtet
+Dorefa-TET | imagenet | det-r34 | 2/2/32 | - | 71.122 | wt-var, sgd-9, FP16 O1 wd2e-5, wtet
+Dorefa-TET | imagenet | det-r50 | 2/2/32 | - | on-progress | wt-var, sgd-9, FP16 O1 wd2e-5, wtet
+Dorefa-TET | imagenet | det-r18 | 3/3/32 | - | on-progress | wt-var, sgd-9, FP16 O1 wd2e-5, wtet
+Dorefa-TET | imagenet | det-r50 | 3/3/32 | - | on-progress | wt-var, sgd-9, FP16 O1 wd2e-5, wtet
  Fixup | imagenet | resnet18 | 32/32/32 | 68.776 | 68.956 | cbsa, mixup0.7, 120 epochs, stratch
  Fixup | imagenet | resnet18 | 32/32/32 | 68.776 | 68.776 | cbsa, no mixup, 120 epochs, stratch
  HORQ++ | imagenet | resnet18 | 32/32/32 | - | 67.902 | bacs, PReLU
- HORQ++ | imagenet | resnet18 | 32/32/32 | - | ?????? | bcas,
+ HORQ++ | imagenet | resnet18 | 32/32/32 | - | 68.282 | bcas
 
-{1}: has no effect, as it uses the dorefa.qfn function which support var only
+{1}: has no effect (no weight normalization), as it uses the dorefa.qfn/tet-wt function which supports var only
 
