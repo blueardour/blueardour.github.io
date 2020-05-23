@@ -1,0 +1,613 @@
+<!-- <div style="margin-top: 10em;"> -->
+
+## ADMM: Algorithm, Application and Covergence
+
+chenp 2020/05/24
+
+</div>
+
+---
+
+## Content
+
+- ADMM: Alternating Direction Method of Multipliers
+- Applications
+- Convergence analysis with variational inequality
+
+---
+
+##### Convex optimization
+
+
+<div style="text-align: left; font-size: 0.5em;">
+
+- General Convex optimization problem
+
+`$$
+\text{minimize} f(x)  \text{, subject to } Ax \leq c 
+$$`
+
+</div>
+<div style="text-align: left; font-size: 0.5em; margin-left: 3em;"> tranlate into: </div>
+<div style="text-align: left; font-size: 0.5em">
+
+`$$
+L_\rho = f(x) + y^T(Ax - c) + (\rho/2) || Ax - c||^2_2
+$$`
+
+</div>
+<div style="text-align: left; font-size: 0.5em; margin-left: 3em;"> solution: </div>
+<div style="text-align: left; font-size: 0.5em">
+
+`$$
+x^{k+1} := \underset{x}{\text{argmin }}  L_\rho(x, y^k) \\
+y^{k+1} := y^k + \rho(Ax^{k+1} - c)
+$$`
+
+</div>
+
+---
+
+##### ADMM
+
+<div style="text-align: left; font-size: 0.5em">
+
+- When the object funtion is separable
+
+`$$
+\text{minimize} f(x) + g(z)  \text{, subject to } Ax + Bz \leq c \\
+$$`
+
+</div>
+<div style="text-align: left; font-size: 0.5em; margin-left: 3em;"> tranlate into: </div>
+<div style="text-align: left; font-size: 0.5em">
+
+
+`$$
+L_\rho = f(x) + g(z) + y^T(Ax + Bz - c) + (\rho/2) || Ax + Bz - c||^2_2
+$$`
+
+</div>
+<div style="text-align: left; font-size: 0.5em; margin-left: 3em;"> solution: </div>
+<div style="text-align: left; font-size: 0.5em">
+
+`$$
+x^{k+1} := \underset{x}{\text{argmin }}  L_\rho(x, z^k, y^k) \\
+z^{k+1} := \underset{z}{\text{argmin }}  L_\rho(x^{k+1}, z, y^k) \\
+y^{k+1} := y^k + \rho(Ax^{k+1} + Bz^{k+1} - c)
+$$`
+
+</div>
+<div style="text-align: left; font-size: 0.5em; margin-left: 3em;"> $x^k$ is only an intermediate result. The algorithm update $z^{k+1}, y^{k+1}$ based on last $z^k, y^k$  </div>
+<div style="text-align: left; font-size: 0.5em">
+
+- Difference ?
+
+</div>
+
+---
+
+##### Scaled form of ADMM
+
+<div style="text-align: left; font-size: 0.5em;">
+
+- Scaled form
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+Let $r = Ax + Bz - c$, we have
+$$
+\begin{align}
+y^Tr + (\rho/2)r^2 &= (\rho/2) (r + (1/\rho)y)^2 - (1/2\rho)y^2 \\
+                   &= (\rho/2)(r + u)^2 - (\rho/2)u^2
+\end{align}
+$$
+where $u = (1/\rho)y$ is the scaled dual variable. Then the ADMM becomes:
+$$
+\begin{align}
+x^{k+1} &:= \underset{x}{\text{argmin }}  (f(x) + (\rho/2)||Ax + Bz^k - c + u^k ||_2^2) \\
+z^{k+1} &:= \underset{z}{\text{argmin }}  (g(z) + (\rho/2)||Ax^{k+1} + Bz - c + u^k ||_2^2) \\
+u^{k+1} &:= u^k + \rho(Ax^{k+1} + Bz^{k+1} - c)
+\end{align}
+$$
+</div>
+
+---
+
+##### Extend of ADMM
+
+<div style="text-align: left; font-size: 0.5em;">
+
+- Extend of ADMM: multiple blocks (note may not convergence)
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+$$
+\text{minimize} \sum_{i=1}^N f_i(x_i) \text{,  subject to } \sum_{i=1}^N A_ix_i \leq c
+$$
+The Gauss-Seidel update:
+$$
+\begin{align}
+x^{k+1}_1 &:= \underset{x}{\text{argmin }}  L_\rho(x_1, x_2^k, \dotsc, x_N^k, y^k) \\
+          & \dotsc \\
+x^{k+1}_i &:= \underset{x}{\text{argmin }}  L_\rho(x_1^{k+1}, x_2^{k+1}, \dotsc, x_i, x_{i+1}^k, \dotsc, x_N^k, y^k) \\
+y^{k+1}   &:= y^k + \rho(\sum_{i=1}^N A_ix^{k+1}_i  - c)
+\end{align}
+$$
+</div>
+
+<div style="text-align: left; font-size: 0.5em;">
+
+- Extend of ADMM: Parallel Distribution
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+The Jacobian update is possible with extra conditions ($A_i$ is mutually orthogonal): 
+$$
+\begin{align}
+x^{k+1}_i &:= \underset{x}{\text{argmin }}  L_\rho(x_1^{k}, x_2^{k}, \dotsc, x_i, x_{i+1}^k, \dotsc, x_N^k, y^k) \\
+y^{k+1}   &:= y^k + \rho(\sum_{i=1}^N A_ix^{k+1}_i  - c)
+\end{align}
+$$
+</div>
+<div style="text-align: left; font-size: 0.5em;">
+
+- Extend of ADMM: Addtional regularization
+
+</div>
+<div style="text-align: left; font-size: 0.4em;">
+$$
+x^{k+1}_i := \underset{x}{\text{argmin }}  L_\rho(x_1^{k+1}, x_2^{k+1}, 
+\dotsc, x_i, x_{i+1}^k, \dotsc, x_N^k, y^k) + \alpha||x_i - x_i^k||_2^2\\
+$$
+</div>
+
+---
+
+##### How to use 
+
+--
+
+##### Application
+
+<div style="text-align: left; font-size: 0.5em;">
+
+- Separate objective function
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+$$
+\text{minimize} f(x) + g(x)
+$$
+rewrite:
+$$
+\text{minimize} f(x) + g(z) \text{, subject to } x - z = 0
+$$
+Examples: Weight Decay term in CNN training
+</div>
+<div style="text-align: left; font-size: 0.5em;">
+
+- Constrained Convex optimization
+
+</div>
+<div style="text-align: left; font-size: 0.4em">
+$$
+\text{minimize} f(x) \text{, subject to } x \in C \\
+$$
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;"> rewrite: </div>
+<div style="text-align: left; font-size: 0.4em">
+$$
+\text{minimize} f(x) + g(z) \text{, subject to } x - z = 0
+$$
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;"> where $g(z)$ is indicator function </div>
+<div style="text-align: left; font-size: 0.4em">
+$$
+g(z) = 1_C(z) = \begin{cases} 1, & \text{ if } x \in C\\ 0, & \text{otherwise} \end{cases}
+$$
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;"> Examples: Extremely Low Bit Neural Network: Squeeze the Last Bit Out with ADMM, AAAI 2017 </div>
+
+---
+
+##### 2-Block ADMM Convergence analysis with variational inequality
+
+--
+
+##### What is variational inequality
+
+<div style="text-align: left; font-size: 0.5em">
+
+- Variational inequality
+
+</div>
+
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+Given a convex set $\Omega \in R^n$ and a convex function $F: R^n \rightarrow R$, the variational inequality is to find a $x^\ast$ 
+$$
+(x - x^\ast)^TF(x^\ast) \geq 0, \forall x \in \Omega
+$$
+</div>
+
+<div style="text-align: left; font-size: 0.5em">
+
+- Convex optimization
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+For diffierential convex problem $min \left\{ \Theta(x) | x \in \Omega \right\}$, if $x^\ast$ is its solution,
+then from the point of $x^\ast$,
+$$$$
+all loss decreasing set: $S_d(x^\ast) = \{s \in R^n | s^T\delta \Theta(x^\ast) < 0 \}$
+$$$$
+and all possible update set $S_f(x^\ast) = \{ s \in R^n | s = x - x^\ast, x \in \Omega \}$
+$$$$
+have no overlap:
+$$
+(x - x^\ast)^T\delta \Theta(x^\ast) \geq 0, \forall x \in \Omega
+$$
+If $\Theta(x)$ is second-order derivable, the Hessian matrix $\delta^2 \Theta(x)$ is symmetric.
+In $VI(\Omega, F)$, if $F$ is derivable, we don't require the Jacobian maxtrix $\delta F(x)$ to be symmetric.
+
+</div>
+
+
+--
+
+<div style="text-align: left; font-size: 0.5em">
+
+### Able to Convergence
+
+- 2-Block ADMM (equation constraint as an example)
+
+`$$
+\text{minimize } f_1(x) + f_2(z)  \text{ , subject to } Ax + Bz = c
+$$`
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;"> where  $f(x)$ : $R^{n_1} \rightarrow R$,
+$f_2(z)$ : $R^{n_2} \rightarrow R$, $c \in R^m$. If we solve with ADMM, we have </div>
+
+<div style="text-align: left; font-size: 0.4em">
+
+`$$
+x^{k+1} := \underset{x}{\text{argmin }}  (f_1(x) + (\rho/2)||Ax + Bz^k - c - u^k ||_2^2) \\
+z^{k+1} := \underset{z}{\text{argmin }}  (f_2(z) + (\rho/2)||Ax^{k+1} + Bz - c - u^k ||_2^2) \\
+u^{k+1} := u^k - \rho(Ax^{k+1} + Bz^{k+1} - c)
+$$`
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;"> we denote $v = (z, u)$, $w = (x, z, u)$. Our goal is to prove with iteration time $k$ increases, $v$ goes to $v^\ast$, $w$ goes to $w^\ast$ </div>
+
+--
+
+<div style="text-align: left; font-size: 0.5em">
+
+### Able to Convergence
+
+- VI
+
+`$$
+\text{minimize } f_1(x) + f_2(z)  \text{ , subject to } Ax + Bz = c
+$$`
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+based on the mix-max of lagrange function, for the solution $(x^\ast, z^\ast, u^\ast)$ of the problem, we have
+$$
+\begin{cases}
+f_1(x) - f_1(x^\ast) + (x - x^\ast)^T (-A^Tu^\ast) \geq 0 \\
+f_2(z) - f_2(z^\ast) + (z - z^\ast)^T (-B^Tu^\ast) \geq 0 \\
+(u - u^\ast)^T(Ax^\ast + Bz^\ast - c) \geq 0 \\
+\end{cases}
+$$
+by defining
+$
+\lambda = \begin{pmatrix}
+x \\
+z 
+\end{pmatrix} 
+$,
+$
+w = 
+\begin{pmatrix}
+x \\
+z \\
+u
+\end{pmatrix}
+$,
+$
+G(w) = \begin{pmatrix}
+-A^Tu \\
+-B^Tu \\
+Ax + Bz - c
+\end{pmatrix}
+$ , and
+$
+F(\lambda) = f_1(x) + f_2(z)
+$
+$$$$
+origin task is actually the problem VI$(\Omega, G, F)$:
+$$
+F(\lambda) - F(\lambda^\ast) + (w - w^\ast)^TG(w^\ast) \geq 0, \forall w \in \Omega
+$$
+</div>
+
+--
+
+<div style="text-align: left; font-size: 0.5em">
+
+### Able to Convergence
+
+- 2-Block ADMM
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+$$f_1(x) - f_1(x^{k+1}) + (x - x^{k+1})^T (-A^Tu^k + \rho A^T(Ax^{k+1} + Bz^k -c)) \geq 0 $$
+holds for any $x \in R^{n_1}$, similarly,
+$$f_2(z) - f_2(z^{k+1}) + (z - z^{k+1})^T (-B^Tu^k + \rho B^T(Ax^{k+1} + Bz^{k+1} - c)) \geq 0 $$ 
+holds for any $z \in R^{n_2}$. Then substituing $u^{k}$ in the two inequaility, we get
+$$ f_1(x) - f_1(x^{k+1}) + (x - x^{k+1})^T (-A^Tu^k + \rho A^T(Ax^{k+1} + Bz^k -c)) = \\
+   f_1(x) - f_1(x^{k+1}) + (x - x^{k+1})^T (-A^T(u^{k+1} + \rho(Ax^{k+1} + Bz^{k+1} - c)) + \rho A^T(Ax^{k+1} + Bz^k -c)) = \\
+   f_1(x) - f_1(x^{k+1}) + (x - x^{k+1})^T (-A^Tu^{k+1} + \rho A^TB(z^k -z^{k+1})) \geq 0 $$
+holds for any $x \in R^{n_1}$ and 
+$$ f_2(z) - f_2(z^{k+1}) + (z - z^{k+1})^T (-B^Tu^{k+1}) \geq 0 $$
+holds for any $z \in R^{n_2}$.
+</div>
+
+--
+
+<div style="text-align: left; font-size: 0.5em">
+
+### Able to Convergence
+
+- 2-Block ADMM
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+Next, we add the two inequaility together and get:
+$$f_1(x) - f_1(x^{k+1}) + (x - x^{k+1})^T (-A^Tu^{k+1} + \rho A^TB(z^k -z^{k+1})) +\\
+  f_2(z) - f_2(z^{k+1}) + (z - z^{k+1})^T (-B^Tu^k + \rho B^T(Ax^{k+1} + Bz^{k+1} -c)) \geq 0 $$
+Denote $\lambda = (x, z)$ and $F(\lambda) = f_1(x) + f_2(z)$, above inequaility can be rewriten in a more compact form,
+$$
+F(\lambda) - F(\lambda^{k+1}) + 
+\begin{pmatrix}
+x - x^{k+1} \\
+z - z^{k+1} 
+\end{pmatrix}^T
+\left\{
+\begin{pmatrix}
+-A^Tu^{k+1} \\
+-B^Tu^{k+1}
+\end{pmatrix} + \rho
+\begin{pmatrix}
+A^T \\
+B^T
+\end{pmatrix} B(z^k - z^{k+1}) +
+\begin{pmatrix}
+0 & 0 \\
+0 & \rho B^TB
+\end{pmatrix}
+\begin{pmatrix}
+x^{k+1} - x^k \\
+z^{k+1} - z^k
+\end{pmatrix}
+\right\}
+\geq 0
+$$ for $\forall \lambda \in (R^{n_1}, R^{n_2})$ holds. We addtionally add the scaled dual variable $u$ in the inequaility to get
+$$
+F(\lambda) - F(\lambda^{k+1}) +
+\begin{pmatrix}
+x - x^{k+1} \\
+z - z^{k+1} \\
+u - u^{k+1}
+\end{pmatrix}^T
+\left\{
+\begin{pmatrix}
+-A^Tu^{k+1} \\
+-B^Tu^{k+1} \\
+Ax^{k+1} + Bz^{k+1} - c
+\end{pmatrix} + \rho
+\begin{pmatrix}
+A^T \\
+B^T \\
+0
+\end{pmatrix} B(z^k - z^{k+1}) +
+\begin{pmatrix}
+0 & 0 \\
+0 & \rho B^TB \\
+0 & 1/\rho I_m
+\end{pmatrix}
+\begin{pmatrix}
+x^{k+1} - x^k \\
+z^{k+1} - z^k
+\end{pmatrix}
+\right\}
+\geq 0
+$$
+</div>
+
+--
+
+<div style="text-align: left; font-size: 0.5em">
+
+### Able to Convergence
+
+- 2-Block ADMM 
+
+</div>
+
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+Last inequaility holds for all $w = (x, z, u)$, thus we can set $w = w^\ast$ and get
+$$
+F(\lambda^\ast) - F(\lambda^{k+1}) + (w^\ast - w ^{k+1})^T
+\left\{
+\begin{pmatrix}
+-A^Tu^{k+1} \\
+-B^Tu^{k+1} \\
+Ax^{k+1} + Bz^{k+1} - c
+\end{pmatrix} + \rho
+\begin{pmatrix}
+A^T \\
+B^T \\
+0
+\end{pmatrix} B(z^k - z^{k+1}) +
+\begin{pmatrix}
+0 & 0 \\
+0 & \rho B^TB \\
+0 & 1/\rho I_m
+\end{pmatrix}
+\begin{pmatrix}
+x^{k+1} - x^k \\
+z^{k+1} - z^k
+\end{pmatrix}
+\right\}
+\geq 0
+$$
+For simplicity, we rewrite it to
+$$
+F(\lambda^\ast) - F(\lambda^{k+1}) + (w^\ast - w ^{k+1})^T
+\left\{
+G(w^{k+1} + P(z^k, z^{k+1}) + H_0(v^{k+1} - v^k) 
+\right\}
+\geq 0
+$$
+Then move several term form left to right, we get:
+$$
+(w^\ast - w ^{k+1})^TH_0(v^{k+1} - v^k) 
+\geq
+(w ^{k+1} - w^\ast)^TP(z^k, z^{k+1}) + 
+F(\lambda^{k+1}) - F(\lambda^\ast) + (w ^{k+1} - w^\ast)^TG(w^{k+1})
+$$
+As the first row of $H_0$ are all zero, we can rewrite it to ($H$ represents the last two rows of $H_0$):
+$$
+(v^{k+1} - v^\ast)H(v^k - v^{k+1}) \geq
+(w ^{k+1} - w^\ast)^TP(z^k, z^{k+1}) +  \\
+F(\lambda^{k+1}) - F(\lambda^\ast) + (w ^{k+1} - w^\ast)^TG(w^{k+1})
+$$
+On the other hand, for the second part, we have:
+$$
+\left\{F(\lambda^{k+1}) - F(\lambda^\ast) \right\} + (w ^{k+1} - w^\ast)^TG(w^{k+1}) \geq 
+\left\{F(\lambda^{k+1}) - F(\lambda^\ast) \right\} + (w ^{k+1} - w^\ast)^TG(w^\ast) \geq 0
+$$
+The former inquaility holds as F is monotone and the later inquaility holds as it is the definition of VI.
+</div>
+
+--
+
+<div style="text-align: left; font-size: 0.5em">
+
+### Able to Convergence
+
+- 2-Block ADMM 
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+It is clear that
+$$
+(v^{k+1} - v^\ast)H(v^k - v^{k+1}) \geq
+(w ^{k+1} - w^\ast)^TP(z^k, z^{k+1}) 
+$$
+For the right side, we have
+$$
+\begin{align}
+&
+(w ^{k+1} - w^\ast)^TP(z^k, z^{k+1}) = \\
+&
+(w ^{k+1} - w^\ast)^T 
+\rho
+\begin{pmatrix}
+A^T \\
+B^T \\
+0
+\end{pmatrix} B(z^k - z^{k+1}) = \\
+&
+(B(z^k - z^{k+1}))^T \rho (A, B, 0)(w ^{k+1} - w^\ast) = \\
+&
+(B(z^k - z^{k+1}))^T \rho (Ax^{k+1} + Bz^{k+1}) - (Ax^\ast + Bz^\ast) = \\
+&
+(B(z^k - z^{k+1}))^T \rho (Ax^{k+1} + Bz^{k+1} - c) = \\
+&
+(B(z^k - z^{k+1}))^T (u^k - u^{k+1}) = \\
+&
+(u^k - u^{k+1})^TB(z^k - z^{k+1})
+\end{align}
+$$
+
+</div>
+
+--
+
+<div style="text-align: left; font-size: 0.5em">
+
+### Able to Convergence
+
+- 2-Block ADMM 
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+Recall that 
+$$ f_2(z) - f_2(z^{k+1}) + (z - z^{k+1})^T (-B^Tu^{k+1}) \geq 0 $$
+holds for any $z \in R^{n_2}$. It can also be known that
+$$ f_2(z) - f_2(z^{k}) + (z - z^{k})^T (-B^Tu^{k}) \geq 0 $$ 
+holds for any $z \in R^{n_2}$. Set the $z$ to be $z^{k}$ in the former inequation and $z^{k+1}$ in the latter inequation,
+and add the two inequations, we get:
+$$ (z^k - z^{k+1})^T (-B^Tu^{k+1}) + (z^{k+1} - z^{k})^T (-B^Tu^{k}) = (u^k - u^{k+1})^TB(z^k - z^{k+1}) \geq 0 $$
+It ensures 
+$$
+(w ^{k+1} - w^\ast)^TP(z^k, z^{k+1}) = (u^k - u^{k+1})^TB(z^k - z^{k+1}) \geq 0
+$$
+Overall, we have
+$$
+(v^{k+1} - v^\ast)H(v^k - v^{k+1}) \geq
+(w ^{k+1} - w^\ast)^TP(z^k, z^{k+1}) \geq 0
+$$
+</div>
+
+--
+
+<div style="text-align: left; font-size: 0.5em">
+
+### Able to Convergence
+
+- 2-Block ADMM 
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;"> Having the 
+$$(v^{k+1} - v^\ast)H(v^k - v^{k+1}) \geq 0
+$$
+It is easy to prove that
+$$
+(v^{k} - v^\ast)^TH(v^k - v^{\ast}) = ||(v^{k} - v^\ast)||_H^2 = \\
+||((v^{k+1} - v^\ast) + (v^{k} - v^{k+1}))||_H^2 = \\
+||((v^{k+1} - v^\ast)||_H^2 + 2 (v^{k+1} - v^\ast)H(v^k - v^{k+1}) + ||(v^{k} - v^{k+1}))||_H^2 \geq
+||((v^{k+1} - v^\ast)||_H^2 + ||(v^{k} - v^{k+1}))||_H^2
+$$
+namely, 
+$$
+||((v^{k+1} - v^\ast)||_H^2 \leq ||(v^{k} - v^\ast)||_H^2 - ||(v^{k} - v^{k+1}))||_H^2
+$$
+the sequence is monotonically deceasing (in the word, it can convergence). It further can be proved to convergene at rate $(1/t)$
+</div>
+
+---
+
+##### Reference
+
+<div style="text-align: left; font-size: 0.4em;"> 
+
+- [Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers](https://stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf)
+- [Extremely Low Bit Neural Network: Squeeze the Last Bit Out with ADMM](https://arxiv.org/abs/1707.09870)
+- [The Direct Extension of ADMM for Multi-block Convex Minimization Problems is Not Necessarily Convergent](https://web.stanford.edu/~yyye/ADMM-final.pdf)
+- [优化和单调变分不等式的收缩算法](http://maths.nju.edu.cn/~hebma/slides/20C.pdf)
+- [变分不等式统一模型](http://maths.nju.edu.cn/~hebma/)
+
+</div>
+
+---
+
+##### Q & A
+
+
+

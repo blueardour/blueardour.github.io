@@ -178,6 +178,11 @@ develop code on real platform and get 7x times speedup
 [paper link](https://arxiv.org/abs/1812.06378)
 ECCV 2016
 
+## Post-training Quantization
+
+## find optimal quantization bit
+[Adaptive Quantization for Deep Neural Network](https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/download/16248/16774)
+
 ## Others
 1. BinaryConnect
 2. BinaryNets

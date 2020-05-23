@@ -27,4 +27,5 @@ note: the step1 and step2 employ python3. however caffe requires python2, thus t
 # step4. how to check the result matches with original pytorch(optional)
 ![step4](/w3c/images/experiments/pytorch-onnx-caffe04.png "step4")
 
-
+# extra
+[install python via pyenv](https://stackoverflow.com/questions/46959072/installing-pip-python-3-6-3-ubuntu-16-04-zlib-not-available-but-its-installed)

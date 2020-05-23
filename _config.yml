@@ -42,11 +42,29 @@ gitment_git_comment_repo: "blog-comment" # jokinkuang/comments.git (repo to stor
 future: true
 excerpt_separator: "\n\n" # you can specify your own separator here, default is "\n\n" String
 permalink: /:year/:month/:day/:title.html
+
 highlighter: rouge
 markdown: kramdown
+#markdown_ext: ignoreme
+#defaults:
+#  - scope:
+#      path: "0000"
+#    values:
+#      highlighter: rouge
+#      markdown: redcarpet
+#      markdown_ext: ignoreme
+#
+#  - scope:
+#      path: "slides"
+#    values:
+#      highlighter: rouge
+#      markdown: redcarpet
+#      markdown_ext: ignoreme
+
 kramdown:
   input: GFM
   hard_wrap: true # a newline in markdown text would be changed to <br>
+  math_engine: mathjax
 gems:
   - jemoji # install the emoji plugin
 version: 1.1.0
@@ -71,3 +89,24 @@ version: 1.1.0
 #  noscript: false
 # kramdown:
 #  math_engine: mathjax
+
+# The Reveal theme
+#
+slide:
+  title: Slides
+  reveal_path: reveal.js/
+  reveal_theme: black.css
+  reveal_transition: default
+  reveal_notes_server: false
+  reveal_theme_path: reveal.js/css/theme/ 
+
+# Exclude directories and/or files from the conversion
+exclude:
+  - Gemfile*
+  - LICENSE
+  - README.md
+  - start.sh
+  - share_files
+  - gitment-bak
+
+

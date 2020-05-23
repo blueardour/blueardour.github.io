@@ -336,7 +336,6 @@ a.white, a.white:hover, a.white:visited {
               <img src="{{ site.w3c_url }}images/avator.jpg" alt="about me" title="About Me"/>
             </a>
             <a class="darkgrey" href="{{ site.base }}/"><h2>{{ site.title }}</h2></a>
-            <!-- <h3>Step by Step</h3> -->
             <p> —— {{site.description}} ——</p>
           </div>
         </div>
@@ -350,137 +349,37 @@ a.white, a.white:hover, a.white:visited {
       <div class="center-aside">
         <div id="top-menu" class="top">
           <ul class="nostyle category">
-            <li data="All"><a href="?category=">All</a></li>
-            <li data="Slides"><a href="slides">Slides</a></li>
-            {%comment%}通过liquid获取文件夹作为目录{%endcomment%}
-            {% include total-categories.liquid %}
-            {% for item in total-categories %}
-            {% if forloop.index0 == 0 %}
-            <li data="{{ item }}"><a href="?category={{ item }}">{{ item }}</a></li>
-            {% else %}
-            <li data="{{ item }}"><a href="?category={{ item }}">{{ item }}</a></li>
-            {% endif %}
+            <li data="Homepage"><a href="..">HomePage</a></li>
+            <p>.</p>
+            <p> —— Slides ——</p>
+            {% assign totalCategories = "" %}
+				    {% for post in site.categories.slides reversed %}
+            {% assign list = post.path|split:"/"; %}
+            {% assign index = list.size|minus:2 %}
+            {% for item in list %}
+	            {% if forloop.index0 == index %}
+		            {% if totalCategories == "" %}
+		            	{% assign totalCategories = item %}
+                  <li data="{{ item }}"><a href="{{ item }}.html">{{ item }}</a></li>
+	              {% elsif totalCategories contains item %}
+		              {% continue %}
+		            {% else %}
+		            	{% assign totalCategories = totalCategories |append:"," |append:item %}
+                  <li data="{{ item }}"><a href="{{ item }}.html">{{ item }}</a></li>
+	              {% endif %}
+	            {% endif %}
+            {% endfor %}
+            {% endfor %}
+            <p>.</p>
+            <p> —— Print Version ——</p>
+            {% assign list = totalCategories|split:","; %}
+            {% for item in list %}
+              <li data="{{ item }}"><a href="{{ item }}.html?print-pdf">{{ item }}</a></li>
             {% endfor %}
           </ul>
         </div>
-        <div id="middle-panel" class="bottom">
-          <ul class="nostyle article-list">
-            <script id="post-list-fake" type="text/html">
-              <% for(var i = 0; i < 1; i++) { %>
-        <p> where is post.length is set  </p>
-        <li class="has-img">
-          <% if ( posts[i].image ) { %>
-            <a class="wrap-img" href="<%= posts[i].url %>">
-              <img src="<%= posts[i].image %>" alt="300">
-            </a>
-          <% } %>
-          <div>
-            <p class="list-top">
-              <a class="author-name dark-grey-link" target="_parent" href="{{ site.base }}/aboutme"><%= posts[i].author %></a>
-              <em>&nbsp;·</em>
-              <span class="time" date-time="<%= posts[i].date %>"></span>
-              <!-- <% if ( posts[i].pin > 0 ) { %>
-              <span class="pin"><img src="{{ site.images_url }}pin.jpg" alt="pin"></span>
-              <% } %>
-              -->
-            </p>
-            <h4 class="title">
-              <a target="_parent" href="<%= posts[i].url %>"><%= posts[i].title %></a>
-            </h4>
-            <!--
-            <div class="list-footer">
-              <!--<a class="grey-link" target="_parent" href="<%=posts[i].url%>">阅读 5915</a>-->
-              <span>字数 <%= posts[i].words %></span>
-              <a class="grey-link post-data" target="_parent" href="<%= posts[i].url %>#comments" data-method="comments" 
-                data-thread-key="<%= posts[i].pid %>" data-text=" · 评论 %s"> · 评论 0</a>
-              <span class="post-data" data-method="likes" data-thread-key="<%= posts[i].pid %>" data-text=" · 喜欢 %s"> · 喜欢 0</span>
-              <span class="post-data" data-method="reposts" data-thread-key="<%= posts[i].pid %>" data-text=" · 转发 %s"> · 转发 0</span>
-            </div>
-            -->
-            <% if ( posts[i].excerpt ) { %>
-            <div class="excerpt">
-              {%comment%}:=表示HTML不转义，baiduTemplate默认的=是HTML转义的，转义后&gt;才会输出">"{%endcomment%}
-              <%:= posts[i].excerpt %>
-            </div>
-            <% } %>
-          </div>
-        </li>
-        <% } %>
-            </script>
-          </ul>
-        </div>
-        <div id="paginator-panel" class="paginator-panel">
-          <ul id="paginator" class="paginator"></ul>
-        </div>
       </div>
-
-       <!-- 
-      <div class="right-aside">
-        {% include gitment.html %}
-      </div>
-      -->
-
     </div>
-    <div class="footer"></div>
-
-    <!-- duoshuo -->
-    <!-- a{% include duoshuo.js %} -->
-
-    <!-- baiduTemplatea -->
-    <script type="text/javascript" src="{{ site.baiduTemplate_url }}"></script>
-    <script id="post-list" type="text/html">
-      <% for(var i = 0; i < posts.length; i++) { %>
-        <li class="has-img">
-        <% if ( posts[i].image ) { %>
-          <a class="wrap-img" href="<%= posts[i].url %>"> <img src="<%= posts[i].image %>" alt="300"> </a>
-        <% } %>
-
-        <div>
-          <p class="list-top">
-            <a class="author-name dark-grey-link" target="_parent" href="{{ site.base }}/aboutme"><%= posts[i].author %></a>
-            <em>&nbsp;·</em>
-            <span class="time" date-time="<%= posts[i].date %>"></span>
-            <!--
-            <% if ( posts[i].pin > 0 ) { %>
-            <span class="pin"><img src="{{ site.images_url }}pin.jpg" alt="pin"></span>
-            <% } %>
-            -->
-          </p>
-          <h4 class="title">
-            <a target="_parent" href="<%= posts[i].url %>"><%= posts[i].title %></a>
-          </h4>
-          <!--
-          <div class="list-footer">
-            <span>字数 <%= posts[i].words %></span>
-            <a class="grey-link post-data" target="_parent" href="<%= posts[i].url %>#comments"
-              data-method="comments" data-thread-key="<%= posts[i].pid %>" data-text=" · 评论 %s"> · 评论 0</a>
-            <span class="post-data" data-method="likes" data-thread-key="<%= posts[i].pid %>" data-text=" · 喜欢 %s"> · 喜欢 0</span>
-            <span class="post-data" data-method="reposts" data-thread-key="<%= posts[i].pid %>" data-text=" · 转发 %s"> · 转发 0</span>
-          </div>
-          -->
-          <% if ( posts[i].excerpt ) { %>
-          <div class="excerpt">
-            {%comment%}:=表示HTML不转义，baiduTemplate默认的=是HTML转义的，转义后&gt;才会输出">"{%endcomment%}
-            <%:= posts[i].excerpt %>
-          </div>
-          <% } %>
-        </div>
-
-      </li>
-      <% } %>
-    </script>
-
-    <!-- jQuery -->
-    <script type="text/javascript">
-      var postfile = "{{ site.postfile }}";
-      var pageSize = parseInt("{{ site.page_size }}");
-    </script>
-    <script src="{{ site.jquery_url }}"></script>
-    <script src="{{ site.w3c_url }}js/timeago.js"></script>
-    <script src="{{ site.w3c_url }}js/pagecache.js"></script>
-    <!--  <script src="{{ site.w3c_url }}js/jquery.duoshuo.js"></script>     -->
-    <script src="{{ site.w3c_url }}js/jqPaginator.js"></script>
-    <script src="{{ site.w3c_url }}js/article.js"></script>
 
   </body>
 </html>

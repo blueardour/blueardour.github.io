@@ -13,6 +13,9 @@ Super resolution (SR) is some task in which the input is a low resolution image 
 
 # SISR
 
+## Survey
+[Deep Learning for Single Image Super-Resolution: A Brief Review](https://arxiv.org/pdf/1808.03344.pdf)
+
 ## SRCNN / FSRCNN
 
 ## Accurate Image Super-Resolution Using Very Deep Convolutional Networks (VDSR)
@@ -28,6 +31,11 @@ on CVPR 2016
 [Code](https://github.com/limbee/NTIRE2017)
 on CVPR 2017
 
+## Wide Activation for Efficient and Accurate Image Super-Resolution
+[Paper link](https://arxiv.org/pdf/1808.08718.pdf)
+
+## Single Image Super-Resolution via Squeeze and Excitation Network
+[Paper link](http://bmvc2018.org/contents/papers/0726.pdf)
 
 # Video SR
 ## Detail-revealing Deep Video Super-resolution

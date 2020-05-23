@@ -11,6 +11,9 @@ Usage:
 {% assign categories = _post.categories|join:"," %}
 {% assign subdirs = "" %}
 {% for item in list %}
+  {% if list contains "slides" %}
+  {% continue %}
+	{% endif %}
 	{% assign index = list.size|minus:1 %}
 	{% if forloop.index0 > 0 and forloop.index0 < index %}
 		{% if subdirs == "" %}
