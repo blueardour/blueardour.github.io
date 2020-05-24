@@ -172,7 +172,7 @@ $$
 
 <div style="text-align: left; font-size: 0.5em;">
 
-- Separate objective function
+- Separate objective function (Type I)
 
 </div>
 <div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
@@ -183,11 +183,10 @@ rewrite:
 $$
 \text{minimize} f(x) + g(z) \text{, subject to } x - z = 0
 $$
-Examples: Weight Decay term in CNN training
 </div>
 <div style="text-align: left; font-size: 0.5em;">
 
-- Constrained Convex optimization
+- Constrained Convex optimization (Type II)
 
 </div>
 <div style="text-align: left; font-size: 0.4em">
@@ -206,8 +205,41 @@ $$
 $$
 g(z) = 1_C(z) = \begin{cases} 1, & \text{ if } x \in C\\ 0, & \text{otherwise} \end{cases}
 $$
+
+--
+
+##### Application
+
+<div style="text-align: left; font-size: 0.5em;">
+
+- loss function + regularization
+
 </div>
-<div style="text-align: left; font-size: 0.4em; margin-left: 3em;"> Examples: Extremely Low Bit Neural Network: Squeeze the Last Bit Out with ADMM, AAAI 2017 </div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+$$
+\text{minimize } \: l(x) + \lambda||x||_1
+$$
+Rewrite:
+$$
+\text{minimize } \: l(x) + \lambda||z||_1 \text{ , subject to } x - z = 0
+$$
+</div>
+<div style="text-align: left; font-size: 0.5em;">
+
+- Sparse Linear System
+
+</div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+$$
+\text{minimize } \: ||x||_1 \text{, subject to } Ax - b = 0 \\
+$$
+rewrite:
+$$
+\text{minimize} \: ||x||_1 + 1_C(z) \text{, subject to } x - z = 0 \\
+\text{ where } C =  \{x \in R^n | Ax = b \}
+$$
+Another Examples: Extremely Low Bit Neural Network: Squeeze the Last Bit Out with ADMM, AAAI 2017
+</div>
 
 ---
 
@@ -266,7 +298,9 @@ In $VI(\Omega, F)$, if $F$ is derivable, we don't require the Jacobian maxtrix $
 $$`
 
 </div>
-<div style="text-align: left; font-size: 0.4em; margin-left: 3em;"> where  $f(x)$ : $R^{n_1} \rightarrow R$,
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+where
+$f_1(x)$ : $R^{n_1} \rightarrow R$,
 $f_2(z)$ : $R^{n_2} \rightarrow R$, $c \in R^m$. If we solve with ADMM, we have </div>
 
 <div style="text-align: left; font-size: 0.4em">
@@ -278,7 +312,8 @@ u^{k+1} := u^k - \rho(Ax^{k+1} + Bz^{k+1} - c)
 $$`
 
 </div>
-<div style="text-align: left; font-size: 0.4em; margin-left: 3em;"> we denote $v = (z, u)$, $w = (x, z, u)$. Our goal is to prove with iteration time $k$ increases, $v$ goes to $v^\ast$, $w$ goes to $w^\ast$ </div>
+<div style="text-align: left; font-size: 0.4em; margin-left: 3em;">
+we denote $v = (z, u)$, $w = (x, z, u)$. Our goal is to prove with iteration time $k$ increases, $v$ goes to $v^\ast$, $w$ goes to $w^\ast$ </div>
 
 --
 
