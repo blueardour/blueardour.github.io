@@ -1,7 +1,7 @@
 ---
 layout: post
 title: COCO Segmentation
-categories: training-trick experiments COCO segmentation
+categories: training-trick experiments COCO segmentation result
 date: 2020-01-06 12:38:12
 pid: 20200106-123812
 pin: 40

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: COCO Detection
-categories: training-trick experiments COCO detection
+categories: training-trick experiments COCO detection result
 date: 2020-01-06 12:38:11
 pid: 20200106-123811
 pin: 39
