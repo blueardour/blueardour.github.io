@@ -23,3 +23,4 @@ cat /sys/block/sda/queue/rotational
 1: HDD
 0: SSD
 
+sudo hdparm -I /dev/sda
