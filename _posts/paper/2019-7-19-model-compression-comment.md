@@ -64,3 +64,9 @@ Loss aware weight quantization of deep network
 10. refer ProxQuant   Q'(x) = a * x + (1-a) * Q(x)
 11. mobilnet-v1/2 non-uniform encoder vs  increase the channel number
 12. tanh 'quantization network' in CVPR 2019.
+
+# Additional
+
+1. NICE： Inject noise Q(w) --> Q(w + e)
+2. FAQ: core concept is finetuning from pretrained model rather than scratch.
+
