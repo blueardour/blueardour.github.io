@@ -19,6 +19,11 @@ pin: 53
 3. Richer Convolutional Features for Edge Detection
 [paper](https://arxiv.org/pdf/1612.02103.pdf)
 
+![Accuracy-vs-Speed](/w3c/images/paper/edge-detection-1.png)
+![Accuracy-vs-Speed](/w3c/images/paper/edge-detection-2.png)
+![Accuracy-vs-Speed](/w3c/images/paper/edge-detection-3.png)
+![Accuracy-vs-Speed](/w3c/images/paper/edge-detection-4.png)
+![Accuracy-vs-Speed](/w3c/images/paper/edge-detection-5.png)
 
 Code:
 [1. pytorch](https://github.com/balajiselvaraj1601/RCF_Pytorch_Updated)
