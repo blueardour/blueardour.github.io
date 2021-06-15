@@ -14,6 +14,14 @@ Compressing 1D Time-Channel Separable Convolutions using Sparse Random Ternary M
 
 [paper](https://arxiv.org/pdf/2103.17142.pdf)
 
-Replace some 1x1 convilution with Sparse Random Ternary Matrices
+Replace some 1x1 convolution with Sparse Random Ternary Matrices
+
+Based on observation that 
+
+![Accuracy-vs-Speed](/w3c/images/paper/Sparse-Random-Ternary-Matrices-1.png)
+
+force some weight to random sparse matrices:
+
+![Accuracy-vs-Speed](/w3c/images/paper/Sparse-Random-Ternary-Matrices-2.png)
 
 Good summary on related work
