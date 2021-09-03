@@ -195,10 +195,14 @@ ECCV 2016
 5. Extremely low bit neural network: Squeeze the last bit out with ADMM: ADMM, extragradient, VOC, SSD, detection
 6. Learning low precision deep neural networks throught regularization: super resolution, sr
 7. QIL: CIFAR100, imagenet, transoform, gradually decrease the bit-width, KAIST
-8. Stochastic Precision Ensemble: Self-Knowledge Distillation for Quantized Deep Neural Networks, knowledge-distll, use higher bit-precision to guide low bit activation,  Cosine Similarity Learning, Alexnet, ResNet-18, CIFAR10/100, ImageNet
+8. Stochastic Precision Ensemble: Self-Knowledge Distillation for Quantized Deep Neural Networks, knowledge-distill, use higher bit-precision to guide low bit activation,  Cosine Similarity Learning, Alexnet, ResNet-18, CIFAR10/100, ImageNet. Seem to be the reason why progressive training works
 9. PAMS: Quantized Super-Resolution, seems to use PACT, exp on EDSR, only non-linear submodule
 10. Network Quantization with Element-wise Gradient Scaling, EWGS, add gradient scale
 11. TRAINING WITH QUANTIZATION NOISE FOR EXTREME MODEL COMPRESSION, select randomly portion of weight for quantization, Facebook
+12. LCQ and PWLQ: Piecewise Quantization. The former is training-aware quantization and the later is post-training quantization.
+13. Network Quantization with Element-wise Gradient Scaling:  Somewhat like Proxy-Quant, add  gradient scale, 
+14. REDUCING THE COMPUTATIONAL COST OF DEEP GENERATIVE MODELS WITH BINARY NEURAL NETWORKS. BNN for generative model
+
 
 
 
