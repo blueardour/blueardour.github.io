@@ -39,3 +39,6 @@ sudo smartctl -t long -a /dev/sda
 
 ## Status
 sudo smartctl -a /dev/sda
+
+## samsung
+https://www.samsung.com/semiconductor/minisite/ssd/download/tools/#ge_semi_anchor_stand5
