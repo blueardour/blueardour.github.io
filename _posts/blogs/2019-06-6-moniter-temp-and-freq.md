@@ -24,3 +24,18 @@ cat /sys/block/sda/queue/rotational
 0: SSD
 
 sudo hdparm -I /dev/sda
+
+# check temp of SSD
+sudo apt install smartmontools nvme-cli hddtemp
+sudo nvme smart-log /dev/nvme0
+sudo hddtemp /dev/sda
+
+## enable test
+sudo smartctl -s on -a /dev/sda
+
+## self-test short or long
+sudo smartctl -t short -a /dev/sda
+sudo smartctl -t long -a /dev/sda
+
+## Status
+sudo smartctl -a /dev/sda
