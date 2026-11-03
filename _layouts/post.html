@@ -230,11 +230,11 @@ a.grey-link, a.grey-link:hover, a.grey-link:visited {
     </div>
 
 		<div class="PageNavigation">
-		  {% if page.previous.url %}
+		  {% if page.previous.url and page.previous.hidden_from_index != true %}
 		    <a class="prev" href="{{ page.previous.url }}">&nbsp;&laquo; {{ page.previous.title }}</a>
 		  {% endif %}
       <a class="homepage" href="{{ site.base }}/index.html">&nbsp;&laquo; Homepage &raquo;&nbsp;</a>
-		  {% if page.next.url %}
+		  {% if page.next.url and page.next.hidden_from_index != true %}
 		    <a class="next" href="{{ page.next.url }}">{{ page.next.title }} &raquo;&nbsp;</a>
 		  {% endif %}
 		</div>
@@ -269,11 +269,11 @@ a.grey-link, a.grey-link:hover, a.grey-link:visited {
 		</div>
 
 		<div class="PageNavigation">
-		  {% if page.previous.url %}
+		  {% if page.previous.url and page.previous.hidden_from_index != true %}
 		    <a class="prev" href="{{ page.previous.url }}">&nbsp;&laquo; {{ page.previous.title }}</a>
 		  {% endif %}
       <a class="homepage" href="{{ site.base }}/index.html">&nbsp;&laquo; Homepage &raquo;&nbsp;</a>
-		  {% if page.next.url %}
+		  {% if page.next.url and page.next.hidden_from_index != true %}
 		    <a class="next" href="{{ page.next.url }}">{{ page.next.title }} &raquo;&nbsp;</a>
 		  {% endif %}
 		</div>

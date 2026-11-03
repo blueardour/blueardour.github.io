@@ -1,0 +1,79 @@
+{% assign paper = page.paper %}
+<header class="paper-meta">
+  <p class="paper-kicker">
+    <span>Paper reading note</span>
+    {% if paper.note %}<span class="paper-kicker__dot">&middot;</span><span>{{ paper.note }}</span>{% endif %}
+  </p>
+
+  <h1 class="paper-title">{{ paper.title | default: page.title }}</h1>
+  {% if page.subtitle %}<p class="paper-subtitle">{{ page.subtitle }}</p>{% endif %}
+
+  <div class="paper-byline">
+    {% if paper.authors %}
+    <p class="paper-authors">
+      {% for author in paper.authors %}
+        {% if author.url %}<a href="{{ author.url }}">{{ author.name }}</a>{% else %}{{ author }}{% endif %}{% unless forloop.last %}, {% endunless %}
+      {% endfor %}
+    </p>
+    {% endif %}
+    <p class="paper-venue">
+      {% if paper.venue %}{{ paper.venue }}{% endif %}
+      {% if paper.year %}{% if paper.venue %} &middot; {% endif %}{{ paper.year }}{% endif %}
+      {% if paper.arxiv %} &middot; arXiv:{{ paper.arxiv }}{% endif %}
+    </p>
+  </div>
+
+  {% if paper.tldr %}
+  <p class="paper-tldr"><span class="paper-tldr__label">TL;DR</span> {{ paper.tldr }}</p>
+  {% endif %}
+
+  <div class="paper-actions" aria-label="Paper links">
+    {% if paper.arxiv_url %}<a href="{{ paper.arxiv_url }}">arXiv</a>{% endif %}
+    {% if paper.pdf_url %}<a href="{{ paper.pdf_url }}">PDF</a>{% endif %}
+    {% if paper.project_url %}<a href="{{ paper.project_url }}">Project page</a>{% endif %}
+    {% if paper.code_url %}<a href="{{ paper.code_url }}">Code</a>{% endif %}
+    {% if page.translation %}<a href="{{ page.translation }}" data-lang-switch="1">{% if page.lang == 'zh-Hans' %}English version{% else %}中文版{% endif %}</a>{% endif %}
+  </div>
+
+  <nav class="paper-layers" aria-label="Reading layers">
+    <a class="paper-layer paper-layer--summary" href="#summary">
+      <span class="paper-layer__num">01</span>
+      <span class="paper-layer__body">
+        <strong>Concise summary</strong>
+        <small>{% if paper.reading_time.summary %}{{ paper.reading_time.summary }}{% else %}6 min{% endif %} &middot; the claim and the headline evidence</small>
+      </span>
+    </a>
+    <a class="paper-layer paper-layer--deep" href="#deep">
+      <span class="paper-layer__num">02</span>
+      <span class="paper-layer__body">
+        <strong>Technical deep dive</strong>
+        <small>{% if paper.reading_time.deep %}{{ paper.reading_time.deep }}{% else %}30 min{% endif %} &middot; method, equations, experiments</small>
+      </span>
+    </a>
+    <a class="paper-layer paper-layer--full" href="#full">
+      <span class="paper-layer__num">03</span>
+      <span class="paper-layer__body">
+        <strong>Full academic explainer</strong>
+        <small>{% if paper.reading_time.full %}{{ paper.reading_time.full }}{% else %}60 min{% endif %} &middot; background, derivations, appendices</small>
+      </span>
+    </a>
+  </nav>
+
+  <div class="paper-legend">
+    <span class="paper-legend__item paper-legend__item--claim"><i></i>Paper claim</span>
+    <span class="paper-legend__item paper-legend__item--evidence"><i></i>Evidence</span>
+    <span class="paper-legend__item paper-legend__item--limitation"><i></i>Limitation</span>
+    <span class="paper-legend__item paper-legend__item--take"><i></i>Our reading</span>
+  </div>
+
+  {% if paper.bibtex %}
+  <details class="paper-bibtex">
+    <summary>Cite this paper</summary>
+    <div class="paper-bibtex__body">
+      <pre><code>{{ paper.bibtex | escape }}</code></pre>
+      <button class="paper-copy" type="button" data-copy-target="paper-bibtex-source">Copy</button>
+      <textarea id="paper-bibtex-source" class="paper-visually-hidden" readonly>{{ paper.bibtex }}</textarea>
+    </div>
+  </details>
+  {% endif %}
+</header>

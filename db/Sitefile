@@ -4,11 +4,12 @@
 {
   "site":
   {
+  {% assign index_posts = site.posts | where_exp: "p", "p.hidden_from_index != true" %}
   {% assign totalWords = 0 %}
-  {% for post in site.posts %}
+  {% for post in index_posts %}
     {% assign totalWords = post.content | number_of_words | plus: totalWords %}
   {% endfor %}
-  "totalPosts": "{{ site.posts.size }}",
+  "totalPosts": "{{ index_posts.size }}",
   "totalWords": "{{ totalWords }}"
   }
 }

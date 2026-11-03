@@ -1,0 +1,12 @@
+<figure class="paper-figure{% if include.wide %} paper-figure--wide{% endif %}">
+  {% if include.link %}<a href="{{ include.link }}" target="_blank" rel="noopener">{% endif %}
+  <img src="{{ include.src }}" alt="{{ include.alt | default: include.caption | strip_html }}" loading="{% if include.eager %}eager{% else %}lazy{% endif %}" decoding="async">
+  {% if include.link %}</a>{% endif %}
+  {% if include.caption or include.label %}
+  <figcaption>
+    {% if include.label %}<span class="paper-figure__label">{{ include.label }}</span>{% endif %}
+    {{ include.caption }}
+    {% if include.credit %}<span class="paper-figure__credit">{{ include.credit }}</span>{% endif %}
+  </figcaption>
+  {% endif %}
+</figure>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: 'en' }}">
+<head>
+{% include head.meta %}
+<meta name="color-scheme" content="light dark">
+{% include paper-seo.html %}
+
+<link href='{{ site.w3c_url }}css/markdown.css' rel='stylesheet' type='text/css' />
+<link href='{{ site.w3c_url }}css/rouge.css' rel='stylesheet' type='text/css' />
+<link href='{{ site.w3c_url }}css/paper.css' rel='stylesheet' type='text/css' />
+{% if page.math != false %}{% include paper-math.html %}{% endif %}
+</head>
+
+<body class="paper-page">
+<div class="paper-progress" aria-hidden="true"><span></span></div>
+
+<header class="paper-topbar">
+  <a class="paper-brand" href="{{ site.base }}/index.html">{{ site.title | split: "'" | first }}<span>.</span></a>
+  <nav class="paper-topnav" aria-label="Site">
+    <a href="{{ site.base }}/index.html">All notes</a>
+    <a href="{{ site.base }}/index.html?category=paper">Papers</a>
+    {% if page.translation %}
+    <a class="paper-lang" href="{{ page.translation }}" data-lang-switch="1" hreflang="{% if page.lang == 'zh-Hans' %}en{% else %}zh-Hans{% endif %}">
+      {% if page.lang == 'zh-Hans' %}English{% else %}中文{% endif %}
+    </a>
+    {% endif %}
+  </nav>
+</header>
+
+<main class="paper-shell">
+  <details class="paper-toc-mobile">
+    <summary>Contents</summary>
+    <nav class="paper-toc-mobile__nav" aria-label="Table of contents"></nav>
+  </details>
+
+  <div class="paper-grid">
+    <article class="paper-content">
+      {% include paper-meta.html %}
+      {{ content }}
+    </article>
+
+    <aside class="paper-toc" aria-label="Table of contents">
+      <div class="paper-toc__inner">
+        <p class="paper-toc__title">Contents</p>
+        <nav class="paper-toc__nav"></nav>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="paper-footer">
+  <p>
+    <a href="{{ site.base }}/index.html">{{ site.title }}</a>
+    <span>&middot;</span>
+    <a href="{{ page.paper.arxiv_url | default: '#' }}">arXiv {{ page.paper.arxiv }}</a>
+    {% if page.translation %}<span>&middot;</span><a href="{{ page.translation }}" data-lang-switch="1">{% if page.lang == 'zh-Hans' %}English version{% else %}中文版{% endif %}</a>{% endif %}
+  </p>
+</footer>
+
+<script src="{{ site.w3c_url }}js/paper.js" defer></script>
+</body>
+</html>

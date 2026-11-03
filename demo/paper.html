@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MoSE3 — academic paper template demo</title>
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../w3c/images/sicon.jpg" type="image/x-icon">
+<link href="../w3c/css/markdown.css" rel="stylesheet" type="text/css">
+<link href="../w3c/css/rouge.css" rel="stylesheet" type="text/css">
+<link href="../w3c/css/paper.css" rel="stylesheet" type="text/css">
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    processEscapes: true,
+    tags: 'none'
+  },
+  options: {
+    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+    ignoreHtmlClass: 'no-math'
+  },
+  chtml: { matchFontHeight: true, scale: 1.0 }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body class="paper-page">
+<div class="paper-progress" aria-hidden="true"><span></span></div>
+
+<header class="paper-topbar">
+  <a class="paper-brand" href="#">Blueardour<span>.</span></a>
+  <nav class="paper-topnav" aria-label="Site">
+    <a href="#">All notes</a>
+    <a href="#">Papers</a>
+    <a class="paper-lang" href="#zh" data-lang-switch="1">中文</a>
+  </nav>
+</header>
+
+<main class="paper-shell">
+  <details class="paper-toc-mobile">
+    <summary>Contents</summary>
+    <nav class="paper-toc-mobile__nav" aria-label="Table of contents"></nav>
+  </details>
+
+  <div class="paper-grid">
+    <article class="paper-content">
+      <header class="paper-meta">
+        <p class="paper-kicker">
+          <span>Paper reading note</span>
+          <span class="paper-kicker__dot">&middot;</span>
+          <span>NeurIPS 2026 Spotlight</span>
+        </p>
+
+        <h1 class="paper-title">MoSE3: Learning World-Space SE(3) at Every Pixel</h1>
+        <p class="paper-subtitle">Dense 6-DoF motion from monocular video, built from 3D point tracks and learned rigidity embeddings.</p>
+
+        <div class="paper-byline">
+          <p class="paper-authors">Jiahuan Cheng, Zhiyi Li, Tian Xia, Ruojin Cai, Yilun Du, Qianqian Wang</p>
+          <p class="paper-venue">NeurIPS 2026 Spotlight &middot; 2026 &middot; arXiv:2610.03716</p>
+        </div>
+
+        <p class="paper-tldr"><span class="paper-tldr__label">TL;DR</span> MoSE3 predicts a full SE(3) transform at every pixel in a shared world frame, by learning 3D point tracks and rigidity embeddings and fitting the transform in closed form. Object- and part-level poses then come from clustering the embeddings.</p>
+
+        <div class="paper-actions" aria-label="Paper links">
+          <a href="https://arxiv.org/abs/2610.03716">arXiv</a>
+          <a href="https://arxiv.org/pdf/2610.03716">PDF</a>
+          <a href="https://mose3-tracker.github.io/">Project page</a>
+          <a href="#zh" data-lang-switch="1">中文版</a>
+        </div>
+
+        <nav class="paper-layers" aria-label="Reading layers">
+          <a class="paper-layer paper-layer--summary" href="#summary">
+            <span class="paper-layer__num">01</span>
+            <span class="paper-layer__body"><strong>Concise summary</strong><small>6 min &middot; the claim and headline evidence</small></span>
+          </a>
+          <a class="paper-layer paper-layer--deep" href="#deep">
+            <span class="paper-layer__num">02</span>
+            <span class="paper-layer__body"><strong>Technical deep dive</strong><small>30 min &middot; method, equations, experiments</small></span>
+          </a>
+          <a class="paper-layer paper-layer--full" href="#full">
+            <span class="paper-layer__num">03</span>
+            <span class="paper-layer__body"><strong>Full academic explainer</strong><small>60 min &middot; background, derivations, appendices</small></span>
+          </a>
+        </nav>
+
+        <div class="paper-legend">
+          <span class="paper-legend__item paper-legend__item--claim"><i></i>Paper claim</span>
+          <span class="paper-legend__item paper-legend__item--evidence"><i></i>Evidence</span>
+          <span class="paper-legend__item paper-legend__item--limitation"><i></i>Limitation</span>
+          <span class="paper-legend__item paper-legend__item--take"><i></i>Our reading</span>
+        </div>
+
+        <details class="paper-bibtex">
+          <summary>Cite this paper</summary>
+          <div class="paper-bibtex__body">
+            <pre><code>@inproceedings{mose3_2026,
+  title  = {MoSE3: Learning World-Space SE(3) at Every Pixel},
+  author = {Cheng, Jiahuan and Li, Zhiyi and Xia, Tian and Cai, Ruojin and Du, Yilun and Wang, Qianqian},
+  year   = {2026},
+  note   = {NeurIPS Spotlight}
+}</code></pre>
+            <button class="paper-copy" type="button" data-copy-target="paper-bibtex-source">Copy</button>
+            <textarea id="paper-bibtex-source" class="paper-visually-hidden" readonly>@inproceedings{mose3_2026,
+  title  = {MoSE3: Learning World-Space SE(3) at Every Pixel},
+  author = {Cheng, Jiahuan and Li, Zhiyi and Xia, Tian and Cai, Ruojin and Du, Yilun and Wang, Qianqian},
+  year   = {2026},
+  note   = {NeurIPS Spotlight}
+}</textarea>
+          </div>
+        </details>
+      </header>
+
+      <figure class="paper-figure">
+        <img src="../w3c/images/paper/mose3/teaser.svg" alt="MoSE3 pipeline: monocular video goes through pi-cubed and a tracking branch to produce 3D tracks and rigidity embeddings, then a weighted Horn fit produces per-pixel SE(3), and clustering produces object and part poses." loading="eager" decoding="async">
+        <figcaption><span class="paper-figure__label">Figure 1.</span> A readable view of the pipeline. The frozen π³ backbone supplies camera poses and pointmaps; the trainable branch predicts 3D tracks and rigidity embeddings; the weighted Horn fit turns them into dense SE(3). <span class="paper-figure__credit">Diagram redrawn for this note, not a paper figure.</span></figcaption>
+      </figure>
+
+      <h2 id="summary">Summary</h2>
+
+      <p>Dense 3D point tracking tells us where pixels go, but a track is only a 3D translation curve. It does not say how the underlying part rotates, and it does not say which pixels move together as one rigid body. MoSE3 targets that missing structure: a full <strong>SE(3)</strong> transform at every pixel, in a shared world frame, from monocular RGB video.</p>
+
+      <blockquote class="callout claim" data-label="Paper claim">
+        <p>MoSE3 is the first feed-forward model to predict dense, per-pixel, world-frame SE(3) motion from monocular RGB video, without CAD models, depth sensors, category priors, or per-video optimization.</p>
+      </blockquote>
+
+      <h3 id="summary-idea">The core idea</h3>
+
+      <p>Instead of regressing rotation and translation directly, MoSE3 predicts two intermediates:</p>
+      <ol>
+        <li><strong>Dense 3D point tracks</strong> <span>\( \mathbf{X}^{w}_{i} \)</span>, which say where each query pixel goes in 3D.</li>
+        <li><strong>Rigidity embeddings</strong> <span>\( \mathbf{E}_{q} \)</span>, whose cosine similarity says which pixels move rigidly together.</li>
+      </ol>
+
+      <p>Given those, the SE(3) motion of a pixel is recovered by a <strong>weighted Horn fit</strong>, a closed-form Procrustes alignment inside a soft rigid cluster:</p>
+
+      <div>
+        \[
+        \mathbf{T}_{q\to i}(\mathbf{u}) =
+        \arg\min_{\hat{\mathbf{T}}\in SE(3)}
+        \sum_{\mathbf{v}\in\mathcal{G}}
+        w(\mathbf{u},\mathbf{v})\,
+        \left\|
+        \hat{\mathbf{T}}\cdot\mathbf{X}^{w}_{q}(\mathbf{v})
+        -
+        \mathbf{X}^{w}_{i}(\mathbf{v})
+        \right\|_{2}^{2}.
+        \]
+      </div>
+
+      <p>The weights are a softmax over embedding similarity. The fit is differentiable, so the SE(3) loss trains both the tracks and the grouping. That is the technical heart of the paper.</p>
+
+      <h3 id="summary-evidence">Headline evidence</h3>
+
+      <table>
+        <caption>Table 1. Selected numbers from the paper. Lower is better for RRE and ADD; higher is better for AUC and tracking accuracy.</caption>
+        <thead>
+          <tr><th>Benchmark</th><th>Metric</th><th>MoSE3</th><th>Best baseline</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>HO3D, per-pixel</td><td>RRE ↓</td><td><strong>18.28°</strong></td><td>36.45°</td></tr>
+          <tr><td>iTACO, per-pixel</td><td>RRE ↓</td><td><strong>12.30°</strong></td><td>28.60°</td></tr>
+          <tr><td>3D tracking, avg.</td><td>L-16 ↑</td><td><strong>0.5941</strong></td><td>0.5847</td></tr>
+          <tr><td>3D tracking, avg.</td><td>L-50 ↑</td><td><strong>0.5946</strong></td><td>0.5402</td></tr>
+        </tbody>
+      </table>
+
+      <blockquote class="callout evidence" data-label="Evidence">
+        <p>The SE(3) gains are large on both a real rigid hand-object benchmark (HO3D) and a synthetic articulated benchmark (iTACO). The 3D-tracking margin over Track4World is real but much smaller, especially at L-16.</p>
+      </blockquote>
+
+      <h3 id="summary-limits">What it does not do</h3>
+
+      <blockquote class="callout limitation" data-label="Limitation">
+        <p>The method depends on π³ for camera poses and pointmaps; camera errors propagate. “World-space” is a shared frame up to scale, not necessarily metric world coordinates. Deformable motion is evaluated only qualitatively, and fast motion degrades the tracks that the SE(3) fit depends on.</p>
+      </blockquote>
+
+      <blockquote class="callout our-take" data-label="Our reading">
+        <p>This is best read as a structured upgrade of dense 3D tracking: keep the tracking backbone, add rotation and rigid grouping, and let SE(3) supervision shape both. It is a strong fit for manipulation and physical reasoning, but not a replacement for model-based 6D pose when a CAD model, metric scale, or known identity is available.</p>
+      </blockquote>
+
+      <h2 id="deep">Technical deep dive</h2>
+
+      <h3 id="deep-formulation">1. Formulation</h3>
+
+      <p>Let <span>\(I_1,\ldots,I_N\)</span> be the input frames and <span>\(q\)</span> the query frame. The goal is a dense field of transforms <span>\(\mathbf{T}_{q\to i}(\mathbf{u})\in SE(3)\)</span> such that</p>
+
+      <div>
+        \[
+        \mathbf{X}^{w}_{i}(\mathbf{u})
+        =
+        \mathbf{R}_{q\to i}(\mathbf{u})\,\mathbf{X}^{w}_{q}(\mathbf{u})
+        +
+        \mathbf{t}_{q\to i}(\mathbf{u}).
+        \]
+      </div>
+
+      <p>The model is not asked to output a single object pose. It outputs a transform per pixel; object-level structure is a property that emerges from grouping pixels with similar rigidity embeddings.</p>
+
+      <h3 id="deep-architecture">2. Architecture</h3>
+
+      <p>The geometry branch is a frozen π³-Large model. Its pointmaps and camera poses provide the world-frame scaffold. A trainable tracking branch is attached alongside it, and its tokens attend to the frozen geometry tokens. Two heads read the tracking features:</p>
+
+      <ul>
+        <li><strong>Point-tracking head:</strong> predicts normalized image coordinates, signed depth, and visibility for every query pixel in every target frame.</li>
+        <li><strong>Rigidity-embedding head:</strong> predicts an L2-normalized embedding on each frame's image grid. It is query-frame invariant, because rigid-body identity belongs to the scene, not to the query.</li>
+      </ul>
+
+      <h3 id="deep-fit">3. Why Horn instead of direct regression</h3>
+
+      <p>Direct SE(3) regression is possible, but rotations live on a curved manifold and dense SE(3) annotations are scarce. The decomposition replaces one hard regression with two better-supervised targets. The ablation is decisive: on iTACO per-pixel SE(3), direct regression reports 24.57° RRE, while the full model reports 17.27°.</p>
+
+      <blockquote class="callout note" data-label="Intuition">
+        <p>The Horn fit is a differentiable “geometric layer.” It does not add parameters; it adds structure. The network learns tracks and grouping, and the layer turns them into a valid rigid transform.</p>
+      </blockquote>
+
+      <h3 id="deep-training">4. Joint supervision</h3>
+
+      <p>The objective combines a tracking loss, a visibility loss, a rigidity-affinity loss, and an SE(3) loss. The affinity loss has two forms: an SE(3)-based target when labels exist, and a track-based target that only requires constant pairwise 3D distance over time. The latter lets the embedding train on clips without SE(3) annotations.</p>
+
+      <table>
+        <caption>Table 2. Ablation on iTACO per-pixel SE(3), reduced training schedule. The full model is the bottom row of the paper's Table 3.</caption>
+        <thead>
+          <tr><th>Variant</th><th>RRE ↓</th><th>AUC_r ↑</th><th>ADD ↓</th><th>AUC_ADD ↑</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Direct SE(3) regression</td><td>24.57</td><td>0.525</td><td>19.05</td><td>0.393</td></tr>
+          <tr><td>Track-only + k-NN</td><td>31.11</td><td>0.453</td><td>20.96</td><td>0.382</td></tr>
+          <tr><td>w/o SE(3) loss</td><td>23.90</td><td>0.555</td><td>17.82</td><td>0.465</td></tr>
+          <tr><td>Full MoSE3</td><td><strong>17.27</strong></td><td><strong>0.647</strong></td><td><strong>14.09</strong></td><td><strong>0.517</strong></td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="deep-data">5. Art-Kubric</h3>
+
+      <p>Art-Kubric is the data side of the contribution: 5,000 synthetic scenes, 120 frames each, articulated and rigid objects under physics simulation, dense long-range tracks, per-pixel rigid-part labels, and per-link SE(3) at every frame. It is released under CC BY-NC 4.0.</p>
+
+      <blockquote class="callout question" data-label="Open question">
+        <p>How much of the real-world generalization comes from Art-Kubric, and how much from the other five training sources? The ablation removes Art-Kubric entirely, but does not ablate the other sources one by one.</p>
+      </blockquote>
+
+      <h2 id="full">Full academic explainer</h2>
+
+      <h3 id="full-background">Background: why SE(3), not a track</h3>
+
+      <p>A 3D point track is a function <span>\(t \mapsto \mathbf{X}(t)\in\mathbb{R}^3\)</span>. It tells you where a point is, but not how the body carrying that point rotates. A rigid transform <span>\(\mathbf{T}\in SE(3)\)</span> carries both rotation and translation, and a collection of pixels sharing one transform defines a rigid body. That is the representation MoSE3 is after.</p>
+
+      <h3 id="full-horn">Horn's method, briefly</h3>
+
+      <p>Given corresponding 3D points <span>\(\mathbf{s}_v\)</span> at the query frame and <span>\(\mathbf{t}_v\)</span> at the target frame, with weights <span>\(w_v\)</span>, the weighted Procrustes problem is solved by:</p>
+
+      <ol>
+        <li>computing weighted centroids <span>\(\bar{\mathbf{s}}\)</span> and <span>\(\bar{\mathbf{t}}\)</span>;</li>
+        <li>forming the weighted cross-covariance <span>\(\Sigma\)</span>;</li>
+        <li>building Horn's matrix <span>\(H\)</span> from <span>\(\Sigma\)</span> and taking the unit quaternion eigenvector for the rotation;</li>
+        <li>setting <span>\(\mathbf{t}=\bar{\mathbf{t}}-\mathbf{R}\bar{\mathbf{s}}\)</span>.</li>
+      </ol>
+
+      <p>The authors prefer Horn's quaternion form over SVD because it gives more stable gradients in their differentiable training loop. The fit is exact for a rigid body and differentiable, which is why the SE(3) loss can train the upstream predictors.</p>
+
+      <h3 id="full-scale">Scale and coordinate conventions</h3>
+
+      <p>This is the caveat to keep in view. Training uses scene-scale normalization. Evaluation aligns predicted tracks to ground truth with a global scale and translation before computing metrics. The output is a shared world-frame motion field, but it is not guaranteed to be metric. For robotics, do not treat it as a metric object pose without an external scale source.</p>
+
+      <blockquote class="callout limitation" data-label="Important caveat">
+        <p>“World-space” in this paper means a shared reference frame, not necessarily metric world units. The evaluation protocol uses scale/translation alignment. For a survey on object 6DoF SE(3), this distinction should be explicit.</p>
+      </blockquote>
+
+      <h3 id="full-results">Reading the results fairly</h3>
+
+      <p>The strongest evidence is the per-pixel and object/part-level SE(3) result on HO3D and iTACO, plus the ablation against direct SE(3) regression and track-only variants. The 3D-tracking result is also strong, but the L-16 margin over Track4World is small and MoSE3 is second on ADT L-16.</p>
+
+      <p>The baselines are adapted 3D trackers using a shared post-hoc protocol: for each query pixel, take its 3D k-nearest neighbors at the query frame, treat them as a rigid group, and fit a transform with Horn. MoSE3 also reports a k-NN variant, which already beats every baseline; the rigidity-embedding variant adds the learned grouping on top. This is a fair adaptation, but it is not the same as comparing to a method trained with dense SE(3) supervision.</p>
+
+      <h3 id="full-references">References</h3>
+
+      <ol class="references">
+        <li id="ref-horn">Horn, B. K. P. Closed-form solution of absolute orientation using unit quaternions. <em>Journal of the Optical Society of America A</em>, 4(4):629–642, 1987.</li>
+        <li id="ref-pi3">Wang, Y., Zhou, J., Zhu, H., et al. π³: Permutation-equivariant visual geometry learning. arXiv:2507.13347, 2025.</li>
+        <li id="ref-track4world">Lu, J., Xu, J., Hu, W., et al. Track4World: Feedforward world-centric dense 3D tracking of all pixels. arXiv:2603.02573, 2026.</li>
+        <li id="ref-spatialtracker">Xiao, Y., Wang, Q., Zhang, S., et al. SpatialTracker: Tracking any 2D pixels in 3D space. CVPR 2024.</li>
+        <li id="ref-raft3d">Teed, Z., Deng, J. RAFT-3D: Scene flow using rigid-motion embeddings. CVPR 2021.</li>
+      </ol>
+    </article>
+
+    <aside class="paper-toc" aria-label="Table of contents">
+      <div class="paper-toc__inner">
+        <p class="paper-toc__title">Contents</p>
+        <nav class="paper-toc__nav"></nav>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="paper-footer">
+  <p><a href="#">Blueardour' Technic Blog</a><span>&middot;</span><a href="https://arxiv.org/abs/2610.03716">arXiv 2610.03716</a><span>&middot;</span><a href="#zh">中文版</a></p>
+</footer>
+
+<script src="../w3c/js/paper.js?v=2" defer></script>
+</body>
+</html>

@@ -8,7 +8,8 @@ description: > # this means to ignore newlines until next "tag"
 #repository: jokinkuang/jokinkuang.github.io # solve the errors when change the post on jekyll running
 
 # Site URL NOTE: if your site is base on subdir /blog you should change base to "/blog"
-domain: "http://blueardour.github.io" # the domain URL for your site
+domain: "https://blueardour.github.io" # the domain URL for your site
+url: "https://blueardour.github.io" # used by canonical, hreflang, and JSON-LD
 base: ""  # the relative path that different with domain so you can test locally
 
 # Source URL NOTE: end with / cause it's [URL + FILE]

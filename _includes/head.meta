@@ -8,5 +8,5 @@
 
 <link rel="icon" href="{{ site.w3c_url }}images/sicon.jpg" type="image/x-icon" />
 <link rel="shortcut icon" href="{{ site.w3c_url }}images/sicon.jpg" type="image/x-icon" />
-<link rel="canonical" href="{{ site.domain }}{{ page.url | replace:'index.html',''">
+<link rel="canonical" href="{{ site.domain }}{{ page.url | replace:'index.html','' }}">
 <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ site.domain }}/db/feed.xml">

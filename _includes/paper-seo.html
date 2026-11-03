@@ -1,0 +1,68 @@
+{% assign paper_url_base = site.url | default: site.domain %}
+{% assign paper_title = page.paper.title | default: page.title %}
+{% assign paper_desc = page.description | default: page.paper.tldr | default: page.excerpt | strip_html | strip_newlines | truncate: 200 %}
+{% if page.image %}
+  {% if page.image contains 'http' %}
+    {% assign paper_image = page.image %}
+  {% else %}
+    {% assign paper_image = paper_url_base | append: site.images_url | append: page.image %}
+  {% endif %}
+{% endif %}
+
+{% if page.lang == 'zh-Hans' %}
+  {% assign this_locale = 'zh_CN' %}
+  {% assign other_locale = 'en_US' %}
+  {% assign this_lang = 'zh-Hans' %}
+  {% assign other_lang = 'en' %}
+{% else %}
+  {% assign this_locale = 'en_US' %}
+  {% assign other_locale = 'zh_CN' %}
+  {% assign this_lang = 'en' %}
+  {% assign other_lang = 'zh-Hans' %}
+{% endif %}
+
+<link rel="alternate" hreflang="{{ this_lang }}" href="{{ paper_url_base }}{{ page.url }}">
+{% if page.translation %}
+<link rel="alternate" hreflang="{{ other_lang }}" href="{{ paper_url_base }}{{ page.translation }}">
+{% endif %}
+<link rel="alternate" hreflang="x-default" href="{{ paper_url_base }}{% if page.lang == 'zh-Hans' and page.translation %}{{ page.translation }}{% else %}{{ page.url }}{% endif %}">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="{{ site.title }}">
+<meta property="og:title" content="{{ paper_title }}">
+<meta property="og:description" content="{{ paper_desc }}">
+<meta property="og:url" content="{{ paper_url_base }}{{ page.url }}">
+<meta property="og:locale" content="{{ this_locale }}">
+{% if page.translation %}<meta property="og:locale:alternate" content="{{ other_locale }}">{% endif %}
+{% if paper_image %}<meta property="og:image" content="{{ paper_image }}">{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ paper_title }}">
+<meta name="twitter:description" content="{{ paper_desc }}">
+{% if paper_image %}<meta name="twitter:image" content="{{ paper_image }}">{% endif %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": {{ paper_title | jsonify }},
+  "description": {{ paper_desc | jsonify }},
+  "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
+  "inLanguage": {{ this_lang | jsonify }},
+  "url": {{ paper_url_base | append: page.url | jsonify }},
+  {% if paper_image %}"image": {{ paper_image | jsonify }},{% endif %}
+  "author": {
+    "@type": "Person",
+    "name": {{ site.author | jsonify }}
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": {{ site.title | jsonify }},
+    "url": {{ paper_url_base | jsonify }}
+  },
+  "about": {
+    "@type": "ScholarlyArticle",
+    "name": {{ paper_title | jsonify }},
+    "sameAs": {{ page.paper.arxiv_url | jsonify }}
+  }
+}
+</script>

@@ -4,8 +4,9 @@
 {
   "posts":
   [
+  {% assign index_posts = site.posts | where_exp: "p", "p.hidden_from_index != true" %}
   {% assign totalCategories = "" %}
-  {% for post in site.posts %}
+  {% for post in index_posts %}
     {% comment %}第一部分，获取文章的子目录+categories（优先级：目录 > categories变量）{% endcomment %}
     {% assign list = post.path|split:"/"; %}
     {% assign categories = post.categories|join:"," %}
@@ -38,7 +39,7 @@
     {% endfor %}
 
     {% comment %}增加到"总目录"{% endcomment %}
-    {% if post == site.posts.first %}
+    {% if post == index_posts.first %}
       {% assign totalCategories = totalCategories | append: result %}
     {% else %}
       {% assign totalCategories = totalCategories | append:"," | append: result %}
@@ -82,7 +83,7 @@
         ""
       {% endif %}
     }
-    {% if post != site.posts.last %}
+    {% if post != index_posts.last %}
       ,
     {% endif %}
   {% endfor %}
