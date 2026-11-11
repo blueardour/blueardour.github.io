@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 · 系统架构 — Quant Design Notes</title>
+<meta name="description" content="分层、包职责、依赖矩阵、运行时拓扑与 NautilusTrader 映射。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>03 · 系统架构</h1>
+    <p class="quant-lead">分层、包职责、依赖矩阵、运行时拓扑与 NautilusTrader 映射。</p>
+    <h2 id="1-目的与范围">1. 目的与范围</h2>
+
+<p>本文定义系统的<strong>结构</strong>：包职责、依赖方向、运行时拓扑。它不定义具体策略、参数或
+执行细节；那些在 <a href="04-design-spec.html"><code>design_spec.md</code></a> 和 ADR 中。</p>
+
+<p>范围：单用户，A股/港股，日线优先，long-only，约 75 万人民币，后续 paper trading、
+实盘和可视化。非目标见 §12。</p>
+
+<h2 id="2-系统上下文">2. 系统上下文</h2>
+
+<pre><code>数据源 (tencent/tushare/baostock/akshare/...)
+        │
+        ▼
+   datafeeder (数据层) ──► 本地存储 (quality/market_data/provenance/...)
+        │
+        ▼
+   strategy (alpha) ──► portfolio (sizing) ──► risk (policy)
+        │                                      │
+        └──────────────► execution (orders/ledger/broker)
+                                 │
+                                 ▼
+                    backtest / paper / live / visualization
+</code></pre>
+
+<h2 id="3-设计哲学">3. 设计哲学</h2>
+
+<ol>
+<li><strong>One owner</strong>：每个可变状态只有一个写入者。</li>
+<li><strong>One direction</strong>：依赖从编排/适配器指向纯领域，不能反向或横向。</li>
+<li><strong>One pipeline</strong>：backtest、paper、live、visualization 共用同一条事件序列；
+只替换 <code>Clock</code>、<code>DataPortal</code>、<code>Broker</code> 适配器。</li>
+<li><strong>Specs before code</strong>：分层、所有权、契约、执行语义、配置 schema 的变更先写
+ADR/规格。</li>
+<li><strong>Boring, explicit, deterministic</strong>：同步主循环、注入时钟、显式配置、无隐藏全局
+状态；不做微服务、事件溯源、HFT。</li>
+</ol>
+
+<h2 id="4-当前-vs-目标">4. 当前 vs 目标</h2>
+
+<p>当前代码是<strong>过渡期实现</strong>：</p>
+
+<ul>
+<li><code>backtest/engine.py</code> 是 composition root，同时拥有现金、持仓、撮合、
+<code>PositionManager</code>、<code>RiskManager</code>。</li>
+<li><code>strategy.positions</code> 是 engine 持仓的共享引用；<code>PositionManager</code> 又存一份
+<code>PositionInfo</code> 副本；现金在 engine/strategy/PM/RM 各有一份派生值。</li>
+<li><code>Signal</code> 只有 BUY/SELL/HOLD、price、metadata；SELL 永远全平。</li>
+<li>回测当根收盘成交，没有 D+1、盘中 high/low、T+1、涨跌停、部分卖出。</li>
+</ul>
+
+<p>目标结构把状态和职责分开：</p>
+
+<table>
+<thead>
+<tr>
+  <th>关注点</th>
+  <th>当前</th>
+  <th>目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>现金/持仓账本</td>
+  <td>engine + strategy + PM + RM</td>
+  <td><code>execution/AccountLedger</code> 唯一</td>
+</tr>
+<tr>
+  <td>订单/成交</td>
+  <td>engine 内联</td>
+  <td><code>execution/OrderManager</code> + <code>BrokerPort</code></td>
+</tr>
+<tr>
+  <td>策略输入</td>
+  <td>共享可变 <code>Position</code></td>
+  <td>只读 <code>StrategyContext</code></td>
+</tr>
+<tr>
+  <td>策略输出</td>
+  <td><code>Signal(BUY/SELL)</code></td>
+  <td><code>Intent</code>（含数量/订单类型/<code>ExitPlan</code>）</td>
+</tr>
+<tr>
+  <td>sizing</td>
+  <td><code>PositionManager</code> 兼管持仓</td>
+  <td><code>portfolio/SizingPolicy</code> 纯策略</td>
+</tr>
+<tr>
+  <td>风控</td>
+  <td><code>RiskManager</code> 兼管资本</td>
+  <td><code>risk/RiskPolicy</code> 返回决策</td>
+</tr>
+<tr>
+  <td>回测/实盘</td>
+  <td>两套路径</td>
+  <td>同一管线，只换适配器</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong><code>core/</code> 不要重新引入</strong>。目标纯领域包命名为 <code>domain/</code>，只放值对象、枚举、端口，
+不包含 engine 或 pipeline。</p>
+
+<h2 id="5-目标分层">5. 目标分层</h2>
+
+<pre><code>app / main.py / scripts / visualization
+        │
+        ├── live/          (live adapters + runner)
+        └── backtest/      (historical replay + analytics)
+                 │
+                 └── execution/   (orders, ledger, brokers)
+                        │
+        strategy/ ──────┤
+        portfolio/ ─────┤
+        risk/ ──────────┤
+                        └── domain/  (pure contracts, no I/O)
+        datafeeder/ ────┘  (implements DataPortal)
+        cost/ ──────────┘  (pure fee formulas)
+</code></pre>
+
+<p>依赖只能向下。<code>backtest/</code> 和 <code>live/</code> 是 composition roots：它们负责把数据、策略、
+sizing、风控、执行、账本接起来；engine 本身不拥有业务状态。</p>
+
+<h2 id="6-包职责">6. 包职责</h2>
+
+<table>
+<thead>
+<tr>
+  <th>包</th>
+  <th>职责</th>
+  <th>明确不负责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>domain/</code>（目标）</td>
+  <td><code>Instrument</code>、<code>Bar</code>、<code>Intent</code>、<code>ExitPlan</code>、<code>Order</code>、<code>Fill</code>、<code>AccountSnapshot</code>、<code>BrokerPort</code>、<code>Clock</code> 等纯契约；无 I/O、无 pandas</td>
+  <td>数据抓取、撮合、策略、报表</td>
+</tr>
+<tr>
+  <td><code>datafeeder/</code></td>
+  <td>数据源适配器、存储、日历、质量/溯源、<code>DataPortal</code> 实现、PIT 查询</td>
+  <td>策略、订单、现金</td>
+</tr>
+<tr>
+  <td><code>cost/</code></td>
+  <td>费用/税公式，费率来自 <code>config/fee_config.yaml</code></td>
+  <td>订单状态、持仓</td>
+</tr>
+<tr>
+  <td><code>strategy/</code></td>
+  <td>alpha 生成、<code>Intent</code>/<code>ExitPlan</code> 声明、策略私有状态</td>
+  <td>现金/持仓、订单执行、数据抓取</td>
+</tr>
+<tr>
+  <td><code>portfolio/</code></td>
+  <td>sizing 策略（R 定仓/资金百分比）、目标仓位</td>
+  <td>持仓存储、成交</td>
+</tr>
+<tr>
+  <td><code>risk/</code></td>
+  <td>预交易风控、暴露/集中度/熔断决策</td>
+  <td>现金/持仓账本、撮合</td>
+</tr>
+<tr>
+  <td><code>execution/</code>（目标）</td>
+  <td><code>OrderManager</code>、<code>AccountLedger</code>、<code>SimulatedBroker</code>、<code>LiveBroker</code> 适配器、交易规则</td>
+  <td>策略 alpha、数据抓取</td>
+</tr>
+<tr>
+  <td><code>backtest/</code></td>
+  <td>历史回放、绩效分析、walk-forward</td>
+  <td>生产状态所有权</td>
+</tr>
+<tr>
+  <td><code>live/</code>（目标）</td>
+  <td>实盘 runner、实时数据/券商适配器</td>
+  <td>策略逻辑</td>
+</tr>
+<tr>
+  <td><code>visualization/</code>（目标）</td>
+  <td>只读快照、报表、dashboard API</td>
+  <td>写回执行/策略状态</td>
+</tr>
+<tr>
+  <td><code>scripts/</code>、<code>main.py</code></td>
+  <td>composition roots、CLI、运维脚本</td>
+  <td>领域逻辑</td>
+</tr>
+<tr>
+  <td><code>patterns/</code></td>
+  <td>研究沙箱、实验代码</td>
+  <td>被生产路径 import</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="7-依赖矩阵">7. 依赖矩阵</h2>
+
+<table>
+<thead>
+<tr>
+  <th>包</th>
+  <th>允许 import</th>
+  <th>禁止 import</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>domain/</code></td>
+  <td>仅标准库</td>
+  <td>任何内部包</td>
+</tr>
+<tr>
+  <td><code>datafeeder/</code></td>
+  <td><code>domain/</code>、<code>config/</code>、自身</td>
+  <td><code>strategy/</code>、<code>backtest/</code>、<code>portfolio/</code>、<code>risk/</code>、<code>execution/</code></td>
+</tr>
+<tr>
+  <td><code>cost/</code></td>
+  <td>标准库、<code>config/</code></td>
+  <td>其他业务包</td>
+</tr>
+<tr>
+  <td><code>strategy/</code></td>
+  <td><code>domain/</code>、自身 indicators/factors、<code>config/</code></td>
+  <td><code>backtest/</code>、<code>execution/</code>、<code>portfolio/</code>、<code>risk/</code>、<code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td><code>portfolio/</code></td>
+  <td><code>domain/</code>、<code>config/</code></td>
+  <td>持仓存储、<code>execution/</code>、<code>strategy/</code></td>
+</tr>
+<tr>
+  <td><code>risk/</code></td>
+  <td><code>domain/</code>、<code>config/</code></td>
+  <td>现金/持仓存储、<code>execution/</code>、<code>strategy/</code></td>
+</tr>
+<tr>
+  <td><code>execution/</code></td>
+  <td><code>domain/</code>、<code>cost/</code>、<code>config/</code></td>
+  <td><code>strategy/</code>、<code>datafeeder/</code>、<code>backtest/</code></td>
+</tr>
+<tr>
+  <td><code>backtest/</code></td>
+  <td>所有下层 + <code>domain/</code></td>
+  <td>被下层 import</td>
+</tr>
+<tr>
+  <td><code>live/</code></td>
+  <td>所有下层 + <code>domain/</code></td>
+  <td>被下层 import</td>
+</tr>
+<tr>
+  <td><code>visualization/</code></td>
+  <td><code>domain/</code>、只读快照/报表 API</td>
+  <td>写 <code>execution/</code>/<code>strategy/</code> 状态</td>
+</tr>
+<tr>
+  <td><code>scripts/</code>、<code>main.py</code></td>
+  <td>所有层</td>
+  <td>被库代码 import</td>
+</tr>
+<tr>
+  <td><code>patterns/</code></td>
+  <td>任意研究依赖</td>
+  <td>被生产路径 import</td>
+</tr>
+</tbody>
+</table>
+
+<p>测试可以组合高层；生产代码必须遵守矩阵。后续用 import-linter 或 AST 检查固化。</p>
+
+<h2 id="8-运行时拓扑">8. 运行时拓扑</h2>
+
+<table>
+<thead>
+<tr>
+  <th>模式</th>
+  <th>数据</th>
+  <th>时钟</th>
+  <th>Broker</th>
+  <th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>backtest</td>
+  <td>历史 <code>DataPortal</code></td>
+  <td><code>SimClock</code></td>
+  <td><code>SimulatedBroker</code></td>
+  <td>确定性、可复现</td>
+</tr>
+<tr>
+  <td>paper</td>
+  <td>实时/准实时 <code>DataPortal</code></td>
+  <td><code>RealClock</code></td>
+  <td><code>SimulatedBroker</code></td>
+  <td>与实盘同数据路径，不真发单</td>
+</tr>
+<tr>
+  <td>live</td>
+  <td>实时 <code>DataPortal</code></td>
+  <td><code>RealClock</code></td>
+  <td><code>LiveBroker</code></td>
+  <td>需 paper 门槛、对账、kill switch</td>
+</tr>
+<tr>
+  <td>visualization</td>
+  <td>读快照/事件</td>
+  <td>—</td>
+  <td>—</td>
+  <td>只读，不参与交易</td>
+</tr>
+</tbody>
+</table>
+
+<p>四者共用 <code>Strategy</code>、<code>SizingPolicy</code>、<code>RiskPolicy</code>、<code>AccountLedger</code>。只有适配器不同。</p>
+
+<h2 id="9-事件流">9. 事件流</h2>
+
+<pre><code>Clock
+  -&gt; DataPortal.get_bars()
+  -&gt; Strategy.on_bar(market, portfolio) -&gt; [Intent]
+  -&gt; RiskPolicy.evaluate(intent, snapshot) -&gt; RiskDecision
+  -&gt; SizingPolicy.size(intent, snapshot) -&gt; OrderRequest
+  -&gt; OrderManager -&gt; Broker.submit()
+  -&gt; [Fill]
+  -&gt; AccountLedger.apply(fill)
+  -&gt; AccountSnapshot
+  -&gt; Strategy.on_fill() + observability + visualization
+</code></pre>
+
+<p>不需要 message bus/actor/async。同步主循环足够；实盘适配器可以在边界做异步 I/O，
+但不把异步传染到策略和账本。</p>
+
+<h2 id="10-nautilustrader-概念映射">10. NautilusTrader 概念映射</h2>
+
+<p>参考框架：NautilusTrader（见
+<a href="11-adr.html"><code>adr/0001-nautilustrader-reference.md</code></a>）。
+只借概念，不引入运行时依赖。</p>
+
+<table>
+<thead>
+<tr>
+  <th>Nautilus 概念</th>
+  <th>本项目对应</th>
+  <th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>DataClient / DataEngine</td>
+  <td><code>DataPortal</code> + <code>datafeeder/</code></td>
+  <td>PIT 读取，不暴露 venue 细节</td>
+</tr>
+<tr>
+  <td>Strategy</td>
+  <td><code>strategy/</code></td>
+  <td>只发 <code>Intent</code>，不碰账本</td>
+</tr>
+<tr>
+  <td>ExecutionEngine / OrderManager</td>
+  <td><code>execution/</code></td>
+  <td>订单生命周期、撮合</td>
+</tr>
+<tr>
+  <td>Portfolio</td>
+  <td><code>execution/AccountLedger</code></td>
+  <td>现金/持仓/已实现盈亏唯一账本</td>
+</tr>
+<tr>
+  <td>RiskEngine</td>
+  <td><code>risk/RiskPolicy</code></td>
+  <td>预交易决策，不拥有资本</td>
+</tr>
+<tr>
+  <td>MessageBus / Cache</td>
+  <td>简化同步循环 + 只读快照</td>
+  <td>不采用 actor/async 运行时</td>
+</tr>
+<tr>
+  <td>Clock</td>
+  <td><code>Clock</code>（Sim/Real）</td>
+  <td>禁止 <code>datetime.now()</code></td>
+</tr>
+<tr>
+  <td>Adapters</td>
+  <td><code>SimulatedBroker</code> / <code>LiveBroker</code></td>
+  <td>同一 <code>BrokerPort</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>不采用：actor 模型、message bus 基础设施、async 并发、多 venue 路由、Nautilus 的
+instrument universe 实现、其 Rust/Cython 内部。</p>
+
+<h2 id="11-单一真相源摘要">11. 单一真相源摘要</h2>
+
+<p>完整表在 <a href="04-design-spec.html#4-单一真相源"><code>design_spec.md</code></a>。要点：</p>
+
+<ul>
+<li>现金/持仓/成本/可卖数量：只有 <code>execution/AccountLedger</code> 写。</li>
+<li>订单/成交：只有 <code>execution/</code> 写。</li>
+<li>费用公式：只有 <code>cost.TransactionCost</code>。</li>
+<li>行情/Instrument/日历：只有 <code>datafeeder/</code>。</li>
+<li>策略意图：只有 <code>strategy/</code>。</li>
+<li>配置/密钥：只有 <code>config/</code> loader。</li>
+<li>绩效/报表：<code>backtest/performance</code> / <code>reporting</code> 派生，不是账本。</li>
+<li>可视化：只读快照，不回写。</li>
+</ul>
+
+<h2 id="12-可视化与实盘">12. 可视化与实盘</h2>
+
+<ul>
+<li><strong>可视化</strong>：订阅 <code>AccountSnapshot</code>、<code>Fill</code>、<code>Order</code> 事件；dashboard 只读
+<code>reporting</code> API。禁止 import engine 内部状态。</li>
+<li><strong>实盘</strong>：<code>LiveBroker</code> 实现 <code>BrokerPort</code>；<code>live/runner</code> 复用同一管线。安全设施：
+paper 模式、kill switch、订单幂等 ID、成交对账、审计日志、人工确认、单票/总仓位硬
+上限。</li>
+<li><strong>paper</strong>：实时数据 + <code>SimulatedBroker</code>，用于 3–6 个月验证；与 live 共用数据/策略/
+风控/账本路径。</li>
+</ul>
+
+<h2 id="13-out-of-scope">13. Out of scope</h2>
+
+<ul>
+<li>微服务、分布式消息总线、事件溯源持久化。</li>
+<li>多用户/认证/多租户会计。</li>
+<li>HFT、tick 级延迟优化、做市基础设施。</li>
+<li>做空、科创板、期权、期货、美股实盘。</li>
+<li>完整采用 NautilusTrader 运行时或硬依赖。</li>
+<li>完整税务申报/券商对账系统。</li>
+<li>ML 平台/feature store/自动研究编排。</li>
+<li>执行现实性与 paper 门槛通过前的盘中自动交易。</li>
+</ul>
+
+<h2 id="14-已知偏差">14. 已知偏差</h2>
+
+<p>当前代码与目标结构的差距记录在 <a href="07-roadmap.html"><code>roadmap.md</code></a>。不要在文档中把目标行为
+写成现状；引用当前行为时标注“过渡期”。</p>
+
+<h2 id="15-相关文档">15. 相关文档</h2>
+
+<ul>
+<li><a href="04-design-spec.html"><code>design_spec.md</code></a> — 契约与执行语义</li>
+<li><a href="05-code-style.html"><code>code_style.md</code></a> — 代码风格</li>
+<li><a href="06-glossary.html"><code>glossary.md</code></a> — 术语</li>
+<li><a href="07-roadmap.html"><code>roadmap.md</code></a> — 迁移阶段</li>
+<li><a href="11-adr.html"><code>adr/0001-nautilustrader-reference.md</code></a></li>
+</ul>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <a class="quant-pager__prev" href="02-doc-index.html">&larr; 上一页</a>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <a class="quant-pager__next" href="04-design-spec.html">下一页 &rarr;</a>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>

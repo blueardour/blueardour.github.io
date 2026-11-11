@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10 · 出场策略预注册 — Quant Design Notes</title>
+<meta name="description" content="出场实验的范围、假设、变体、评估方法与失败判据。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>10 · 出场策略预注册</h1>
+    <p class="quant-lead">出场实验的范围、假设、变体、评估方法与失败判据。</p>
+    <blockquote>
+  <p><strong>状态：experiment-draft。</strong> 本文是实验协议，不是架构规范。§1 是当时的契约草案；
+  目标态契约以 <a href="08-exit-contract.html"><code>specs/exit_contract.md</code></a> 为准，执行语义以
+  <a href="04-design-spec.html"><code>design_spec.md</code></a> 为准。实验参数一旦看结果前锁定，修改必须在文末
+  变更记录中写明并重跑。</p>
+  
+  <p>状态：<strong>DRAFT，未看任何回测结果</strong>。所有参数在看结果前锁定；任何修改都要在文末变更记录中写明并重跑。</p>
+  
+  <p>附录 A 是 2026-11-03 的审查快照，其中的行号可能已过期；以当前代码和
+  <a href="07-roadmap.html"><code>roadmap.md</code></a> 为准。
+  依据：<code>docs/strategy_principles.md</code> 原则 1（动态边界、棘轮）、原则 5（验证门槛）。
+  日期：2026-11-03</p>
+</blockquote>
+
+<hr />
+
+<h2 id="0-范围与非目标">0. 范围与非目标</h2>
+
+<p><strong>范围</strong>：只评估<strong>出场规则</strong>。入场信号固定，不调优；仓位规则只做"按 R 定仓"这一条前提。</p>
+
+<p><strong>非目标</strong>：
+- 不设计新入场 alpha。
+- 不调现有策略的参数（<code>trend_following.py</code> / <code>hk_us_lead.py</code> 暂不改）。
+- 不引入行为数据（股东户数 / 资金流 / 龙虎榜尚无历史）。</p>
+
+<hr />
+
+<h2 id="1-架构契约c-作契约-exits-作实现">1. 架构契约（C 作契约 + exits 作实现）</h2>
+
+<pre><code>Strategy（纯 alpha）
+   │  entry signal + ExitPlan（声明止损位、目标、棘轮、时间退出）
+   ▼
+仓位层：size = 风险预算 / R，R = entry_fill − initial_stop
+   ▼
+引擎：只执行订单类型 —— 市价 / 止损 / 止盈 / 移动止损 / 部分平仓
+   │  盘中 low/high 触发 resting order；收盘决策下一 bar 执行
+   ▼
+Position（引擎独占，只读快照回喂策略）
+   │  强制不变量：stop_price 非递减；R 入场时锁定；部分卖出不改 R 分母
+   ▼
+exits/：可复用的 ExitPlan 计算组件（ATR 止损、结构止损、棘轮、分批）
+</code></pre>
+
+<p><strong>引擎不认识 ATR，也不认识"派发"</strong>；它只认订单类型。出场参数由策略在入场时声明，逻辑出场（阶段变化、背离）由策略发 SELL。</p>
+
+<p><strong>向后兼容</strong>：引擎默认"不挂单、只执行策略信号"，未迁移策略零改动可跑。</p>
+
+<hr />
+
+<h2 id="2-执行假设回测必须满足否则结论无效">2. 执行假设（回测必须满足，否则结论无效）</h2>
+
+<table>
+<thead>
+<tr>
+  <th>项</th>
+  <th>规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>信号</td>
+  <td>收盘 D 产生 → D+1 开盘执行</td>
+</tr>
+<tr>
+  <td>resting stop/target</td>
+  <td>盘中触发：<code>low ≤ stop</code> → 成交价 <code>min(open, stop)</code>；<code>high ≥ target</code> → <code>max(open, target)</code>；跳空按开盘</td>
+</tr>
+<tr>
+  <td>A 股 T+1</td>
+  <td>当日买入不可当日卖出</td>
+</tr>
+<tr>
+  <td>涨跌停</td>
+  <td>开盘即封板且方向不利 → 本 bar 不成交，顺延；连续 3 bar 未成交 → 首个可成交开盘按市价出场并打标 <code>forced_exit</code></td>
+</tr>
+<tr>
+  <td>成本</td>
+  <td>一律走 <code>cost.TransactionCost</code>；分批卖出每笔记最低佣金</td>
+</tr>
+<tr>
+  <td>滑点</td>
+  <td>A 股 5bp 单边；港股 10bp 单边（成本敏感性另测 0.5×/1×/2×）</td>
+</tr>
+<tr>
+  <td>污染行</td>
+  <td>沿用 <code>engine._prepare_data</code> 的 <code>is_noisy</code> 过滤</td>
+</tr>
+<tr>
+  <td>停牌</td>
+  <td>无成交，持仓延续</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>已知偏差（必须随结论一起披露）</strong>：
+- <code>universe.py</code> 剔除退市/ST → 买跌类入场存在幸存者偏差，结论偏乐观。
+- 当前数据只有 OHLCV + amount + <code>turnover_rate</code>；逻辑出场只能用价格/量能代理。
+- A 股无交易所止损单，实盘为券商条件单轮询；回测按"挂单即时触发"建模，实盘触发延迟未计入（paper trading 阶段验证）。</p>
+
+<hr />
+
+<h2 id="3-语料entry-testbeds">3. 语料（entry testbeds）</h2>
+
+<p>出场只能在固定入场上评估。预注册两组机械入场，结论<strong>按 archetype 分别成立，不合并</strong>：</p>
+
+<ul>
+<li><strong>E1 趋势</strong>：<code>close &gt; MA20</code> 连续 3 日 ∧ <code>MA10 &gt; MA20</code> ∧ <code>close &gt; MA10</code>；次日开盘入场。</li>
+<li><strong>E2 均值回归</strong>：<code>patterns/second_lowest</code> 的"中深破位 2–10%"事件（结构关系已跨窗口稳健）；回踩日收盘触发，次日开盘入场。</li>
+<li>两组均用 A 股主板，剔除 ST/退市（偏差见 §2）。港股作为第二阶段，不在本次主检验内。</li>
+</ul>
+
+<hr />
+
+<h2 id="4-预注册假设">4. 预注册假设</h2>
+
+<p><strong>主假设（每个 archetype 各一条，共 2 条）</strong></p>
+
+<ul>
+<li><strong>H1-trend / H1-mr</strong>：在相同入场上，<strong>ATR 结构止损 + 棘轮（V1）</strong> 的 OOS 单笔期望 R 高于 <strong>固定百分比止损止盈（V0）</strong>，扣成本后成立。</li>
+</ul>
+
+<p><strong>次假设（探索性，单独标注，不用于"通过"判定）</strong></p>
+
+<ul>
+<li><strong>H2</strong>：分批止盈（V2）相对 V1 提升盈利因子、降低 MFE 回吐，且扣除成本后仍为正。</li>
+<li><strong>H3</strong>：逻辑代理出场（V3：放量不涨 / 换手分位耗尽）在趋势 archetype 上叠加于 V1 仍有增量期望。</li>
+<li><strong>H4（机制自检）</strong>：按 R 定仓 + ATR 止损下，单笔最大亏损 ≤ 1.5R 的交易占比 ≥ 95%（含跳空）。</li>
+</ul>
+
+<hr />
+
+<h2 id="5-预注册变体参数锁定">5. 预注册变体（参数锁定）</h2>
+
+<blockquote>
+  <p>一进场一套参数，<strong>禁止在看结果后网格搜索再挑最优</strong>。若做敏感性扫描，必须报告完整网格 + 选择偏差，且不得作为主结论。</p>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+  <th>变体</th>
+  <th>止损</th>
+  <th>目标</th>
+  <th>棘轮</th>
+  <th>分批</th>
+  <th>时间退出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>V0 现行基准</strong></td>
+  <td>固定 −5%</td>
+  <td>固定 +15%</td>
+  <td>无</td>
+  <td>无</td>
+  <td>无</td>
+</tr>
+<tr>
+  <td><strong>V1 主方案</strong></td>
+  <td><code>max(结构20日低点−0.5ATR, 2.5×ATR14)</code>；若距离 &gt; 3.5ATR 则<strong>不入场</strong></td>
+  <td>无固定目标</td>
+  <td>+1R 激活；<code>max(保本, peak_close − 2.5×ATR14)</code>，只上移</td>
+  <td>无</td>
+  <td>趋势无；均值回归 10 交易日</td>
+</tr>
+<tr>
+  <td><strong>V2 分批</strong></td>
+  <td>同 V1</td>
+  <td>无固定目标</td>
+  <td>同 V1</td>
+  <td>+2R 卖 1/3；余仓棘轮</td>
+  <td>同 V1</td>
+</tr>
+<tr>
+  <td><strong>V3 逻辑代理</strong></td>
+  <td>同 V1</td>
+  <td>无固定目标</td>
+  <td>同 V1</td>
+  <td>无</td>
+  <td>同 V1 + 放量不涨 / 换手分位耗尽</td>
+</tr>
+</tbody>
+</table>
+
+<p>口径说明：
+- <code>ATR14</code> = 14 日平均真实波幅（Wilder）。
+- <code>peak_close</code> 用收盘更新；触发用盘中 <code>low</code>。
+- 保本位在 +1R 达到后启用，且之后不再下移。
+- 单笔风险预算 = 权益 0.5%；单票名义仓位上限 20%（组合层细调另议）。
+- V0 的 ±5%/+15% 取自现有 <code>trend_following</code> DEFAULT，作为"现行做法"对照，不代表它是最优。</p>
+
+<hr />
+
+<h2 id="6-评估方法">6. 评估方法</h2>
+
+<ol>
+<li><strong>配对实验</strong>：V0–V3 使用<strong>完全相同</strong>的入场事件、日期、成本假设，只有出场不同。</li>
+<li><strong>R 口径</strong>：单笔实现盈亏 ÷ 入场时 R 金额；部分平仓合并计算。</li>
+<li><strong>Walk-forward</strong>：参数已锁定，不做拟合；按 6 个月滚动块报告 OOS，不设训练窗调参。</li>
+<li><strong>聚类统计</strong>：按 <code>symbol</code> 与 <code>(date, theme/cap bucket)</code> 聚类做 block bootstrap；同题材料同一天只算一个 bet。</li>
+<li><strong>报告指标</strong>（全部报告，不挑选）：平均 R、盈利因子、胜率、最大单笔亏损（R）、MAE/MFE 分布、最大回撤、换手、成本占毛利、持仓天数、退出原因分布。</li>
+<li><strong>绝对与相对并报</strong>：不只报"相对 V0 的超额"，也报绝对期望 R。</li>
+<li><strong>时间切分</strong>：至少 &lt;2022 / ≥2022 分段；逐年表全部列出。</li>
+<li><strong>多重比较</strong>：主假设 2 条按 Holm 校正；次假设只做探索性描述。</li>
+</ol>
+
+<hr />
+
+<h2 id="7-失败判据预先锁定任一触发即不通过">7. 失败判据（预先锁定，任一触发即不通过）</h2>
+
+<p>主假设判定：</p>
+
+<ul>
+<li><strong>通过</strong>需同时满足：OOS 平均 R 差 &gt; 0；block bootstrap 95% CI 下界 &gt; 0；≥70% 的 walk-forward 窗口方向为正；最大贡献年份/regime 占增量盈亏 ≤ 50%；扣成本成立。</li>
+<li><strong>失败</strong>：CI 含 0；或多数窗口符号翻转；或增量盈亏集中单一 regime；或样本不足。</li>
+<li><strong>不可判定</strong>：多数测试窗口 n &lt; 30。<strong>不可判定 ≠ 通过</strong>。</li>
+<li><strong>机制否决</strong>（独立于收益）：H4 不满足（单笔亏损 &gt; 1.5R 占比 &gt; 5%）→ 该变体不得上 paper。</li>
+</ul>
+
+<hr />
+
+<h2 id="8-待签字项看结果前必须确认">8. 待签字项（看结果前必须确认）</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th>项</th>
+  <th>提案</th>
+  <th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td>时间尺度</td>
+  <td>日线，持有数日～数周；不混 5m</td>
+  <td>待确认</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>验证市场</td>
+  <td>先 A 股；港股第二阶段</td>
+  <td>待确认</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>语料</td>
+  <td>E1 趋势 + E2 中深破位</td>
+  <td>待确认</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>ATR / k</td>
+  <td>ATR14；k_stop=2.5；上限 3.5ATR 否则不入场</td>
+  <td>待确认</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>棘轮</td>
+  <td>+1R 激活；2.5ATR 跟踪；保本不下移</td>
+  <td>待确认</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>分批</td>
+  <td>仅趋势 +2R 卖 1/3</td>
+  <td>待确认</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td>时间退出</td>
+  <td>均值回归 10 交易日；趋势无</td>
+  <td>待确认</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td>风险预算</td>
+  <td>单笔 0.5% 权益；单票上限 20%</td>
+  <td>待确认</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td>滑点</td>
+  <td>A 5bp / HK 10bp 单边</td>
+  <td>待确认</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="附录-a公用层审查与处置">附录 A：公用层审查与处置</h2>
+
+<p>审查范围：<code>backtest/</code>、<code>portfolio/</code>、<code>risk/</code>、<code>cost/</code>、<code>strategy/base.py</code>、<code>strategy/indicators.py</code>。
+测试：修复后全量 <code>337 passed, 1 skipped</code>。</p>
+
+<h3 id="a1-本轮已修复最小改动">A.1 本轮已修复（最小改动）</h3>
+
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>问题</th>
+  <th>位置</th>
+  <th>处置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>E1</td>
+  <td>卖出按收盘市值入账、不吃滑点</td>
+  <td><code>engine.py</code> SELL 分支</td>
+  <td>改为 <code>shares × 执行价</code></td>
+</tr>
+<tr>
+  <td>E2</td>
+  <td>初始持仓不扣现金，首日收益虚高</td>
+  <td><code>engine.py</code> 初始化</td>
+  <td>建仓成本从现金扣除</td>
+</tr>
+<tr>
+  <td>E3</td>
+  <td>PositionManager 从不按市价 mark</td>
+  <td><code>engine.py</code> <code>_process_day</code></td>
+  <td>每日同步 <code>pm.update_prices</code></td>
+</tr>
+<tr>
+  <td>E4</td>
+  <td><code>start_new_day()</code> 从未调用，单日亏损变累计</td>
+  <td><code>engine.py</code></td>
+  <td>每 bar 开始设置单日基准</td>
+</tr>
+<tr>
+  <td>E5</td>
+  <td>A股允许零股；最小仓位会顶破上限；强制 100 股</td>
+  <td><code>position_manager.py</code></td>
+  <td>整手、下限改为"不建仓"过滤、0 股跳过</td>
+</tr>
+<tr>
+  <td>E6</td>
+  <td>费用方向大小写敏感，<code>'sell'</code> 漏印花税</td>
+  <td><code>cost/fees.py</code></td>
+  <td>统一 <code>.upper()</code></td>
+</tr>
+<tr>
+  <td>E7</td>
+  <td>年化线性、Sortino 分子未年化</td>
+  <td><code>engine.py</code> / <code>performance.py</code></td>
+  <td>复利年化、Sortino × √252</td>
+</tr>
+</tbody>
+</table>
+
+<blockquote>
+  <p>注意：E1–E5 会改变历史回测结果。此前基于旧引擎的结论（包括 <code>patterns/</code> 的输出）在对比前需重跑。</p>
+</blockquote>
+
+<h3 id="a2-前置待修不修则-2-执行假设不成立出场实验不可跑">A.2 前置待修（不修则 §2 执行假设不成立，出场实验不可跑）</h3>
+
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>问题</th>
+  <th>位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>X1</td>
+  <td>信号当根收盘成交，无 next-bar</td>
+  <td><code>engine.py:_process_day/_execute_signal</code></td>
+</tr>
+<tr>
+  <td>X2</td>
+  <td>只支持全平；无止损/止盈/移动止损/部分平仓订单</td>
+  <td><code>engine.py</code> SELL 路径、<code>pm.close_position</code></td>
+</tr>
+<tr>
+  <td>X3</td>
+  <td>无 T+1、涨跌停不可成交、跳空按开盘</td>
+  <td><code>engine.py</code></td>
+</tr>
+<tr>
+  <td>X4</td>
+  <td>FIFO 配对忽略股数、丢弃未匹配卖单</td>
+  <td><code>backtest/_fifo.py</code></td>
+</tr>
+<tr>
+  <td>X5</td>
+  <td><code>indicators.ATR</code> 是 SMA 而非 Wilder，与预注册 <code>ATR14</code> 口径不符</td>
+  <td><code>strategy/indicators.py:170</code></td>
+</tr>
+<tr>
+  <td>X6</td>
+  <td><code>dividend_received</code> 从未赋值，红利税恒为 0</td>
+  <td><code>strategy/base.py</code> / <code>engine.py</code></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="a3-可并行影响行为但可用配置隔离">A.3 可并行（影响行为，但可用配置隔离）</h3>
+
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>问题</th>
+  <th>位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Y1</td>
+  <td>熔断用 <code>datetime.now()</code>；<code>can_open_new_position</code> 未接入；HIGH 不拦截买入</td>
+  <td><code>risk_manager.py</code> / <code>engine.py:375</code></td>
+</tr>
+<tr>
+  <td>Y2</td>
+  <td>无行业信息，全部 'Unknown'，行业上限退化为总仓位上限</td>
+  <td><code>engine.py:396</code> / <code>pm</code></td>
+</tr>
+<tr>
+  <td>Y3</td>
+  <td>RiskManager 与 PositionManager 两套资金/现金真相源，未计佣金</td>
+  <td><code>risk_manager.py</code> / <code>pm</code></td>
+</tr>
+<tr>
+  <td>Y4</td>
+  <td>初始持仓 <code>entry_time=now()</code>；引擎报告与 <code>PerformanceAnalyzer</code> 基准不一致</td>
+  <td><code>engine.py</code> / <code>performance.py</code></td>
+</tr>
+<tr>
+  <td>Y5</td>
+  <td>HK 佣金 HKD 当 CNY；股息分档依赖 YAML 顺序</td>
+  <td><code>cost/fees.py</code></td>
+</tr>
+<tr>
+  <td>Y6</td>
+  <td>RSI/KDJ/BOLL 口径与通用实现有偏差</td>
+  <td><code>strategy/indicators.py</code></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="a4-本轮忽略记录不在本项目修复">A.4 本轮忽略（记录，不在本项目修复）</h3>
+
+<ul>
+<li>加仓路径被 <code>pm.can_open_position</code> 拒绝而不可达；<code>Strategy.open_position</code> 覆盖而非加仓。</li>
+<li>美股成本模型返回 0。</li>
+<li>数据无 <code>symbol</code> 列时持仓不做 mark。</li>
+</ul>
+
+<h3 id="a5-出场实验的最小前置清单">A.5 出场实验的最小前置清单</h3>
+
+<p>跑 V0–V3 之前必须完成 <strong>X1–X5</strong>，并补四条不变量测试：</p>
+
+<ol>
+<li>买卖滑点对称且 <code>Trade.amount == shares × price</code>；</li>
+<li>信号 D 产生 → 成交在 D+1；</li>
+<li>部分卖出后现金、成本、R 三者守恒；</li>
+<li>A 股 T+1 与涨跌停不可成交。</li>
+</ol>
+
+<hr />
+
+<h2 id="变更记录">变更记录</h2>
+
+<ul>
+<li><strong>2026-11-03</strong>：初版草案。未运行任何回测。参数待签字。</li>
+<li><strong>2026-11-03</strong>：新增附录 A（审查与处置）；完成 E1–E7 最小修复，全量测试 337 passed。</li>
+</ul>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <a class="quant-pager__prev" href="09-strategy-principles.html">&larr; 上一页</a>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <a class="quant-pager__next" href="11-adr.html">下一页 &rarr;</a>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>

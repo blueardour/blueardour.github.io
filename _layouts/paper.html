@@ -33,16 +33,56 @@
     <nav class="paper-toc-mobile__nav" aria-label="Table of contents"></nav>
   </details>
 
-  <div class="paper-grid">
-    <article class="paper-content">
-      {% include paper-meta.html %}
-      {{ content }}
-    </article>
-
+  <div class="paper-layout">
     <aside class="paper-toc" aria-label="Table of contents">
       <div class="paper-toc__inner">
         <p class="paper-toc__title">Contents</p>
         <nav class="paper-toc__nav"></nav>
+      </div>
+    </aside>
+
+    <article class="paper-content">
+      {% include paper-meta.html %}
+      {{ content }}
+
+      <section class="paper-endmatter" aria-label="Reactions and comments">
+        <div class="paper-endmatter__actions">
+          <button class="paper-like" type="button" data-like-button data-comments-open aria-controls="paper-comments" aria-expanded="true"{% if page.comments.demo %} data-demo-like="true"{% endif %}>
+            <span class="paper-like__icon" aria-hidden="true">👍</span>
+            <span>Like</span>
+            <span class="paper-like__count" data-reaction-count>—</span>
+          </button>
+          <button class="paper-comment-cta" type="button" data-comments-open aria-controls="paper-comments" aria-expanded="true">
+            <span aria-hidden="true">💬</span>
+            <span>Comments</span>
+            <span class="paper-comment-cta__count" data-comment-count>—</span>
+          </button>
+        </div>
+        <div class="paper-comment-bar">
+          <p class="paper-comment-bar__hint">Join the discussion</p>
+          <button class="paper-comment-bar__button" type="button" data-comments-open aria-controls="paper-comments" aria-expanded="true">
+            Write a comment…
+          </button>
+        </div>
+        <p class="paper-endmatter__note">
+          Powered by GitHub Discussions.
+          {% if page.comments.demo %}<span>Demo mode — comments are not live yet.</span>{% endif %}
+        </p>
+      </section>
+    </article>
+
+    <aside class="paper-comments" id="paper-comments" aria-label="Comments">
+      <div class="paper-comments__panel">
+        <header class="paper-comments__header">
+          <div>
+            <p class="paper-comments__kicker">Discussion</p>
+            <h2 class="paper-comments__title">Comments <span class="paper-comments__count" data-comment-count>—</span></h2>
+          </div>
+          <button class="paper-comments__toggle" type="button" data-comments-toggle aria-expanded="true" aria-controls="paper-comments-body">Collapse</button>
+        </header>
+        <div class="paper-comments__body" id="paper-comments-body">
+          {% include paper-comments.html %}
+        </div>
       </div>
     </aside>
   </div>

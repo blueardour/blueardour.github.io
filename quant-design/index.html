@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quant Design Notes</title>
+<meta name="description" content="A股/港股量化系统的架构、契约、风格与迁移路线。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>Quant Design Notes</h1>
+    <p class="quant-lead">A股/港股量化系统的架构、契约、风格与迁移路线。</p>
+    <p>本系列把 <code>quant</code> 仓库的架构、规范与迁移文档拆成可顺序阅读的页面。</p>
+<ul>
+  <li>阅读顺序：项目入口 → 文档索引 → 架构 → 规范 → 风格 → 术语 → 迁移 → 出场契约 → 策略原则 → 预注册 → ADR → 出场实验进展。</li>
+  <li><strong>最新状态：</strong>出场模拟器 bug-fix pass 完成，测试 356 passed / 1 skipped；演示样本内结果见最后一页，<em>不是策略验证通过</em>。</li>
+  <li>每页底部有 <strong>上一页 / 目录 / 下一页</strong>。</li>
+  <li>直接双击 <code>index.html</code> 即可阅读，不需要 Jekyll 或本地服务器。</li>
+  <li>权威源仍是 <code>quant</code> 仓库的 <code>docs/</code>；本页是发布副本，冲突时以仓库文档为准。</li>
+</ul>
+<ul class="quant-index-list">
+  <li><a href="01-overview.html">01 · 项目入口</a><p>项目简介、快速开始与文档入口。</p></li>
+  <li><a href="02-doc-index.html">02 · 文档索引与权威规则</a><p>阅读顺序、权威归属、冲突裁决与 front matter 规则。</p></li>
+  <li><a href="03-architecture.html">03 · 系统架构</a><p>分层、包职责、依赖矩阵、运行时拓扑与 NautilusTrader 映射。</p></li>
+  <li><a href="04-design-spec.html">04 · 设计规范</a><p>单一真相源、核心契约、管线、执行语义、配置/时间/金额与 DoD。</p></li>
+  <li><a href="05-code-style.html">05 · 代码风格</a><p>Python 基线、类型、命名、导入、日志、异常与测试规则。</p></li>
+  <li><a href="06-glossary.html">06 · 术语表</a><p>Intent/Order/Fill/Account/ExitPlan/R/PIT 等中英术语。</p></li>
+  <li><a href="07-roadmap.html">07 · 迁移路线与已知偏差</a><p>当前态与目标态的差距、迁移阶段与 live readiness 清单。</p></li>
+  <li><a href="08-exit-contract.html">08 · 出场契约</a><p>ExitPlan、棘轮不变量、分批、时间退出与必需测试。</p></li>
+  <li><a href="09-strategy-principles.html">09 · 策略设计原则</a><p>四条策略原则、操作化解释与验证门槛。</p></li>
+  <li><a href="10-exit-preregistration.html">10 · 出场策略预注册</a><p>出场实验的范围、假设、变体、评估方法与失败判据。</p></li>
+  <li><a href="11-adr.html">11 · 架构决策记录</a><p>ADR 流程与 0001–0004 四个初始决策。</p></li>
+  <li><a href="12-exit-results.html">12 · 出场实验进展</a><p>2026-11-04 出场敏感性实验的样本内结果、配对差异、限制与下一步。</p></li>
+</ul>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <span></span>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <a class="quant-pager__next" href="01-overview.html">下一页 &rarr;</a>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · 设计规范 — Quant Design Notes</title>
+<meta name="description" content="单一真相源、核心契约、管线、执行语义、配置/时间/金额与 DoD。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>04 · 设计规范</h1>
+    <p class="quant-lead">单一真相源、核心契约、管线、执行语义、配置/时间/金额与 DoD。</p>
+    <p>本文是系统的<strong>规范宪法</strong>。使用 <strong>必须（MUST）</strong>、<strong>应该（SHOULD）</strong>、<strong>可以（MAY）</strong>
+表达约束强度。结构描述见 <a href="03-architecture.html"><code>architecture.md</code></a>；本文定义语义、契约、
+所有权和执行规则。</p>
+
+<h2 id="1-状态与修改">1. 状态与修改</h2>
+
+<ul>
+<li>本文是 normative；任何违反本文的实现都是缺陷。</li>
+<li>修改本文必须走 <a href="11-adr.html">ADR 流程</a>，除非只是修正错别字/链接。</li>
+<li>已接受的 ADR 优先于本文；本文必须链接对应 ADR。</li>
+<li>本文与代码冲突时，按 <a href="02-doc-index.html#冲突裁决"><code>README.md</code></a> 的裁决规则处理。</li>
+</ul>
+
+<h2 id="2-不变量">2. 不变量</h2>
+
+<p>以下不变量是硬约束，任何一层都不得违反：</p>
+
+<ol>
+<li><strong>账本唯一</strong>：现金、持仓、成本、可卖数量、已实现盈亏只能由
+<code>execution/AccountLedger</code> 写入。</li>
+<li><strong>策略纯 alpha</strong>：策略不得持有现金/持仓账本，不得直接发订单或改成交。</li>
+<li><strong>单一所有者</strong>：每个可变数据体只有一个 writer；其他层只读快照。</li>
+<li><strong>单向依赖</strong>：依赖只能从编排/适配器指向 <code>domain/</code>，不能反向或横向。</li>
+<li><strong>禁止同 bar 收盘成交</strong>：D 日收盘决策最早 D+1 开盘成交。</li>
+<li><strong>费用唯一源</strong>：所有费用/税计算必须走 <code>cost.TransactionCost</code>；费率来自
+<code>config/fee_config.yaml</code>。</li>
+<li><strong>时间注入</strong>：所有业务时间来自 <code>Clock</code>；除 live 适配器边界外禁止
+<code>datetime.now()</code>。</li>
+<li><strong>配置显式</strong>：阈值、路径、费率、token 不得硬编码；secret 不得进入 tracked YAML。</li>
+<li><strong>确定性</strong>：回测不得有未播种随机、网络 I/O 或隐藏全局状态。</li>
+<li><strong>文档同步</strong>：契约/行为变化必须在同一改动中更新本文、ADR 和测试。</li>
+</ol>
+
+<h2 id="3-分层与依赖">3. 分层与依赖</h2>
+
+<p>完整矩阵见 <a href="03-architecture.html#7-依赖矩阵"><code>architecture.md</code></a>。摘要：</p>
+
+<ul>
+<li><code>domain/</code>：纯值对象/端口，无 I/O、无 pandas。</li>
+<li><code>strategy/</code>：只依赖 <code>domain/</code> 和自己的 indicators/factors。</li>
+<li><code>portfolio/</code>、<code>risk/</code>：只依赖 <code>domain/</code>，是策略/决策，不是状态存储。</li>
+<li><code>execution/</code>：依赖 <code>domain/</code> + <code>cost/</code>；拥有订单和账本。</li>
+<li><code>datafeeder/</code>：实现 <code>DataPortal</code>；不依赖策略/执行。</li>
+<li><code>backtest/</code>、<code>live/</code>：composition roots。</li>
+<li><code>visualization/</code>：只读快照。</li>
+<li><code>patterns/</code>：研究沙箱，禁止被生产路径 import。</li>
+</ul>
+
+<h2 id="4-单一真相源">4. 单一真相源</h2>
+
+<p>每个可变数据体只有一个权威 writer。派生视图可以有很多，但必须只读、可重建。</p>
+
+<table>
+<thead>
+<tr>
+  <th>数据体</th>
+  <th>唯一 owner / writer</th>
+  <th>读者</th>
+  <th>禁止</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Instrument：lot/tick/currency/price limit/calendar</td>
+  <td><code>datafeeder</code></td>
+  <td><code>execution</code>、<code>strategy</code>、<code>risk</code></td>
+  <td>策略里写死市场规则</td>
+</tr>
+<tr>
+  <td>Bars/quotes/provenance/quality flags</td>
+  <td><code>datafeeder</code></td>
+  <td><code>DataPortal</code> 消费者</td>
+  <td>策略直接抓数据</td>
+</tr>
+<tr>
+  <td>DataPortal 只读视图</td>
+  <td><code>datafeeder.portal</code></td>
+  <td>strategy/backtest/live/visualization</td>
+  <td>消费者修改</td>
+</tr>
+<tr>
+  <td>Config 与 secrets</td>
+  <td><code>config/</code> loader</td>
+  <td>所有层通过显式 config 对象</td>
+  <td>硬编码阈值；secret 进 tracked YAML</td>
+</tr>
+<tr>
+  <td>费用/税公式</td>
+  <td><code>cost.TransactionCost</code></td>
+  <td>execution/backtest</td>
+  <td>重复费用数学</td>
+</tr>
+<tr>
+  <td>Alpha/Intent/ExitPlan</td>
+  <td><code>strategy/</code></td>
+  <td>execution/risk/sizing</td>
+  <td>策略改现金/持仓</td>
+</tr>
+<tr>
+  <td>Sizing policy</td>
+  <td><code>portfolio/</code></td>
+  <td>execution/backtest</td>
+  <td><code>portfolio/</code> 存持仓</td>
+</tr>
+<tr>
+  <td>Risk limits/decisions</td>
+  <td><code>risk/</code></td>
+  <td>execution/backtest</td>
+  <td><code>risk/</code> 拥有现金/持仓</td>
+</tr>
+<tr>
+  <td>Order 生命周期</td>
+  <td><code>execution/OrderManager</code></td>
+  <td>strategy 只读、visualization</td>
+  <td>策略/engine 直接改订单状态</td>
+</tr>
+<tr>
+  <td>Fills</td>
+  <td><code>execution/BrokerPort</code></td>
+  <td>ledger/strategy/analytics</td>
+  <td>伪造 fill</td>
+</tr>
+<tr>
+  <td>现金/持仓/成本/可卖数量/已实现 PnL/FX</td>
+  <td><code>execution/AccountLedger</code></td>
+  <td>所有层通过 <code>AccountSnapshot</code></td>
+  <td>engine/strategy/PM/RM 各存一份</td>
+</tr>
+<tr>
+  <td>Account snapshot</td>
+  <td><code>execution/AccountLedger</code></td>
+  <td>strategy/risk/visualization</td>
+  <td>暴露可变快照</td>
+</tr>
+<tr>
+  <td>绩效指标</td>
+  <td><code>backtest/performance</code> / <code>reporting</code></td>
+  <td>报表/可视化</td>
+  <td>把指标当账本真相</td>
+</tr>
+<tr>
+  <td>策略私有状态</td>
+  <td><code>strategy/</code></td>
+  <td>无</td>
+  <td>策略对象跨策略共享</td>
+</tr>
+<tr>
+  <td>可视化状态</td>
+  <td><code>visualization/</code></td>
+  <td>UI</td>
+  <td>回写执行/策略</td>
+</tr>
+</tbody>
+</table>
+
+<p>规则：</p>
+
+<ul>
+<li><strong>一个 writer</strong>：表中 owner 是唯一写入者；其他层只能读快照或发指令。</li>
+<li><strong>派生不是重复</strong>：多个报表/快照是允许的，但必须从权威状态计算，不能独立维护。</li>
+<li><strong>适配器不是重复</strong>：多个数据源/broker 实现同一个端口，是兼容性，不是重复真相。</li>
+</ul>
+
+<h2 id="5-核心契约">5. 核心契约</h2>
+
+<p>契约定义在 <code>domain/</code>，字段和语义如下。具体 Python 类型在实现时确定；这里锁定概念。</p>
+
+<h3 id="51-instrument">5.1 <code>Instrument</code></h3>
+
+<p>必须包含：<code>symbol</code>、<code>market</code>、<code>currency</code>、<code>lot_size</code>、<code>tick_size</code>、<code>price_limit_rule</code>、
+<code>trading_calendar</code>、<code>board</code>（主板/创业板/科创板/ST 等，若可得）。</p>
+
+<p>用途：执行层决定 lot/tick/涨跌停；策略不得写死这些规则。</p>
+
+<h3 id="52-dataportal">5.2 <code>DataPortal</code></h3>
+
+<p>只读行情访问。必须支持：</p>
+
+<ul>
+<li><code>history(symbols, start, end, fields)</code>：PIT 历史 bars；</li>
+<li><code>latest(symbols, as_of)</code>：截至 as_of 的最新 bar/quote；</li>
+<li><code>calendar(market)</code>：交易日；</li>
+<li><code>instrument(symbol)</code>：静态元数据。</li>
+</ul>
+
+<p>必须明确复权口径（raw/adjusted）和 bar 时间戳语义（bar open vs bar close）。禁止在
+策略内部直接访问数据库/网络。</p>
+
+<h3 id="53-strategy">5.3 <code>Strategy</code></h3>
+
+<div class="codehilite">
+<pre><span></span><code>on_start(ctx)
+on_bar(ctx) -&gt; Iterable[Intent]
+on_fill(fill)
+on_end()
+</code></pre>
+</div>
+
+<ul>
+<li>必须只读 <code>StrategyContext</code>；不得持有现金/持仓账本。</li>
+<li>必须无副作用地生成 <code>Intent</code>；不得直接调用 broker/数据源。</li>
+<li>策略私有状态可以保存在策略对象内，但不得跨策略共享。</li>
+<li>必须确定性；不得使用未注入的时间/随机数。</li>
+</ul>
+
+<h3 id="54-strategycontext">5.4 <code>StrategyContext</code></h3>
+
+<p>只读视图，至少包含：<code>now</code>、<code>account</code>（<code>AccountSnapshot</code>）、<code>positions</code>、
+<code>open_orders</code>、<code>data</code>（<code>DataPortal</code> 只读接口）、<code>params</code>。</p>
+
+<p>不得暴露可变 <code>Position</code> 对象或 engine 内部字典。</p>
+
+<h3 id="55-intent">5.5 <code>Intent</code></h3>
+
+<p>策略意图，不是可执行订单。字段：</p>
+
+<ul>
+<li><code>symbol</code>、<code>side</code>（BUY/SELL）；</li>
+<li><code>qty</code> 或 <code>target_position</code>（二选一）；</li>
+<li><code>order_type</code>：MARKET/LIMIT/STOP/STOP_LIMIT；</li>
+<li><code>limit_price</code>、<code>stop_price</code>；</li>
+<li><code>tif</code>（DAY/GTC/IOC，按需要）；</li>
+<li><code>exit_plan</code>（可选，见 5.6）；</li>
+<li><code>reason</code>、<code>client_id</code>、<code>tag</code>。</li>
+</ul>
+
+<p><code>Intent</code> 必须能被风控/定仓层拒绝或调整；它不是最终订单。</p>
+
+<h3 id="56-exitplan">5.6 <code>ExitPlan</code></h3>
+
+<p>入场时声明，至少包含：</p>
+
+<ul>
+<li><code>initial_stop</code>：初始止损价；</li>
+<li><code>risk_per_share</code> = <code>entry_fill - initial_stop</code>（R）；</li>
+<li><code>targets</code> / <code>partials</code>：目标价与卖出比例；</li>
+<li><code>trail</code>：激活 R、ATR 倍数或结构规则（策略计算，执行层只认 stop price）；</li>
+<li><code>time_exit_days</code>：可选时间退出；</li>
+<li><code>breakeven_after_r</code>：可选保本激活。</li>
+</ul>
+
+<p>不变量：</p>
+
+<ul>
+<li><code>stop_price</code> 只能上移，不能下移；</li>
+<li>R 在入场时锁定，之后不变；</li>
+<li>部分卖出只减少 <code>shares</code>，不改变 R 分母；</li>
+<li>多头 <code>initial_stop &lt; entry_fill</code>。</li>
+</ul>
+
+<p>执行层<strong>不认识 ATR</strong>；策略把 ATR 规则换算成具体 <code>stop_price</code>，执行层只执行订单。</p>
+
+<h3 id="57-order">5.7 <code>Order</code></h3>
+
+<p>执行层接受的指令。必须包含：<code>order_id</code>、<code>symbol</code>、<code>side</code>、<code>order_type</code>、<code>qty</code>、
+<code>limit_price</code>/<code>stop_price</code>、<code>status</code>、<code>filled_qty</code>、<code>avg_fill_price</code>、<code>created_at</code>、
+<code>updated_at</code>、<code>reject_reason</code>。</p>
+
+<p>订单状态机至少：<code>NEW → SUBMITTED → PARTIALLY_FILLED → FILLED</code>，以及 <code>REJECTED</code>、
+<code>CANCELLED</code>、<code>EXPIRED</code>。状态只能由 <code>execution/OrderManager</code> 修改。</p>
+
+<h3 id="58-fill">5.8 <code>Fill</code></h3>
+
+<p>成交事实。必须包含：<code>fill_id</code>、<code>order_id</code>、<code>symbol</code>、<code>side</code>、<code>price</code>、<code>qty</code>、
+<code>fees</code>（commission/stamp/other）、<code>timestamp</code>、<code>liquidity_flag</code>。</p>
+
+<p><code>Fill</code> 由 broker 产生，由 ledger 应用；策略只能读。</p>
+
+<h3 id="59-accountsnapshot">5.9 <code>AccountSnapshot</code></h3>
+
+<p>不可变只读快照。必须包含：<code>cash_total</code>、<code>cash_available</code>、<code>positions</code>（每项含
+<code>symbol</code>、<code>qty</code>、<code>sellable_qty</code>、<code>avg_cost</code>、<code>realized_pnl</code>）、<code>equity</code>、
+<code>unrealized_pnl</code>、<code>currency</code>、<code>as_of</code>。</p>
+
+<p><code>Position</code> 是 snapshot 的条目，不是策略共享的可变对象。</p>
+
+<h3 id="510-brokerport">5.10 <code>BrokerPort</code></h3>
+
+<div class="codehilite">
+<pre><span></span><code>submit(order) -&gt; order_id
+cancel(order_id)
+query(order_id) / open_orders()
+</code></pre>
+</div>
+
+<p>由 <code>SimulatedBroker</code> 和 <code>LiveBroker</code> 实现。只有 broker/ledger 能改账户；策略和 engine
+不得直接改。</p>
+
+<h3 id="511-riskpolicy">5.11 <code>RiskPolicy</code></h3>
+
+<div class="codehilite">
+<pre><span></span><code>evaluate(intent, snapshot) -&gt; allow | reject(reason) | resize(qty)
+</code></pre>
+</div>
+
+<p>必须是纯决策，不修改账户。风控状态（熔断、连续亏损计数）由 <code>risk/</code> 拥有，但不得
+复制现金/持仓账本。</p>
+
+<h3 id="512-clock">5.12 <code>Clock</code></h3>
+
+<p><code>SimClock</code>（回测）/ <code>RealClock</code>（paper/live）。所有业务时间必须来自 <code>Clock</code>；
+<code>datetime.now()</code> 只允许出现在 live 适配器边界。</p>
+
+<h2 id="6-管线契约">6. 管线契约</h2>
+
+<pre><code>DataPortal + Clock
+  -&gt; Runner -&gt; Strategy.on_bar(ctx) -&gt; [Intent]
+  -&gt; RiskPolicy.evaluate -&gt; SizingPolicy
+  -&gt; ExecutionEngine/OrderManager -&gt; Broker(Sim/Live) -&gt; [Fill]
+  -&gt; AccountLedger.apply(fill) -&gt; AccountSnapshot
+  -&gt; Strategy.on_fill + observability + visualization
+</code></pre>
+
+<ul>
+<li><strong>backtest</strong> = historical <code>DataPortal</code> + <code>SimClock</code> + <code>SimulatedBroker</code>。</li>
+<li><strong>paper</strong> = live <code>DataPortal</code> + <code>RealClock</code> + <code>SimulatedBroker</code>。</li>
+<li><strong>live</strong> = live <code>DataPortal</code> + <code>RealClock</code> + <code>LiveBroker</code>。</li>
+<li><strong>visualization</strong> = 订阅 <code>Fill</code>/<code>AccountSnapshot</code>/<code>Order</code> 事件，只读。</li>
+</ul>
+
+<p>四者必须共用 <code>Strategy</code>、<code>SizingPolicy</code>、<code>RiskPolicy</code>、<code>AccountLedger</code>。只替换
+数据/时钟/broker 适配器。不得为 live 另写一套策略/账本逻辑。</p>
+
+<h2 id="7-执行语义">7. 执行语义</h2>
+
+<table>
+<thead>
+<tr>
+  <th>维度</th>
+  <th>规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>决策时点</td>
+  <td>收盘 D 产生意图，最早 D+1 开盘执行；禁止同 bar 收盘成交</td>
+</tr>
+<tr>
+  <td>订单类型</td>
+  <td>MARKET/LIMIT/STOP/STOP_LIMIT；止盈/移动止损由策略换算成 STOP 或条件单；执行层不认识 ATR</td>
+</tr>
+<tr>
+  <td>盘中触发</td>
+  <td>卖出止损：<code>low &lt;= stop</code> → 成交价 <code>min(open, stop)</code>；止盈：<code>high &gt;= target</code> → <code>max(open, target)</code>；跳空按开盘</td>
+</tr>
+<tr>
+  <td>同日双触发</td>
+  <td>同一 bar 同时触止损和止盈时，默认<strong>止损优先</strong>（保守）；必须记录 tie-break 规则</td>
+</tr>
+<tr>
+  <td>A 股 T+1</td>
+  <td>D 日买入的 shares 在 D+1 才可卖；ledger 维护 <code>sellable_qty</code></td>
+</tr>
+<tr>
+  <td>涨跌停</td>
+  <td>开盘即封板且方向不利 → 不成交；顺延/过期策略必须显式；连续 N bar 未成交 → <code>forced_exit</code> 并打标</td>
+</tr>
+<tr>
+  <td>停牌</td>
+  <td>无成交；订单保留或过期按显式策略；不得静默跳过</td>
+</tr>
+<tr>
+  <td>lot/tick</td>
+  <td>使用 <code>Instrument</code>；A 股 100 股整手；港股 board lot；价格按 tick 舍入</td>
+</tr>
+<tr>
+  <td>费用</td>
+  <td>每笔 fill 走 <code>cost.TransactionCost</code>；最低佣金、卖出印花税、港股印花税取整；费用明细写入 <code>Fill</code></td>
+</tr>
+<tr>
+  <td>滑点</td>
+  <td>显式模型/配置，不藏在信号价里；回测默认值必须在报告中披露</td>
+</tr>
+<tr>
+  <td>部分成交</td>
+  <td>回测用确定性 participation/volume cap；live 用真实 broker fill</td>
+</tr>
+<tr>
+  <td>部分退出</td>
+  <td><code>Intent.qty</code> 或 <code>ExitPlan.partials</code>；R 分母不变；每笔费用独立</td>
+</tr>
+<tr>
+  <td>企业行为</td>
+  <td>执行用可交易 raw price；分析可用 adjusted；复权因子必须 PIT，禁止 look-ahead</td>
+</tr>
+<tr>
+  <td>分红/红利税</td>
+  <td>ledger 记录现金和税基；持有期决定税率；未实现则必须显式声明不支持</td>
+</tr>
+<tr>
+  <td>拒单</td>
+  <td>拒单是显式记录（reason），不是静默 <code>return</code></td>
+</tr>
+<tr>
+  <td>确定性</td>
+  <td>回测无 <code>datetime.now()</code>、无未播种随机、事件循环内无网络</td>
+</tr>
+<tr>
+  <td>污染数据</td>
+  <td>质量 flag 是策略输入；不可交易 bar 必须标记/审计，不能无记录丢弃</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="8-策略契约">8. 策略契约</h2>
+
+<ul>
+<li>策略是<strong>纯 alpha</strong>：只读 <code>StrategyContext</code>，只发 <code>Intent</code>。</li>
+<li>策略不得 import <code>backtest/</code>、<code>execution/</code>、<code>portfolio/</code>、<code>risk/</code>、<code>datafeeder/</code>；
+只依赖 <code>domain/</code>、自身 indicators/factors、<code>config/</code>。</li>
+<li>策略不得持有现金/持仓账本，不得修改 <code>AccountSnapshot</code>。</li>
+<li>策略必须确定性；时间/随机数通过 context 注入。</li>
+<li>策略必须在入场时声明 <code>ExitPlan</code>；出场更新通过 <code>Intent</code> 表达，不能直接改 <code>Position</code>。</li>
+<li>策略可以有自己的参数和私有状态；不得跨策略共享可变对象。</li>
+</ul>
+
+<h2 id="9-组合与风险契约">9. 组合与风险契约</h2>
+
+<ul>
+<li><code>portfolio/SizingPolicy</code>：把 <code>Intent</code> 转成目标数量/权重；纯函数/纯策略；不存持仓。</li>
+<li><code>risk/RiskPolicy</code>：检查单票/行业/总仓位、熔断、连续亏损、流动性等；返回
+allow/reject/resize；不修改账本。</li>
+<li>风险状态（熔断计数、当日基准）由 <code>risk/</code> 拥有；现金/持仓来自 <code>AccountSnapshot</code>。</li>
+<li>不得出现 engine/PM/RM 各存一份资本或现金的情况。</li>
+</ul>
+
+<h2 id="10-配置时间与金额">10. 配置、时间与金额</h2>
+
+<h3 id="配置">配置</h3>
+
+<ul>
+<li>所有 tunable 必须在 <code>config/*.yaml</code>，通过单一 loader 读取。</li>
+<li>优先级：run override &gt; 环境变量（secrets/运行时）&gt; YAML &gt; 代码默认值。</li>
+<li>Secret 只在 <code>config/tokens.yaml</code> 或环境变量；不得进入 tracked <code>settings.yaml</code>。</li>
+<li>新 key 必须有 owner、unit、default、allowed range。</li>
+<li>YAML 百分比字段用百分点（<code>20.0</code> = 20%），领域字段用比率（<code>0.20</code>）；后缀必须区分
+<code>_pct</code> 与 <code>_ratio</code>。</li>
+</ul>
+
+<h3 id="时间">时间</h3>
+
+<ul>
+<li>内部统一 timezone-aware UTC；交易所规则用 <code>Asia/Shanghai</code> / <code>Asia/Hong_Kong</code>。</li>
+<li>Bar 时间戳语义必须明确（bar open 或 bar close），全系统一致。</li>
+<li>业务时间只来自 <code>Clock</code>；<code>datetime.now()</code> 只在 live 适配器边界允许。</li>
+<li>交易日是 date，不是任意 datetime。</li>
+</ul>
+
+<h3 id="金额">金额</h3>
+
+<ul>
+<li>账本、现金、费用、已实现 PnL 用 <code>Decimal</code> + 显式币种。</li>
+<li>指标/研究/分析可用 float；转换边界必须记录。</li>
+<li>CNY/HKD 不得隐式相加；换汇要记录 rate/source/timestamp。</li>
+<li>价格按 tick、数量按 lot、金额按交易所规则舍入。</li>
+<li>年化口径（252 交易日）、无风险利率来源、收益口径必须在一处定义。</li>
+</ul>
+
+<h2 id="11-观测持久化与审计">11. 观测、持久化与审计</h2>
+
+<ul>
+<li>订单/成交/账本快照必须可持久化/回放；回测确定性 ID，live 用 UUID。</li>
+<li>日志必须结构化，包含 <code>run_id</code>、<code>symbol</code>、<code>order_id</code>、<code>fill_id</code>、<code>reason</code>。</li>
+<li>库代码禁止 <code>print</code>；CLI/研究脚本可以使用。</li>
+<li>实盘必须有审计日志、对账（broker vs ledger）、kill switch、订单幂等。</li>
+</ul>
+
+<h2 id="12-测试与-definition-of-done">12. 测试与 Definition of Done</h2>
+
+<p>测试类别：</p>
+
+<ul>
+<li>单元：domain/config/cost/sizing/risk。</li>
+<li>契约：<code>DataPortal</code>、<code>BrokerPort</code> 的实现一致性。</li>
+<li>不变量：账本守恒、lot/tick、T+1、棘轮、部分卖出。</li>
+<li>黄金场景：完整管线的确定性回放。</li>
+<li>回测/实盘 parity：同一脚本在 <code>SimulatedBroker</code> 与 paper/live 适配器上行为一致。</li>
+<li>研究测试与生产测试分开；<code>patterns/</code> 不进入默认生产测试路径。</li>
+</ul>
+
+<p>DoD：</p>
+
+<ul>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 契约/ADR 先更新。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 所有权表未变或已更新。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 单元 + 集成测试。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 行为变化有不变量/黄金场景测试。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> <code>make check</code> 通过（lint/type/tests/import contracts/docs links）。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 无禁止 import 方向。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 无重复现金/持仓/config。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 无 <code>datetime.now()</code>/隐藏不确定性。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 费用只走 <code>cost.TransactionCost</code>。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 配置 key 有 owner/unit/default/range。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 文档更新并交叉链接。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 触发时链接 ADR。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 无 secret/过期行号引用。</li>
+</ul>
+
+<h2 id="13-变更控制">13. 变更控制</h2>
+
+<p>必须写 ADR 的变更：</p>
+
+<ul>
+<li>分层/依赖方向；</li>
+<li>单一真相源/所有权；</li>
+<li>核心契约（<code>Intent</code>/<code>Order</code>/<code>Fill</code>/<code>AccountSnapshot</code> 等）；</li>
+<li>执行语义（成交、费用、T+1、涨跌停、部分成交）；</li>
+<li>配置 schema；</li>
+<li>参考框架；</li>
+<li>新运行时依赖。</li>
+</ul>
+
+<p>流程：</p>
+
+<ol>
+<li>写 ADR（Proposed）。</li>
+<li>更新本文对应章节并链接 ADR。</li>
+<li>改代码 + 测试。</li>
+<li>更新 <code>roadmap.md</code> 阶段/偏差。</li>
+<li>ADR 置为 Accepted；永不删除，Superseded 时保留链接。</li>
+</ol>
+
+<p>与 prereg 冲突：不得静默改写预注册；必须加 changelog 并重跑。</p>
+
+<h2 id="附录-a不变量清单">附录 A：不变量清单</h2>
+
+<ol>
+<li><code>sum(position.qty * price) + cash == equity</code>（按币种）。</li>
+<li><code>sellable_qty &lt;= qty</code>；A 股 T+1 后 <code>sellable_qty</code> 才增加。</li>
+<li><code>stop_price</code> 非递减；<code>initial_risk</code> 入场后不变。</li>
+<li>部分卖出后 <code>qty_remaining + qty_sold == qty_initial</code>；R 分母不变。</li>
+<li>每笔 fill 的 <code>amount == shares * price</code>；费用明细可加总。</li>
+<li>订单状态只能前进，不能回退（除显式 cancel/reject）。</li>
+<li>回测相同输入/配置/种子 → 相同结果。</li>
+</ol>
+
+<h2 id="附录-b拒绝模式">附录 B：拒绝模式</h2>
+
+<ul>
+<li>策略持有/修改现金或持仓。</li>
+<li>engine 直接改 PM/RM 的内部资本。</li>
+<li>同一状态在 engine/strategy/PM/RM 各存一份。</li>
+<li>同 bar 收盘成交。</li>
+<li>用固定百分比替代初始止损/棘轮（除非作为对照变体）。</li>
+<li>在策略里写死 lot/tick/涨跌停/费率。</li>
+<li>在文档里引用 engine 行号作为契约。</li>
+<li>为 live 另写一套策略/账本逻辑。</li>
+<li>先改代码后补契约。</li>
+</ul>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <a class="quant-pager__prev" href="03-architecture.html">&larr; 上一页</a>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <a class="quant-pager__next" href="05-code-style.html">下一页 &rarr;</a>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>

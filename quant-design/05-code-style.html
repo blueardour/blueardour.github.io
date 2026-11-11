@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 · 代码风格 — Quant Design Notes</title>
+<meta name="description" content="Python 基线、类型、命名、导入、日志、异常与测试规则。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>05 · 代码风格</h1>
+    <p class="quant-lead">Python 基线、类型、命名、导入、日志、异常与测试规则。</p>
+    <p>本文定义代码风格与工程规则。结构见 <a href="03-architecture.html"><code>architecture.md</code></a>，语义见
+<a href="04-design-spec.html"><code>design_spec.md</code></a>。新代码必须遵守；旧代码在迁移时逐步收敛，不得继续
+扩大违规。</p>
+
+<h2 id="1-非协商项">1. 非协商项</h2>
+
+<ol>
+<li>每个可变状态只有一个 writer。</li>
+<li>依赖方向不能反向或横向。</li>
+<li>策略不得持有/修改现金、持仓、订单。</li>
+<li>费用只走 <code>cost.TransactionCost</code>。</li>
+<li>时间只来自 <code>Clock</code>；<code>datetime.now()</code> 只在 live 适配器边界。</li>
+<li>配置/secret 不硬编码。</li>
+<li>库代码不 <code>print</code>；不 broad <code>except</code>；不吞异常。</li>
+<li>契约/分层变更先写 ADR。</li>
+</ol>
+
+<h2 id="2-python-基线">2. Python 基线</h2>
+
+<ul>
+<li>Python 3.10+；新文件使用 <code>from __future__ import annotations</code>。</li>
+<li>使用内置泛型：<code>list[str]</code>、<code>dict[str, int]</code>、<code>tuple[...]</code>、<code>X | None</code>。
+新代码不用 <code>typing.List/Dict/Optional/Union</code>。</li>
+<li>数据模型优先 <code>@dataclass</code>；不可变值对象用 <code>frozen=True</code>。</li>
+<li>枚举用 <code>enum.Enum</code> / <code>IntEnum</code>；不要用魔法字符串。</li>
+<li>接口用 <code>typing.Protocol</code>；不要为每个小功能建 ABC 继承树。</li>
+<li>不使用通配导入（<code>from x import *</code>）。</li>
+</ul>
+
+<h2 id="3-类型与数据模型">3. 类型与数据模型</h2>
+
+<ul>
+<li>公共函数/方法必须有参数和返回值类型；内部短函数也应尽量标注。</li>
+<li>避免 <code>Any</code>；确实需要时在注释里说明边界。</li>
+<li>值对象不可变；可变状态集中在 <code>AccountLedger</code> / <code>OrderManager</code>。</li>
+<li>不把 pandas <code>DataFrame</code> 当领域对象传递；在适配器/分析边界转换。</li>
+<li>金额、数量、价格使用明确类型/单位；不要用裸 float 混用币种。</li>
+</ul>
+
+<h2 id="4-命名">4. 命名</h2>
+
+<ul>
+<li>模块/函数/变量：<code>snake_case</code>；类：<code>PascalCase</code>；常量：<code>UPPER_SNAKE_CASE</code>。</li>
+<li>私有：前缀 <code>_</code>。</li>
+<li>领域术语以 <a href="06-glossary.html"><code>glossary.md</code></a> 为准；不要为同一概念造多个名字。</li>
+<li>单位后缀必须明确：<code>_pct</code>（百分点）、<code>_ratio</code>（比率）、<code>_amount</code>（金额）、
+<code>_price</code>、<code>_qty</code>、<code>_ts</code>、<code>_days</code>。</li>
+<li>布尔变量用 <code>is_</code>/<code>has_</code>/<code>can_</code> 前缀；避免 <code>flag</code>。</li>
+<li>不用 <code>data</code>、<code>info</code>、<code>obj</code>、<code>tmp</code> 作为公共 API 名称。</li>
+</ul>
+
+<h2 id="5-模块与导入">5. 模块与导入</h2>
+
+<ul>
+<li>一个模块一个职责；模块名说明“它拥有什么”。</li>
+<li><code>__all__</code> 只导出公共 API；内部实现不导出。</li>
+<li>禁止 wildcard import；禁止在 <code>__init__.py</code> 写业务逻辑。</li>
+<li>生产代码只能按 <a href="03-architecture.html#7-依赖矩阵"><code>architecture.md</code></a> 的方向 import。</li>
+<li><code>patterns/</code>、<code>scripts/</code>、<code>backtest/</code> 不得被 <code>strategy/</code>、<code>domain/</code> 反向 import。</li>
+<li>避免 lazy import 解决循环依赖；如果出现循环，说明分层错了，先改结构。</li>
+<li>不允许在函数内 import 生产依赖来“绕过”分层；唯一的例外是可选依赖/CLI 启动。</li>
+</ul>
+
+<h2 id="6-函数与类">6. 函数与类</h2>
+
+<ul>
+<li>优先纯函数；副作用留在边界（数据、执行、日志、UI）。</li>
+<li>函数只做一件事；参数过多时用 dataclass/config 对象。</li>
+<li>不用 boolean flag 参数控制行为；用 enum 或拆方法。</li>
+<li>类小、职责单一；不要 god object。</li>
+<li>组合优于继承；只有真正的 is-a 关系才用继承。</li>
+<li>公共 API 不返回可变内部状态；返回快照/副本。</li>
+<li>异常路径显式；不要用 <code>None</code> 表示多种失败原因。</li>
+</ul>
+
+<h2 id="7-数据与-pandas">7. 数据与 pandas</h2>
+
+<ul>
+<li>pandas 只用于数据适配器、研究、绩效分析；领域契约用普通值/序列。</li>
+<li>明确 copy/view：修改共享 DataFrame 前先复制。</li>
+<li>时间列必须 timezone-aware；不要混用 naive/aware。</li>
+<li>不在循环里反复 <code>iterrows()</code> 处理大数据；优先向量化，必要时用 itertuples。</li>
+<li>数据列名、单位、复权口径在读取时统一；不要在下游猜测。</li>
+</ul>
+
+<h2 id="8-错误与日志">8. 错误与日志</h2>
+
+<ul>
+<li>领域异常集中在 <code>domain/errors.py</code>（目标）或现有 <code>datafeeder/errors.py</code>；
+不要到处 <code>raise ValueError</code>。</li>
+<li>禁止无理由的 <code>except Exception</code>；捕获必须具体，并有恢复/记录/重新抛出。</li>
+<li>禁止 <code>except: pass</code>；如果确实要忽略，必须注释原因并记录 debug 日志。</li>
+<li>拒单/风控拒绝是<strong>记录值</strong>，不是静默 <code>return</code>。</li>
+<li>库代码用 <code>logging.getLogger(__name__)</code>；CLI/研究脚本可用 <code>print</code>。</li>
+<li>日志字段结构化：<code>run_id</code>、<code>symbol</code>、<code>order_id</code>、<code>fill_id</code>、<code>reason</code>。</li>
+<li>不记录 secret、完整 token、账户敏感信息。</li>
+</ul>
+
+<h2 id="9-配置与密钥">9. 配置与密钥</h2>
+
+<ul>
+<li>所有 tunable 进 <code>config/*.yaml</code>；代码里只允许物理常量（如 252 交易日）且必须注释。</li>
+<li>Secret 只在 <code>config/tokens.yaml</code> 或环境变量；不得进入 tracked YAML。</li>
+<li>配置读取走单一 loader；不要在模块顶层读文件。</li>
+<li>新配置 key 必须写 owner/unit/default/range。</li>
+<li>百分比字段用 <code>_pct</code>（20.0）还是 <code>_ratio</code>（0.20）必须与字段名一致。</li>
+<li>配置校验失败要 fail fast，不要静默用默认值。</li>
+</ul>
+
+<h2 id="10-测试">10. 测试</h2>
+
+<ul>
+<li>测试文件放对应包的 <code>tests/</code>；命名 <code>test_*.py</code>；测试函数 <code>test_*</code>。</li>
+<li>单元测试不访问网络/真实数据库；需要时用 fixture/mock。</li>
+<li>随机测试必须固定 seed。</li>
+<li>行为变化必须有不变量/黄金场景测试；不能只测“能跑”。</li>
+<li>新增契约要有 contract test；新增执行规则要有 invariant test。</li>
+<li>研究测试（<code>patterns/</code>）与生产测试分开；默认 <code>pytest</code> 不依赖研究数据。</li>
+<li>测试名说明行为，不说明实现。</li>
+</ul>
+
+<h2 id="11-注释与文档">11. 注释与文档</h2>
+
+<ul>
+<li>注释解释 <strong>why</strong>，不解释 <strong>what</strong>；代码本身说明 what。</li>
+<li>公共模块/类/函数用 docstring；Google 风格即可。</li>
+<li>文档正文中文；代码标识符英文；术语按 glossary。</li>
+<li>不写“临时/以后改”的注释；开 issue/roadmap。</li>
+<li>文档里不要引用 engine 行号作为契约；用文件名 + 符号名。</li>
+<li>变更契约/行为时同步更新文档。</li>
+</ul>
+
+<h2 id="12-工具后续阶段接入">12. 工具（后续阶段接入）</h2>
+
+<p>目标 <code>make check</code>：</p>
+
+<div class="codehilite">
+<pre><span></span><code>ruff<span class="w"> </span>check<span class="w"> </span>.
+ruff<span class="w"> </span>format<span class="w"> </span>--check<span class="w"> </span>.
+mypy<span class="w"> </span>domain<span class="w"> </span>execution<span class="w">   </span><span class="c1"># 逐步扩大</span>
+pytest
+python<span class="w"> </span>scripts/check_imports.py
+python<span class="w"> </span>scripts/check_docs.py
+</code></pre>
+</div>
+
+<p>当前仓库还没有 ruff/mypy 配置；在接入前，至少：</p>
+
+<ul>
+<li>保持现有测试全绿；</li>
+<li>不新增 broad except/print/硬编码；</li>
+<li>不新增禁止 import；</li>
+<li>手动跑 <code>python -m pytest -v</code>。</li>
+</ul>
+
+<h2 id="13-反模式">13. 反模式</h2>
+
+<ul>
+<li>共享可变 <code>Position</code> 对象给策略。</li>
+<li>engine/strategy/PM/RM 各存一份现金/持仓。</li>
+<li>策略里写死 lot/tick/涨跌停/费率/日期。</li>
+<li>同 bar 收盘成交。</li>
+<li>用 <code>datetime.now()</code> 做业务决策。</li>
+<li>用固定百分比止损/止盈代替 ATR/结构（除非是预注册对照）。</li>
+<li>在文档里引用 engine 行号。</li>
+<li>为 live 另写一套策略/账本。</li>
+<li>大而全的 <code>utils.py</code> / <code>common.py</code>。</li>
+<li>先改代码后补契约。</li>
+</ul>
+
+<h2 id="14-review-checklist">14. Review checklist</h2>
+
+<ul>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 这个模块的 owner 是谁？是否只有一个 writer？</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 是否违反依赖矩阵？</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 是否复制了已有状态/规则？</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 时间/随机/配置是否注入？</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 费用是否走 <code>cost</code>？</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 失败路径是否显式记录？</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 是否有不变量/黄金场景测试？</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 文档/ADR 是否同步？</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 是否有 secret/行号/过时引用？</li>
+</ul>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <a class="quant-pager__prev" href="04-design-spec.html">&larr; 上一页</a>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <a class="quant-pager__next" href="06-glossary.html">下一页 &rarr;</a>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>

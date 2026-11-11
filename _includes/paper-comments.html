@@ -1,0 +1,62 @@
+{% assign giscus = site.comments %}
+{% if page.comments.demo %}
+<div class="paper-comments__demo" data-demo-reactions="12" data-demo-comments="3">
+  <p class="paper-comments__notice">Demo comments. Enable GitHub Discussions and install the giscus app to make this thread live.</p>
+  <ol class="paper-comment-list">
+    <li class="paper-comment">
+      <span class="paper-comment__avatar">AL</span>
+      <div class="paper-comment__body">
+        <div class="paper-comment__meta"><span class="paper-comment__name">Alex Li</span><span class="paper-comment__time">2h ago</span></div>
+        <p class="paper-comment__text">The distinction between a shared world frame and metric scale is the part I would keep in the summary. It changes how I read the robotics claims.</p>
+        <div class="paper-comment__actions"><span>👍 4</span><span>Reply</span></div>
+      </div>
+    </li>
+    <li class="paper-comment">
+      <span class="paper-comment__avatar">MK</span>
+      <div class="paper-comment__body">
+        <div class="paper-comment__meta"><span class="paper-comment__name">Mia K.</span><span class="paper-comment__time">Yesterday</span></div>
+        <p class="paper-comment__text">The track + rigidity decomposition is a nice way to explain why this is not just another 3D tracker. The Horn fit is the bridge.</p>
+        <div class="paper-comment__actions"><span>👍 7</span><span>Reply</span></div>
+      </div>
+    </li>
+    <li class="paper-comment">
+      <span class="paper-comment__avatar">RS</span>
+      <div class="paper-comment__body">
+        <div class="paper-comment__meta"><span class="paper-comment__name">R. Singh</span><span class="paper-comment__time">2 days ago</span></div>
+        <p class="paper-comment__text">Would be useful to see the camera-pose sensitivity quantified. The paper mentions it, but the failure mode is buried in limitations.</p>
+        <div class="paper-comment__actions"><span>👍 2</span><span>Reply</span></div>
+      </div>
+    </li>
+  </ol>
+  <form class="paper-comment-form" onsubmit="return false;">
+    <textarea placeholder="Write a comment…" aria-label="Write a comment"></textarea>
+    <button type="submit" disabled>Post comment</button>
+  </form>
+</div>
+{% elsif giscus.repo_id and giscus.category_id %}
+  {% assign giscus_lang = 'en' %}
+  {% if page.lang == 'zh-Hans' %}{% assign giscus_lang = 'zh-CN' %}{% endif %}
+  <div class="giscus"></div>
+  <script src="https://giscus.app/client.js"
+    data-repo="{{ giscus.repo }}"
+    data-repo-id="{{ giscus.repo_id }}"
+    data-category="{{ giscus.category }}"
+    data-category-id="{{ giscus.category_id }}"
+    data-mapping="{{ giscus.mapping | default: 'pathname' }}"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="1"
+    data-input-position="top"
+    data-theme="{{ giscus.theme | default: 'preferred_color_scheme' }}"
+    data-lang="{{ giscus_lang }}"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+  </script>
+{% else %}
+  <p class="paper-comments__notice">
+    Comments are not configured yet. Enable GitHub Discussions, install the
+    <a href="https://github.com/apps/giscus">giscus app</a>, and set
+    <code>site.comments.category_id</code> in <code>_config.yml</code>.
+  </p>
+{% endif %}

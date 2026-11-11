@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 · 术语表 — Quant Design Notes</title>
+<meta name="description" content="Intent/Order/Fill/Account/ExitPlan/R/PIT 等中英术语。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>06 · 术语表</h1>
+    <p class="quant-lead">Intent/Order/Fill/Account/ExitPlan/R/PIT 等中英术语。</p>
+    <p>代码标识符统一英文；文档正文中文。新增术语先加到这里，再在代码/文档中使用。</p>
+
+<table>
+<thead>
+<tr>
+  <th>英文</th>
+  <th>中文</th>
+  <th>定义</th>
+  <th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Alpha</td>
+  <td>超额收益信号</td>
+  <td>策略产生的、可交易的预测/优势；不等于订单</td>
+  <td><code>strategy/</code></td>
+</tr>
+<tr>
+  <td>Signal</td>
+  <td>信号</td>
+  <td>策略内部的原始判断；不应直接作为执行指令</td>
+  <td><code>strategy/</code></td>
+</tr>
+<tr>
+  <td>Intent</td>
+  <td>交易意图</td>
+  <td>策略希望执行的动作（方向、数量/目标、订单类型、ExitPlan）</td>
+  <td><code>strategy/</code></td>
+</tr>
+<tr>
+  <td>Order</td>
+  <td>订单</td>
+  <td>经过风控/定仓后，执行层接受的指令</td>
+  <td><code>execution/</code></td>
+</tr>
+<tr>
+  <td>Fill</td>
+  <td>成交</td>
+  <td>broker 产生的实际成交事实</td>
+  <td><code>execution/</code></td>
+</tr>
+<tr>
+  <td>Position</td>
+  <td>持仓</td>
+  <td>账户中某标的的数量、成本、可卖数量；是 <code>AccountSnapshot</code> 的只读条目</td>
+  <td><code>execution/AccountLedger</code></td>
+</tr>
+<tr>
+  <td>Account</td>
+  <td>账户</td>
+  <td>现金、持仓、已实现盈亏的集合；不是 <code>portfolio/</code> 包</td>
+  <td><code>execution/AccountLedger</code></td>
+</tr>
+<tr>
+  <td>Ledger</td>
+  <td>账本</td>
+  <td>唯一记录现金/持仓/成本的权威状态</td>
+  <td><code>execution/AccountLedger</code></td>
+</tr>
+<tr>
+  <td>Snapshot</td>
+  <td>快照</td>
+  <td>某一时点的只读状态，如 <code>AccountSnapshot</code></td>
+  <td><code>execution/AccountLedger</code></td>
+</tr>
+<tr>
+  <td>DataPortal</td>
+  <td>数据门户</td>
+  <td>只读、PIT 的行情/元数据访问接口</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>Instrument</td>
+  <td>标的元数据</td>
+  <td>symbol、市场、币种、lot、tick、涨跌停、日历</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>Bar</td>
+  <td>K 线</td>
+  <td>某周期的 OHLCV；时间戳语义必须明确</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>Quote</td>
+  <td>报价</td>
+  <td>最新价/买卖盘（若数据源提供）</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>Tick</td>
+  <td>逐笔</td>
+  <td>逐笔成交/盘口；当前数据不一定有</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>BrokerPort</td>
+  <td>券商端口</td>
+  <td>submit/cancel/query 的抽象；Sim/Live 两种实现</td>
+  <td><code>execution/</code></td>
+</tr>
+<tr>
+  <td>SimulatedBroker</td>
+  <td>模拟券商</td>
+  <td>回测/paper 的确定性撮合</td>
+  <td><code>execution/</code></td>
+</tr>
+<tr>
+  <td>LiveBroker</td>
+  <td>实盘券商</td>
+  <td>真实券商 API 适配器</td>
+  <td><code>execution/</code></td>
+</tr>
+<tr>
+  <td>RiskPolicy</td>
+  <td>风控策略</td>
+  <td>返回 allow/reject/resize，不修改账本</td>
+  <td><code>risk/</code></td>
+</tr>
+<tr>
+  <td>RiskDecision</td>
+  <td>风控决策</td>
+  <td>风控输出值</td>
+  <td><code>risk/</code></td>
+</tr>
+<tr>
+  <td>SizingPolicy</td>
+  <td>定仓策略</td>
+  <td>把意图转换为目标数量/权重</td>
+  <td><code>portfolio/</code></td>
+</tr>
+<tr>
+  <td>ExitPlan</td>
+  <td>出场计划</td>
+  <td>入场时声明的止损、R、目标、棘轮、时间退出</td>
+  <td><code>strategy/</code></td>
+</tr>
+<tr>
+  <td>Initial stop</td>
+  <td>初始止损</td>
+  <td>入场时定义论据失效的价格</td>
+  <td><code>strategy/</code></td>
+</tr>
+<tr>
+  <td>R</td>
+  <td>风险单位</td>
+  <td><code>entry_fill - initial_stop</code>（每股）；总风险 = shares × R</td>
+  <td><code>strategy/</code></td>
+</tr>
+<tr>
+  <td>Trailing stop</td>
+  <td>移动止损/棘轮</td>
+  <td>随有利方向移动、只上移的保护线</td>
+  <td><code>strategy/</code></td>
+</tr>
+<tr>
+  <td>Take profit</td>
+  <td>止盈</td>
+  <td>目标价/目标 R 的退出</td>
+  <td><code>strategy/</code></td>
+</tr>
+<tr>
+  <td>Time exit</td>
+  <td>时间退出</td>
+  <td>持有 N 天后未触发其他条件则退出</td>
+  <td><code>strategy/</code></td>
+</tr>
+<tr>
+  <td>Partial exit</td>
+  <td>分批退出</td>
+  <td>卖出一部分仓位，剩余继续持有</td>
+  <td><code>strategy/</code> + <code>execution/</code></td>
+</tr>
+<tr>
+  <td>T+1</td>
+  <td>次日可卖</td>
+  <td>A 股当日买入次日才可卖；港股 T+0</td>
+  <td><code>execution/</code></td>
+</tr>
+<tr>
+  <td>sellable quantity</td>
+  <td>可卖数量</td>
+  <td>当前可卖出的股数</td>
+  <td><code>execution/AccountLedger</code></td>
+</tr>
+<tr>
+  <td>lot size</td>
+  <td>每手股数</td>
+  <td>A 股 100 股；港股按标的</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>tick size</td>
+  <td>最小价格变动</td>
+  <td>报价/成交价的最小单位</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>limit-up / limit-down</td>
+  <td>涨停/跌停</td>
+  <td>日涨跌幅限制；封板时方向不利不可成交</td>
+  <td><code>execution/</code></td>
+</tr>
+<tr>
+  <td>suspension</td>
+  <td>停牌</td>
+  <td>无成交；订单需显式保留/过期</td>
+  <td><code>execution/</code></td>
+</tr>
+<tr>
+  <td>slippage</td>
+  <td>滑点</td>
+  <td>理论价与成交价的差；必须显式建模</td>
+  <td><code>execution/</code></td>
+</tr>
+<tr>
+  <td>commission</td>
+  <td>佣金</td>
+  <td>券商费用；有最低值</td>
+  <td><code>cost/</code></td>
+</tr>
+<tr>
+  <td>stamp duty</td>
+  <td>印花税</td>
+  <td>A 股卖出、港股双边；费率唯一源 <code>config/fee_config.yaml</code></td>
+  <td><code>cost/</code></td>
+</tr>
+<tr>
+  <td>dividend tax</td>
+  <td>红利税</td>
+  <td>按 holding days 分档，卖出时补扣</td>
+  <td><code>cost/</code></td>
+</tr>
+<tr>
+  <td>adjusted / unadjusted</td>
+  <td>复权/不复权</td>
+  <td>分析用复权，执行用可交易 raw price</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>point-in-time (PIT)</td>
+  <td>时点数据</td>
+  <td>决策时只能看到当时已知的数据</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>survivorship bias</td>
+  <td>幸存者偏差</td>
+  <td>universe 只含现存标的导致高估收益</td>
+  <td>research</td>
+</tr>
+<tr>
+  <td>walk-forward</td>
+  <td>滚动样本外</td>
+  <td>训练/测试按时间滚动，禁止未来数据</td>
+  <td>research</td>
+</tr>
+<tr>
+  <td>out-of-sample (OOS)</td>
+  <td>样本外</td>
+  <td>未参与参数选择的数据</td>
+  <td>research</td>
+</tr>
+<tr>
+  <td>paper trading</td>
+  <td>模拟实盘</td>
+  <td>实时数据 + 模拟 broker，不真发单</td>
+  <td><code>live/</code></td>
+</tr>
+<tr>
+  <td>live trading</td>
+  <td>实盘</td>
+  <td>真实资金/券商</td>
+  <td><code>live/</code></td>
+</tr>
+<tr>
+  <td>current state</td>
+  <td>当前态</td>
+  <td>代码现在的行为</td>
+  <td><code>roadmap.md</code></td>
+</tr>
+<tr>
+  <td>target state</td>
+  <td>目标态</td>
+  <td>文档定义的架构/契约</td>
+  <td><code>design_spec.md</code></td>
+</tr>
+<tr>
+  <td>known deviation</td>
+  <td>已知偏差</td>
+  <td>当前态与目标态的差距</td>
+  <td><code>roadmap.md</code></td>
+</tr>
+<tr>
+  <td>ADR</td>
+  <td>架构决策记录</td>
+  <td>记录重要决策及理由</td>
+  <td><code>docs/adr/</code></td>
+</tr>
+<tr>
+  <td>context bucket</td>
+  <td>上下文分桶</td>
+  <td>按市值/行业/热度/阶段等过滤后再比较</td>
+  <td>research</td>
+</tr>
+<tr>
+  <td>universe</td>
+  <td>标的池</td>
+  <td>策略可交易的标的集合</td>
+  <td><code>datafeeder/</code></td>
+</tr>
+<tr>
+  <td>regime</td>
+  <td>市场状态</td>
+  <td>牛/熊/震荡/高波动等</td>
+  <td>research</td>
+</tr>
+<tr>
+  <td>stage</td>
+  <td>交易阶段</td>
+  <td>吸筹/拉升/派发/下跌</td>
+  <td>research</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="刻意不使用的词">刻意不使用的词</h2>
+
+<table>
+<thead>
+<tr>
+  <th>不用的说法</th>
+  <th>应该用</th>
+  <th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>用 “portfolio” 指账户</td>
+  <td><code>AccountLedger</code> / <code>AccountSnapshot</code></td>
+  <td><code>portfolio/</code> 是 sizing 包，不是账户</td>
+</tr>
+<tr>
+  <td>用 “signal” 指可执行订单</td>
+  <td><code>Intent</code> / <code>Order</code></td>
+  <td>信号是策略判断，订单是执行指令</td>
+</tr>
+<tr>
+  <td>用 “position” 指策略共享对象</td>
+  <td><code>Position</code>（snapshot 条目）</td>
+  <td>避免策略持有可变持仓</td>
+</tr>
+<tr>
+  <td>用 “buy/sell” 描述风控决策</td>
+  <td>allow/reject/resize</td>
+  <td>风控不直接交易</td>
+</tr>
+<tr>
+  <td>用 “core” 指纯领域包</td>
+  <td><code>domain/</code></td>
+  <td>旧 <code>core/</code> 已删除，避免复活单体</td>
+</tr>
+</tbody>
+</table>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <a class="quant-pager__prev" href="05-code-style.html">&larr; 上一页</a>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <a class="quant-pager__next" href="07-roadmap.html">下一页 &rarr;</a>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>

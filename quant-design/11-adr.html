@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11 · 架构决策记录 — Quant Design Notes</title>
+<meta name="description" content="ADR 流程与 0001–0004 四个初始决策。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>11 · 架构决策记录</h1>
+    <p class="quant-lead">ADR 流程与 0001–0004 四个初始决策。</p>
+    <h2>架构决策记录（ADR）</h2>
+<p>ADR 记录<strong>重要且难以逆转</strong>的决策及理由。它防止同一问题反复争论，也防止后续改动悄悄
+偏离原设计。</p>
+
+<h2 id="何时必须写-adr">何时必须写 ADR</h2>
+
+<ul>
+<li>分层/依赖方向变化；</li>
+<li>单一真相源/所有权变化；</li>
+<li>核心契约变化（<code>Intent</code>/<code>Order</code>/<code>Fill</code>/<code>AccountSnapshot</code>/<code>ExitPlan</code> 等）；</li>
+<li>执行语义变化（成交、费用、T+1、涨跌停、部分成交）；</li>
+<li>配置 schema 变化；</li>
+<li>参考框架/新运行时依赖；</li>
+<li>会推翻已有预注册实验的变更。</li>
+</ul>
+
+<p>纯文档修正、错别字、链接修复不需要 ADR。</p>
+
+<h2 id="生命周期">生命周期</h2>
+
+<p><code>Proposed → Accepted → Superseded | Deprecated</code></p>
+
+<ul>
+<li>永不删除 ADR；被替代时保留原文，并在头部链接新 ADR。</li>
+<li>单用户项目允许自我批准，但必须记录日期和理由。</li>
+<li>Accepted ADR 优先于 <code>design_spec.md</code>；<code>design_spec.md</code> 必须链接 ADR。</li>
+</ul>
+
+<h2 id="编号与命名">编号与命名</h2>
+
+<p><code>NNNN-short-kebab-title.md</code>，四位递增。一个 ADR 只做一个决策。</p>
+
+<h2 id="索引">索引</h2>
+
+<table>
+<thead>
+<tr>
+  <th>ADR</th>
+  <th>决策</th>
+  <th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="11-adr.html">0001</a></td>
+  <td>以 NautilusTrader 为概念参考，不引入运行时依赖</td>
+  <td>Accepted</td>
+</tr>
+<tr>
+  <td><a href="11-adr.html">0002</a></td>
+  <td>每个可变状态一个 owner；单向依赖</td>
+  <td>Accepted</td>
+</tr>
+<tr>
+  <td><a href="11-adr.html">0003</a></td>
+  <td>回测/paper/live/可视化共用一条管线</td>
+  <td>Accepted</td>
+</tr>
+<tr>
+  <td><a href="11-adr.html">0004</a></td>
+  <td>D+1、盘中触发、T+1、涨跌停、部分成交</td>
+  <td>Accepted</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="模板">模板</h2>
+
+<p>见 <a href="11-adr.html"><code>template.md</code></a>。</p>
+
+<h2 id="变更流程">变更流程</h2>
+
+<ol>
+<li>复制模板，编号，状态 <code>Proposed</code>。</li>
+<li>写清 Context/Decision/Consequences/Alternatives/Verification。</li>
+<li>更新 <code>design_spec.md</code> 对应章节并双向链接。</li>
+<li>更新 <code>roadmap.md</code> 阶段/偏差。</li>
+<li>改代码 + 测试；DoD 通过后置 <code>Accepted</code>。</li>
+<li>若替代旧 ADR：旧文件头部加 <code>Superseded by NNNN</code>，新文件写 <code>Supersedes NNNN</code>。</li>
+</ol>
+
+<h2>0001: 以 NautilusTrader 作为概念参考</h2>
+<ul>
+<li><strong>Status</strong>: Accepted</li>
+<li><strong>Date</strong>: 2026-11-04</li>
+<li><strong>Owner</strong>: architecture</li>
+<li><strong>Supersedes</strong>: none</li>
+<li><strong>Superseded by</strong>: none</li>
+</ul>
+
+<h2 id="context">Context</h2>
+
+<p>系统要从“研究脚本”演进到可回测、可 paper、可实盘、可视化的单用户 A 股/港股系统。
+需要一套成熟的领域词汇和分层，避免继续在 <code>backtest/engine.py</code> 上叠加状态。候选框架：</p>
+
+<ul>
+<li>NautilusTrader：事件驱动、回测/实盘同管线、Portfolio/Execution/Risk 分层清晰；</li>
+<li>vn.py：国内实盘生态好，但架构较旧、全局状态多；</li>
+<li>Backtrader：简单，但实盘/部分成交/订单类型弱；</li>
+<li>Zipline/Qlib：研究/回测强，实盘弱。</li>
+</ul>
+
+<h2 id="decision">Decision</h2>
+
+<p>以 <strong>NautilusTrader</strong> 作为唯一主要概念参考，但<strong>不引入其运行时依赖</strong>。</p>
+
+<p>借用：</p>
+
+<ul>
+<li>ports/adapters：数据、执行、broker 适配器；</li>
+<li>Order/Fill 生命周期与显式状态；</li>
+<li>回测/paper/live 共用策略与执行管线；</li>
+<li>注入 <code>Clock</code>、只读账户快照；</li>
+<li><code>Instrument</code> 作为一等元数据（lot/tick/currency/price limit）。</li>
+</ul>
+
+<p>不借：</p>
+
+<ul>
+<li>actor/message bus/async 运行时；</li>
+<li>多 venue 路由、完整 instrument universe；</li>
+<li>Nautilus 内部实现/打包/Rust/Cython。</li>
+</ul>
+
+<p>A 股/港股规则（T+1、100 股整手、涨跌停、印花税、港股 board lot）由本项目
+<code>execution/</code> 和 <code>datafeeder/</code> 显式建模，不能依赖框架。</p>
+
+<h2 id="consequences">Consequences</h2>
+
+<ul>
+<li>正面：有成熟词汇和清晰边界；回测/实盘同管线；后续接券商只需实现 <code>BrokerPort</code>。</li>
+<li>负面：概念偏多，需要做减法；不能直接复制 Nautilus 的复杂 runtime。</li>
+<li>中性：vn.py 的券商 gateway 经验可在未来 <code>LiveBroker</code> ADR 中单独借用。</li>
+<li>迁移：阶段 2 引入 <code>domain/</code> 契约；阶段 3 引入 <code>AccountLedger</code>；阶段 4 执行现实性；
+阶段 5 <code>LiveBroker</code>。</li>
+</ul>
+
+<h2 id="alternatives">Alternatives</h2>
+
+<ul>
+<li><strong>vn.py</strong>：国内实盘生态更好，但 EventEngine/OmsEngine/App 架构较旧，回测/实盘一致性
+弱，容易重新引入全局状态。若未来券商接入成为主要约束，另写 ADR 引入薄 <code>LiveBroker</code>
+适配器，而不是改整体架构。</li>
+<li><strong>Backtrader</strong>：简单，但部分成交、订单类型、T+1、实盘支持不足。</li>
+<li><strong>Zipline/Qlib</strong>：研究/回测强，但不满足未来实盘和可视化同管线要求。</li>
+</ul>
+
+<h2 id="verification">Verification</h2>
+
+<ul>
+<li><code>docs/architecture.md#10-nautilustrader-概念映射</code> 的映射表完整。</li>
+<li>阶段 2–5 的契约和测试不暴露 Nautilus 类型。</li>
+<li>不在 <code>pyproject.toml</code> 增加 Nautilus 运行时依赖。</li>
+<li>新依赖/参考框架变化必须新 ADR。</li>
+</ul>
+
+<h2 id="links">Links</h2>
+
+<ul>
+<li><a href="03-architecture.html"><code>../architecture.md</code></a></li>
+<li><a href="04-design-spec.html"><code>../design_spec.md</code></a></li>
+<li><a href="07-roadmap.html"><code>../roadmap.md</code></a></li>
+</ul>
+
+<h2>0002: 单一所有者与单向依赖</h2>
+<ul>
+<li><strong>Status</strong>: Accepted</li>
+<li><strong>Date</strong>: 2026-11-04</li>
+<li><strong>Owner</strong>: architecture</li>
+<li><strong>Supersedes</strong>: none</li>
+<li><strong>Superseded by</strong>: none</li>
+</ul>
+
+<h2 id="context">Context</h2>
+
+<p>当前现金/持仓存在多份表示：<code>engine.positions</code>、<code>strategy.positions</code>（共享引用）、
+<code>PositionManager.positions</code>（副本）、<code>RiskManager</code> 的资本派生值。<code>strategy</code> 还 lazy
+import <code>datafeeder</code>。这导致对账困难、状态分叉，且无法安全添加实盘/可视化。</p>
+
+<h2 id="decision">Decision</h2>
+
+<ol>
+<li><strong>每个可变状态只有一个 owner/writer</strong>。完整表见
+<a href="04-design-spec.html#4-单一真相源"><code>../design_spec.md#4-单一真相源</code></a>。</li>
+<li><strong>单向依赖</strong>：编排/适配器 → <code>domain/</code>，不能反向或横向。矩阵见
+<a href="03-architecture.html#7-依赖矩阵"><code>../architecture.md#7-依赖矩阵</code></a>。</li>
+<li>现金/持仓/成本/可卖数量/已实现 PnL 的唯一 writer 是
+<code>execution/AccountLedger</code>；其他层只读 <code>AccountSnapshot</code>。</li>
+<li>策略只读 <code>StrategyContext</code>，只发 <code>Intent</code>；不得持有账本。</li>
+<li><code>portfolio/</code> 只做 sizing，<code>risk/</code> 只做决策，不存现金/持仓。</li>
+<li>派生视图/报表可以多份，但必须只读、可重建；适配器多实现同一端口不算重复。</li>
+</ol>
+
+<h2 id="consequences">Consequences</h2>
+
+<ul>
+<li>正面：对账简单；策略可替换；回测/实盘/可视化共享状态模型。</li>
+<li>负面：迁移期需要兼容层；旧代码的多份状态要逐步删除。</li>
+<li>迁移：阶段 2 引入 <code>domain/</code>；阶段 3 合并到 <code>AccountLedger</code>；阶段 6 删除
+<code>strategy.positions</code>/<code>strategy.cash</code>/PM/RM 资本副本。</li>
+</ul>
+
+<h2 id="alternatives">Alternatives</h2>
+
+<ul>
+<li><strong>保持现状</strong>：继续在 engine 上叠加，状态会继续分叉，实盘对账不可靠。</li>
+<li><strong>只加锁/同步</strong>：治标不治本，仍有多个 writer。</li>
+<li><strong>微服务/独立账户服务</strong>：单人系统过度设计，增加运维成本。</li>
+</ul>
+
+<h2 id="verification">Verification</h2>
+
+<ul>
+<li>新增 import contract 检查（阶段 1）。</li>
+<li>阶段 3 黄金回测：账本外无现金/持仓写入。</li>
+<li>代码审查 checklist：每个可变状态是否只有一个 writer。</li>
+<li>文档所有权表与包图一致。</li>
+</ul>
+
+<h2 id="links">Links</h2>
+
+<ul>
+<li><a href="04-design-spec.html"><code>../design_spec.md</code></a></li>
+<li><a href="03-architecture.html"><code>../architecture.md</code></a></li>
+<li><a href="07-roadmap.html"><code>../roadmap.md</code></a></li>
+</ul>
+
+<h2>0003: 回测/paper/live/可视化共用一条管线</h2>
+<ul>
+<li><strong>Status</strong>: Accepted</li>
+<li><strong>Date</strong>: 2026-11-04</li>
+<li><strong>Owner</strong>: architecture</li>
+<li><strong>Supersedes</strong>: none</li>
+<li><strong>Superseded by</strong>: none</li>
+</ul>
+
+<h2 id="context">Context</h2>
+
+<p>当前 <code>BacktestEngine</code> 和 <code>PaperTradingEngine</code> 各自复制了一套流程；未来实盘如果另写
+一套，会形成无法回测的实盘分支。可视化也容易直接读 engine 内部状态。</p>
+
+<h2 id="decision">Decision</h2>
+
+<p>所有模式共用同一条事件序列：</p>
+
+<pre><code>DataPortal + Clock
+  -&gt; Strategy.on_bar(ctx) -&gt; [Intent]
+  -&gt; RiskPolicy.evaluate -&gt; SizingPolicy
+  -&gt; OrderManager -&gt; Broker(Sim/Live) -&gt; [Fill]
+  -&gt; AccountLedger.apply(fill) -&gt; AccountSnapshot
+  -&gt; Strategy.on_fill + observability + visualization
+</code></pre>
+
+<ul>
+<li><strong>backtest</strong> = 历史 <code>DataPortal</code> + <code>SimClock</code> + <code>SimulatedBroker</code>。</li>
+<li><strong>paper</strong> = 实时 <code>DataPortal</code> + <code>RealClock</code> + <code>SimulatedBroker</code>。</li>
+<li><strong>live</strong> = 实时 <code>DataPortal</code> + <code>RealClock</code> + <code>LiveBroker</code>。</li>
+<li><strong>visualization</strong> = 订阅只读事件/快照，不写回。</li>
+</ul>
+
+<p>只替换适配器；<code>Strategy</code>、<code>SizingPolicy</code>、<code>RiskPolicy</code>、<code>AccountLedger</code> 必须复用。
+不引入 message bus/actor/async 运行时；同步主循环足够。</p>
+
+<h2 id="consequences">Consequences</h2>
+
+<ul>
+<li>正面：策略/风控/账本只写一次；backtest/paper/live 行为一致；可视化天然只读。</li>
+<li>负面：需要 <code>BrokerPort</code>/<code>Clock</code>/<code>DataPortal</code> 抽象；迁移期有双路径。</li>
+<li>迁移：阶段 3 建账本/模拟 broker；阶段 4 执行现实性；阶段 5 paper/live/可视化。</li>
+</ul>
+
+<h2 id="alternatives">Alternatives</h2>
+
+<ul>
+<li><strong>backtest/live 两套代码</strong>：最常见但最危险；策略行为会分叉。</li>
+<li><strong>直接采用 Nautilus/LEAN 运行时</strong>：过重，且 A 股/港股规则仍需自建。</li>
+<li><strong>事件总线/微服务</strong>：单人系统过度设计。</li>
+</ul>
+
+<h2 id="verification">Verification</h2>
+
+<ul>
+<li>同一策略/配置在 <code>SimulatedBroker</code> 与 paper 适配器上产生一致的订单/成交序列（parity
+test）。</li>
+<li>live 路径不得 import 策略私有实现；只通过契约。</li>
+<li>visualization 不能写 <code>AccountLedger</code>/<code>Strategy</code> 状态。</li>
+<li>paper trading 3–6 个月通过后才能实盘。</li>
+</ul>
+
+<h2 id="links">Links</h2>
+
+<ul>
+<li><a href="03-architecture.html#8-运行时拓扑"><code>../architecture.md#8-运行时拓扑</code></a></li>
+<li><a href="04-design-spec.html#6-管线契约"><code>../design_spec.md#6-管线契约</code></a></li>
+<li><a href="07-roadmap.html"><code>../roadmap.md</code></a></li>
+</ul>
+
+<h2>0004: 执行现实性规则</h2>
+<ul>
+<li><strong>Status</strong>: Accepted</li>
+<li><strong>Date</strong>: 2026-11-04</li>
+<li><strong>Owner</strong>: architecture</li>
+<li><strong>Supersedes</strong>: none</li>
+<li><strong>Superseded by</strong>: none</li>
+</ul>
+
+<h2 id="context">Context</h2>
+
+<p>当前回测同 bar 收盘成交、只能全平、不看盘中 high/low、无 T+1/涨跌停/部分成交。这样
+测出的止损/止盈/分批结果不可信，尤其对 A 股。</p>
+
+<h2 id="decision">Decision</h2>
+
+<p>执行层必须实现：</p>
+
+<ol>
+<li><strong>D+1</strong>：D 日收盘决策，最早 D+1 开盘成交；禁止同 bar 收盘成交。</li>
+<li><strong>订单类型</strong>：MARKET/LIMIT/STOP/STOP_LIMIT；执行层不认识 ATR/策略概念。</li>
+<li><strong>盘中触发</strong>：卖出止损 <code>low &lt;= stop → min(open, stop)</code>；止盈
+<code>high &gt;= target → max(open, target)</code>；跳空按 open。同日双触发默认止损优先。</li>
+<li><strong>T+1</strong>：A 股买入次日才可卖；ledger 维护 <code>sellable_qty</code>。港股 T+0。</li>
+<li><strong>涨跌停/停牌</strong>：方向不利封板不成交；顺延/过期显式；连续未成交标 <code>forced_exit</code>。</li>
+<li><strong>lot/tick</strong>：A 股 100 股整手；港股 board lot；价格按 tick。</li>
+<li><strong>逐笔费用</strong>：每笔 fill 走 <code>cost.TransactionCost</code>；最低佣金、卖出印花税、港股印花税
+取整；费用明细写入 <code>Fill</code>。</li>
+<li><strong>部分成交/部分退出</strong>：<code>Intent.qty</code>/<code>ExitPlan.partials</code>；R 分母不变；每笔费用独立。</li>
+<li><strong>确定性</strong>：回测无 <code>datetime.now()</code>、未播种随机、事件循环内网络。</li>
+<li><strong>复权/PIT</strong>：执行用可交易 raw price；分析用 adjusted；复权因子必须 PIT。</li>
+</ol>
+
+<h2 id="consequences">Consequences</h2>
+
+<ul>
+<li>正面：止损/止盈/分批结果可信；回测更接近实盘；A 股规则显式。</li>
+<li>负面：实现复杂度上升；需要更多不变量测试；旧回测结论需重跑。</li>
+<li>迁移：阶段 4；依赖阶段 3 的单账本。</li>
+</ul>
+
+<h2 id="alternatives">Alternatives</h2>
+
+<ul>
+<li><strong>继续收盘全平</strong>：无法测分批/盘中止损，结论不可用。</li>
+<li><strong>只做日线近似</strong>：可以过渡，但必须标注，不能作为主结论。</li>
+<li><strong>直接接实盘验证</strong>：成本/风险太高，且无法复现。</li>
+</ul>
+
+<h2 id="verification">Verification</h2>
+
+<p>不变量测试：</p>
+
+<ul>
+<li>滑点对称，<code>amount == shares × price</code>；</li>
+<li>信号 D → 成交 D+1；</li>
+<li>部分卖出后现金/成本/R 守恒；</li>
+<li>A 股 T+1、涨跌停不可成交；</li>
+<li>跳空按 open；</li>
+<li>棘轮只上移；</li>
+<li>每笔费用可加总。</li>
+</ul>
+
+<h2 id="links">Links</h2>
+
+<ul>
+<li><a href="04-design-spec.html#7-执行语义"><code>../design_spec.md#7-执行语义</code></a></li>
+<li><a href="08-exit-contract.html"><code>../specs/exit_contract.md</code></a></li>
+<li><a href="10-exit-preregistration.html"><code>../exit_preregistration.md</code></a></li>
+<li><a href="07-roadmap.html"><code>../roadmap.md</code></a></li>
+</ul>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <a class="quant-pager__prev" href="10-exit-preregistration.html">&larr; 上一页</a>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <a class="quant-pager__next" href="12-exit-results.html">下一页 &rarr;</a>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>

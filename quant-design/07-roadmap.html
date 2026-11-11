@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 · 迁移路线与已知偏差 — Quant Design Notes</title>
+<meta name="description" content="当前态与目标态的差距、迁移阶段与 live readiness 清单。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>07 · 迁移路线与已知偏差</h1>
+    <p class="quant-lead">当前态与目标态的差距、迁移阶段与 live readiness 清单。</p>
+    <p>本文记录<strong>当前态与目标态</strong>的差距、迁移阶段和 live readiness 门槛。目标态定义见
+<a href="03-architecture.html"><code>architecture.md</code></a> 与 <a href="04-design-spec.html"><code>design_spec.md</code></a>。</p>
+
+<h2 id="1-当前阶段">1. 当前阶段</h2>
+
+<p>阶段 0（文档）已建立。生产路径仍是过渡期实现；不要把目标行为当成现状。</p>
+
+<p>Track A（独立的出场-only 研究模拟器）已先行落地：<code>backtest/exit_sim.py</code> +
+<code>scripts/exit_experiment.py</code> 支持 D+1、盘中触发、T+1、涨跌停、分批、逐笔费用和
+棘轮止损，只用于单笔出场事件研究，<strong>不改变生产 engine 的行为</strong>。当前测试
+<code>356 passed, 1 skipped</code>。演示 watchlist 的样本内结果见
+<a href="12-exit-results.html"><code>experiments/exit_sensitivity_2026_11.md</code></a>；
+它不是策略验证结论，正式测试需要真实 watchlist 与 walk-forward/OOS。</p>
+
+<h2 id="2-已知偏差">2. 已知偏差</h2>
+
+<blockquote>
+  <p>下表描述<strong>生产 engine 与目标契约</strong>的差距。Track A 的研究模拟器已实现其中一部分
+  执行语义（D+1、盘中触发、T+1、涨跌停、分批、Wilder ATR），但生产路径尚未
+  迁移；不要把研究模拟器的能力当成 engine 的现状。</p>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>当前行为</th>
+  <th>目标行为</th>
+  <th>影响</th>
+  <th>处理阶段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>D1</td>
+  <td>现金/持仓在 engine、strategy、PM、RM 各有一份</td>
+  <td><code>execution/AccountLedger</code> 唯一账本</td>
+  <td>对账困难、状态分叉</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>D2</td>
+  <td><code>strategy.positions</code> 是 engine 持仓的共享引用</td>
+  <td>策略只读 <code>StrategyContext</code>/<code>AccountSnapshot</code></td>
+  <td>策略可意外改状态</td>
+  <td>2–3</td>
+</tr>
+<tr>
+  <td>D3</td>
+  <td>SELL 永远全平；无部分卖出</td>
+  <td><code>Intent.qty</code>/<code>ExitPlan.partials</code></td>
+  <td>无法测分批止盈/止损</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>D4</td>
+  <td>同 bar 收盘成交</td>
+  <td>D+1 开盘成交</td>
+  <td>回测偏乐观</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>D5</td>
+  <td>无盘中 high/low 触发</td>
+  <td>resting stop/target 盘中触发、跳空按 open</td>
+  <td>止损失真</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>D6</td>
+  <td>无 T+1、涨跌停、停牌显式处理</td>
+  <td>ledger <code>sellable_qty</code> + 执行规则</td>
+  <td>不可交易日被当成可成交</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>D7</td>
+  <td><code>ATR</code> 是 SMA，不是 Wilder</td>
+  <td>Wilder ATR14</td>
+  <td>与预注册口径不符</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>D8</td>
+  <td>FIFO 配对忽略股数、丢弃未匹配卖单</td>
+  <td>share-aware 配对</td>
+  <td>分批/多次买入绩效错误</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>D9</td>
+  <td><code>dividend_received</code> 从未赋值</td>
+  <td>ledger 记录分红/税基</td>
+  <td>红利税恒为 0</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>D10</td>
+  <td><code>PositionManager</code> 用资金百分比定仓</td>
+  <td><code>portfolio/SizingPolicy</code>，支持 R 定仓</td>
+  <td>风险不按 R 归一</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>D11</td>
+  <td>初始持仓 <code>entry_time=now()</code>；engine 与 analyzer 交易计数口径不同</td>
+  <td>显式 entry time，统一口径</td>
+  <td>持有天数/绩效偏差</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>D12</td>
+  <td><code>strategy/base.py</code> lazy import <code>datafeeder.signal_logger</code></td>
+  <td>观测层独立</td>
+  <td>分层泄漏</td>
+  <td>6</td>
+</tr>
+<tr>
+  <td>D13</td>
+  <td><code>config/settings.yaml</code> 含 token</td>
+  <td>token 只在 <code>tokens.yaml</code>/env</td>
+  <td>安全风险</td>
+  <td>1（安全）</td>
+</tr>
+<tr>
+  <td>D14</td>
+  <td><code>CLAUDE.md</code> 的 Signal 字段/阈值/max holding 与代码不一致</td>
+  <td>薄路由，链接规范</td>
+  <td>误导开发者</td>
+  <td>0（本次）</td>
+</tr>
+<tr>
+  <td>D15</td>
+  <td><code>patterns/second_lowest/tests</code> 不在默认 testpaths</td>
+  <td>研究测试显式/独立</td>
+  <td>研究测试被忽略</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>D16</td>
+  <td>无 ruff/mypy；Makefile flake8 `|</td>
+  <td>true`</td>
+  <td><code>make check</code> 强制</td>
+  <td>风格漂移</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>D17</td>
+  <td>packaging <code>include = ["quant", ...]</code> 与顶层包不符</td>
+  <td>与目录一致</td>
+  <td>打包失败/混淆</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>D18</td>
+  <td>无行业数据，sector 全 <code>Unknown</code></td>
+  <td>Instrument/行业数据</td>
+  <td>行业上限退化</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>D19</td>
+  <td><code>RiskManager</code> 熔断用 <code>datetime.now()</code></td>
+  <td>注入 <code>Clock</code></td>
+  <td>回测不确定</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>D20</td>
+  <td><code>exit_preregistration.md</code> 的目标契约与代码不一致</td>
+  <td>目标契约 = <code>specs/exit_contract.md</code></td>
+  <td>文档易误解</td>
+  <td>0/4</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="3-迁移阶段">3. 迁移阶段</h2>
+
+<table>
+<thead>
+<tr>
+  <th>阶段</th>
+  <th>内容</th>
+  <th>退出条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>0 文档</td>
+  <td>本套文档、ADR、CLAUDE.md 薄路由、现有文档状态标记</td>
+  <td>文档齐全、链接可达、所有权表完整、代码不变</td>
+</tr>
+<tr>
+  <td>1 强制</td>
+  <td>ruff/format/mypy（增量）、pytest markers、import contracts、docs-check、<code>make check</code>、安全迁移 token</td>
+  <td>新违规被拦截；旧违规有 baseline；token 不在 tracked YAML</td>
+</tr>
+<tr>
+  <td>2 契约</td>
+  <td>新增 <code>domain/</code> 值对象/端口；adapter 包住旧 engine；行为不变</td>
+  <td>旧测试全绿；契约测试通过；无重复真相新增</td>
+</tr>
+<tr>
+  <td>3 单账本</td>
+  <td><code>execution/AccountLedger</code> + <code>SimulatedBroker</code>；PM 改纯 sizing，RM 改纯 risk；策略只读 context</td>
+  <td>黄金回测一致；账本外无现金/持仓写入</td>
+</tr>
+<tr>
+  <td>4 执行现实性</td>
+  <td>D+1、订单类型、盘中触发、T+1、涨跌停、部分成交、确定性时钟、Wilder ATR、share-aware FIFO</td>
+  <td>不变量测试；exit prereg V0–V3 可跑</td>
+</tr>
+<tr>
+  <td>5 paper/live/可视化</td>
+  <td>LiveBroker、paper runner、只读 dashboard/API</td>
+  <td>paper 3–6 个月；parity test；可视化不可写</td>
+</tr>
+<tr>
+  <td>6 策略迁移/清理</td>
+  <td>策略改用 <code>Intent</code>/<code>ExitPlan</code>；删旧路径/兼容 shim</td>
+  <td>无禁止 import、无重复真相、文档与代码一致</td>
+</tr>
+</tbody>
+</table>
+
+<p>顺序约束：</p>
+
+<ul>
+<li>阶段 2 不改行为。</li>
+<li>阶段 3 必须先于阶段 4（执行现实性需要单账本）。</li>
+<li>阶段 5 在阶段 4 parity 和 paper 门槛通过前不得发真实订单。</li>
+<li>阶段 6 最后做，避免策略迁移与管线迁移同时进行。</li>
+</ul>
+
+<h2 id="4-废弃与移除门槛">4. 废弃与移除门槛</h2>
+
+<ul>
+<li>旧 API/路径必须标记 deprecated，给出替代和移除阶段。</li>
+<li>删除前必须有黄金/回归测试覆盖。</li>
+<li>不得在同一改动中既改行为又删兼容层；分两步。</li>
+<li><code>strategy.positions</code>、<code>strategy.cash</code>、PM/RM 的资本副本在阶段 6 删除。</li>
+<li>删除 <code>core/</code> 类单体结构后不得重新引入；目标纯领域包是 <code>domain/</code>。</li>
+</ul>
+
+<h2 id="5-live-readiness-清单">5. Live readiness 清单</h2>
+
+<p>实盘前必须全部满足：</p>
+
+<ul>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 阶段 4 执行现实性完成：D+1、T+1、涨跌停、部分成交、逐笔费用。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> <code>AccountLedger</code> 是唯一账本；与 broker 对账无差异。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 回测/paper/live parity 测试通过。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> paper trading 连续 3–6 个月，含异常日（涨跌停/停牌/跳空）。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 订单幂等 ID、重试/撤单/超时处理。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> kill switch、单票/总仓位硬上限、日亏损上限。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 审计日志、成交/持仓对账、告警。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> secret 管理：token 只在 <code>tokens.yaml</code>/env，已轮换。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 人工确认/审批开关（至少首月）。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 券商 API 限流/断线重连/状态恢复测试。</li>
+<li><input type="checkbox" class="task-list-item-checkbox" disabled> 策略通过预注册、walk-forward OOS、成本、聚类统计门槛。</li>
+</ul>
+
+<h2 id="6-文档债">6. 文档债</h2>
+
+<ul>
+<li>现有 <code>docs/</code> 文档已加状态标记；历史文档不再作为架构真相。</li>
+<li>删除文档中的 engine 行号引用；改用文件名 + 符号名。</li>
+<li>统一 <code>CLAUDE.md</code> 与代码的字段/阈值/默认值。</li>
+<li>后续接入 <code>docs-check</code>：front matter、链接、禁止词、重复规范。</li>
+<li>季度 review <code>last_reviewed</code>，更新本表。</li>
+</ul>
+
+<h2 id="7-明确不做">7. 明确不做</h2>
+
+<ul>
+<li>微服务/分布式消息总线/事件溯源。</li>
+<li>多用户/认证/多租户。</li>
+<li>HFT/tick 级延迟/做市。</li>
+<li>做空/科创板/期权/期货/美股实盘。</li>
+<li>完整 NautilusTrader 运行时依赖。</li>
+<li>完整税务/券商对账系统。</li>
+<li>ML 平台/feature store/自动研究编排。</li>
+<li>执行现实性与 paper 门槛通过前的盘中自动交易。</li>
+</ul>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <a class="quant-pager__prev" href="06-glossary.html">&larr; 上一页</a>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <a class="quant-pager__next" href="08-exit-contract.html">下一页 &rarr;</a>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>

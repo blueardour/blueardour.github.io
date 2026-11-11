@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12 · 出场实验进展 — Quant Design Notes</title>
+<meta name="description" content="2026-11-04 出场敏感性实验的样本内结果、配对差异、限制与下一步。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>12 · 出场实验进展</h1>
+    <p class="quant-lead">2026-11-04 出场敏感性实验的样本内结果、配对差异、限制与下一步。</p>
+    <blockquote>
+  <p><strong>这不是策略验证结论。</strong> 本文记录的是 bug-fix 后的<strong>样本内、演示 watchlist</strong>
+  结果，用于检查模拟器和实验流程，不构成 paper/live 门槛的通过证据。
+  实验协议见 <a href="10-exit-preregistration.html"><code>../exit_preregistration.md</code></a>，
+  目标契约见 <a href="08-exit-contract.html"><code>../specs/exit_contract.md</code></a>。</p>
+</blockquote>
+
+<h2 id="1-结论摘要">1. 结论摘要</h2>
+
+<ul>
+<li>演示 watchlist：<code>000001.SZ</code>、<code>600036.SH</code>、<code>000858.SZ</code>、<code>601318.SH</code>；
+数据从 2020-01 开始，至本地缓存 2025-12-31。</li>
+<li>固定趋势入场事件，所有 variant 共用；配对共同样本 <strong>40 笔 / 38 个交易日</strong>。</li>
+<li>主假设 <strong>H1（V1 ATR 移动止损优于 V0 固定 −5%/+15%）未通过</strong>：
+配对差 <code>+0.167R</code>，日期聚类 bootstrap 95% CI <code>[-0.192, 0.527]</code>，包含 0。</li>
+<li>V2 在 V1 基础上 <code>+2R</code> 卖 1/3，配对差 <code>+0.042R</code>，CI <code>[0.013, 0.078]</code>；
+V1 把 trail 从 2.5 ATR 收窄到 2.0 ATR，配对差 <code>+0.083R</code>，CI <code>[0.046, 0.120]</code>。
+两者为正，但属于<strong>样本内、多重比较、探索性</strong>结果，不能直接采用。</li>
+<li>机制检查：配对样本中 V1/V2 <strong>没有交易亏损超过 1.5R</strong>；这是必要条件，不是充分条件。</li>
+</ul>
+
+<h2 id="2-实验设置">2. 实验设置</h2>
+
+<table>
+<thead>
+<tr>
+  <th>项目</th>
+  <th>设置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>数据频率</td>
+  <td>日线</td>
+</tr>
+<tr>
+  <td>入场</td>
+  <td>MA10/MA20 趋势 + 3 日确认；次日开盘成交；固定入场事件</td>
+</tr>
+<tr>
+  <td>初始止损</td>
+  <td><code>max_structural_atr</code>：结构低点 + 0.5 ATR 与 2.5 ATR 取宽；超过 3.5 ATR 跳过</td>
+</tr>
+<tr>
+  <td>移动止损</td>
+  <td>+1R 激活，2.5 ATR；+1R 后保本</td>
+</tr>
+<tr>
+  <td>目标</td>
+  <td>V1/V2 无固定目标；V0 固定 +15%</td>
+</tr>
+<tr>
+  <td>分批</td>
+  <td>V2 在 +2R 卖出初始仓位的 1/3（按 100 股整手向下取整）</td>
+</tr>
+<tr>
+  <td>执行</td>
+  <td>D 日收盘决策，D+1 开盘成交；A 股 T+1；5bp 单边滑点</td>
+</tr>
+<tr>
+  <td>涨跌停</td>
+  <td>主板 10%、创业板/科创板 20%、北交所 30%；跌停封死不可卖</td>
+</tr>
+<tr>
+  <td>成本</td>
+  <td><code>cost.TransactionCost</code> 逐笔费用；每股 R 分母入场后锁定</td>
+</tr>
+<tr>
+  <td>最大持有</td>
+  <td>60 个交易日</td>
+</tr>
+</tbody>
+</table>
+
+<p>变体：</p>
+
+<table>
+<thead>
+<tr>
+  <th>变体</th>
+  <th>规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>v0_fixed</code></td>
+  <td>固定 −5% 止损 / +15% 目标，无移动止损、无分批</td>
+</tr>
+<tr>
+  <td><code>v1_atr</code></td>
+  <td>结构+ATR 初始止损，2.5 ATR 移动止损，无目标、无分批</td>
+</tr>
+<tr>
+  <td><code>v2_partial</code></td>
+  <td>V1 + 在 +2R 卖出 1/3</td>
+</tr>
+<tr>
+  <td><code>v1_trail_giveback</code></td>
+  <td>探索性：V1 + 从峰值最多回吐 1/3 利润</td>
+</tr>
+<tr>
+  <td><code>v1_trail_2atr</code></td>
+  <td>探索性：移动止损宽度 2.0 ATR</td>
+</tr>
+<tr>
+  <td><code>v1_trail_3atr</code></td>
+  <td>探索性：移动止损宽度 3.0 ATR</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="3-配对结果">3. 配对结果</h2>
+
+<p>只统计所有变体都产生交易的共同入场事件，避免 V1 因“止损过宽跳过”造成样本选择偏差。</p>
+
+<table>
+<thead>
+<tr>
+  <th>变体</th>
+  <th style="text-align:right;">交易数</th>
+  <th style="text-align:right;">平均 R</th>
+  <th style="text-align:right;">中位 R</th>
+  <th style="text-align:right;">胜率</th>
+  <th style="text-align:right;">盈亏比</th>
+  <th style="text-align:right;">最大单笔亏损</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>v0_fixed</code></td>
+  <td style="text-align:right;">40</td>
+  <td style="text-align:right;">−0.178</td>
+  <td style="text-align:right;">−1.026</td>
+  <td style="text-align:right;">22.5%</td>
+  <td style="text-align:right;">0.77</td>
+  <td style="text-align:right;">−1.05R</td>
+</tr>
+<tr>
+  <td><code>v1_atr</code></td>
+  <td style="text-align:right;">40</td>
+  <td style="text-align:right;">−0.012</td>
+  <td style="text-align:right;">0.068</td>
+  <td style="text-align:right;">52.5%</td>
+  <td style="text-align:right;">0.97</td>
+  <td style="text-align:right;">−1.16R</td>
+</tr>
+<tr>
+  <td><code>v2_partial</code></td>
+  <td style="text-align:right;">40</td>
+  <td style="text-align:right;">+0.031</td>
+  <td style="text-align:right;">0.108</td>
+  <td style="text-align:right;">52.5%</td>
+  <td style="text-align:right;">1.07</td>
+  <td style="text-align:right;">−1.16R</td>
+</tr>
+<tr>
+  <td><code>v1_trail_giveback</code></td>
+  <td style="text-align:right;">40</td>
+  <td style="text-align:right;">−0.012</td>
+  <td style="text-align:right;">0.068</td>
+  <td style="text-align:right;">52.5%</td>
+  <td style="text-align:right;">0.97</td>
+  <td style="text-align:right;">−1.16R</td>
+</tr>
+<tr>
+  <td><code>v1_trail_2atr</code></td>
+  <td style="text-align:right;">40</td>
+  <td style="text-align:right;">+0.072</td>
+  <td style="text-align:right;">0.308</td>
+  <td style="text-align:right;">55.0%</td>
+  <td style="text-align:right;">1.16</td>
+  <td style="text-align:right;">−1.16R</td>
+</tr>
+<tr>
+  <td><code>v1_trail_3atr</code></td>
+  <td style="text-align:right;">40</td>
+  <td style="text-align:right;">−0.009</td>
+  <td style="text-align:right;">−0.022</td>
+  <td style="text-align:right;">45.0%</td>
+  <td style="text-align:right;">0.98</td>
+  <td style="text-align:right;">−1.16R</td>
+</tr>
+</tbody>
+</table>
+
+<p>说明：</p>
+
+<ul>
+<li><code>v1_trail_giveback</code> 在该样本中与 V1 完全一致，因为 1/3 回吐项没有比 2.5 ATR
+更紧；这不代表该规则在其他参数/样本下无效。</li>
+<li>V0 在全部可用样本上有 198 笔、最大亏损 −3.94R；配对样本只有 V1 也接受的那
+40 笔，所以表中的 V0 最大亏损是 −1.05R。不要把两个样本混在一起比较。</li>
+</ul>
+
+<h2 id="4-配对差异与置信区间">4. 配对差异与置信区间</h2>
+
+<p>按 <code>symbol + entry_date + entry_price + shares</code> 配对；以 <code>entry_date</code> 为聚类，
+重采样 38 个日期 5000 次（seed <code>20261104</code>），计算平均 R 差的 95% 区间。</p>
+
+<table>
+<thead>
+<tr>
+  <th>对比</th>
+  <th style="text-align:right;">平均差</th>
+  <th>95% CI</th>
+  <th>判读</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>V1 − V0</td>
+  <td style="text-align:right;">+0.167</td>
+  <td>[−0.192, 0.527]</td>
+  <td>包含 0，H1 未通过</td>
+</tr>
+<tr>
+  <td>V2 − V0</td>
+  <td style="text-align:right;">+0.209</td>
+  <td>[−0.163, 0.597]</td>
+  <td>包含 0</td>
+</tr>
+<tr>
+  <td>V2 − V1</td>
+  <td style="text-align:right;">+0.042</td>
+  <td>[0.013, 0.078]</td>
+  <td>为正，但样本内/探索性</td>
+</tr>
+<tr>
+  <td>trail 2.0ATR − V1</td>
+  <td style="text-align:right;">+0.083</td>
+  <td>[0.046, 0.120]</td>
+  <td>为正，但样本内/探索性</td>
+</tr>
+<tr>
+  <td>trail 3.0ATR − V1</td>
+  <td style="text-align:right;">+0.003</td>
+  <td>[−0.084, 0.123]</td>
+  <td>包含 0</td>
+</tr>
+<tr>
+  <td>giveback − V1</td>
+  <td style="text-align:right;">0.000</td>
+  <td>—</td>
+  <td>该样本中规则未生效</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="5-判读与限制">5. 判读与限制</h2>
+
+<p><strong>可以说的：</strong></p>
+
+<ul>
+<li>模拟器/runner 的完整链路已跑通：固定入场、多个出场变体、逐笔成本、配对统计。</li>
+<li>在该演示样本中，V1/V2 的尾部亏损明显小于 V0 的全样本（V0 全样本最大 −3.94R）。</li>
+<li>窄 trail（2.0 ATR）与 +2R 分批在共同样本上为正，值得在正式样本外实验中检验。</li>
+</ul>
+
+<p><strong>不能说的：</strong></p>
+
+<ul>
+<li>不能说 H1 通过：V1 − V0 的区间包含 0。</li>
+<li>不能说 V2/2ATR 已经有效：4 只示例股、40 笔配对交易、样本内、多重比较，
+没有 walk-forward/OOS。</li>
+<li>不能把结果外推到所有趋势入场：V1/V2 只交易止损不超过 3.5 ATR 的子集。</li>
+<li>当前是单笔事件研究，没有组合资金约束、并发持仓、相关性、停牌/流动性冲击。</li>
+</ul>
+
+<h2 id="6-bug-fix-与可复现性">6. Bug-fix 与可复现性</h2>
+
+<p>本轮修复了出场模拟器的关键问题，包括：</p>
+
+<ul>
+<li><strong>P0 前视</strong>：ATR/结构止损只使用入场前的 bar，不再使用入场当根 K 线。</li>
+<li>时间/最大持仓退出：收盘决策、下一开盘成交。</li>
+<li>跌停封死不可卖；连续 N 根后强制退出；数据结束按最后收盘估值并标
+<code>unresolved_lock</code>。</li>
+<li>棘轮只上移；分批不改变 R 分母；逐笔费用；板块感知涨跌停。</li>
+<li>非法 OHLC/非正止损/过宽止损显式跳过；配对统计只使用共同样本；严格 JSON。</li>
+</ul>
+
+<p>测试状态（2026-11-04）：</p>
+
+<div class="codehilite">
+<pre><span></span><code>python -m pytest -q
+356 passed, 1 skipped
+</code></pre>
+</div>
+
+<p>唯一 skip 是 tushare token 缺失，属于预期。</p>
+
+<p>运行命令：</p>
+
+<div class="codehilite">
+<pre><span></span><code>python<span class="w"> </span>scripts/exit_experiment.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--config<span class="w"> </span>config/experiments/exit_sensitivity_2026_11.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output-dir<span class="w"> </span>output/exit_experiment_demo_fixed
+</code></pre>
+</div>
+
+<p>输出：<code>trades.csv</code>、<code>summary.csv/json</code>、<code>summary_paired.csv/json</code>。</p>
+
+<h2 id="7-下一步">7. 下一步</h2>
+
+<ol>
+<li>把 <code>config/exit/base.yaml</code> 的演示 symbol 换成真实 watchlist。</li>
+<li>预注册正式实验并在<strong>未参与调参</strong>的时间段做 walk-forward/OOS。</li>
+<li>把日期聚类 bootstrap、时间切分和多重比较校正集成进 runner，而不是外部分析。</li>
+<li>增加组合层约束（并发持仓、资金、相关性）后再判断是否值得进入 paper。</li>
+<li>在正式结果出来前，不根据本文调整默认参数。</li>
+</ol>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <a class="quant-pager__prev" href="11-adr.html">&larr; 上一页</a>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <span></span>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09 · 策略设计原则 — Quant Design Notes</title>
+<meta name="description" content="四条策略原则、操作化解释与验证门槛。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="quant-page">
+<header class="quant-topbar">
+  <a class="quant-brand" href="index.html">Quant Design Notes</a>
+  <nav class="quant-topnav" aria-label="Site">
+    <a href="index.html">Index</a>
+    <a href="../index.html">Blog</a>
+  </nav>
+</header>
+
+<main class="quant-shell">
+  <article class="quant-content">
+    <p class="quant-kicker">Quant Trading System &middot; Design Notes</p>
+    <h1>09 · 策略设计原则</h1>
+    <p class="quant-lead">四条策略原则、操作化解释与验证门槛。</p>
+    <blockquote>
+  <p><strong>状态：research。</strong> 本文是策略研究/验证原则；系统架构、契约、执行语义以
+  <a href="04-design-spec.html"><code>design_spec.md</code></a> 和 <a href="03-architecture.html"><code>architecture.md</code></a> 为准。
+  本文的“下一根 bar 执行”等规则与目标执行语义一致，但当前代码可能尚未实现。</p>
+  
+  <p>本文件是所有策略讨论、设计、评审的共同基准。新增策略、修改参数、做研究前先对照本文。
+  原始原则由用户提出（2026-10-29），操作化解释由讨论整理。<strong>原则优先于具体实现。</strong></p>
+  
+  <p>相关文档：<code>patterns/second_lowest/FINDINGS.md</code>（实证方法与教训）、<code>docs/data_source_decisions.md</code>（数据口径）。</p>
+</blockquote>
+
+<hr />
+
+<h2 id="0-总纲">0. 总纲</h2>
+
+<p>不预测价格，而是判断其他参与者的持仓与行为；在人群未拥挤时进入，在人群耗尽或逻辑破坏时退出；止盈止损随价格棘轮上移；只和同上下文（市值 / 行业 / 热度 / 阶段）的样本比较。</p>
+
+<hr />
+
+<h2 id="1-边界动态化不设固定盈亏线">1. 边界动态化，不设固定盈亏线</h2>
+
+<h3 id="原始原则">原始原则</h3>
+
+<blockquote>
+  <p>There are no hard floating win/loss boundaries. The paper loss/win boundary should be dynamic, based on current price rather than a fixed price. For example, if paper win is 5%, then price goes up to 10%, we should not sell, but adjust the win boundary to 9%. If the price continues to go up, we increase the win boundary again.</p>
+</blockquote>
+
+<h3 id="操作化">操作化</h3>
+
+<ul>
+<li><strong>棘轮</strong>：盈利保护线只上移，不下移。</li>
+<li><strong>激活条件</strong>：浮盈 &gt; 1×ATR 或 &gt; 1R 后才开始跟踪，避免噪声触发。</li>
+<li><strong>回撤宽度</strong>：<code>max(固定底线, k×ATR%, r%×峰值利润)</code>。不要机械使用固定 1pp——高波动股的 1% 回撤只是噪声。</li>
+<li><strong>亏损侧</strong>：初始止损用 ATR / 结构低点；浮盈 +1R 后移到保本，再转跟踪。</li>
+<li><strong>退出方式</strong>：明确部分止盈 vs 一次性退出（两者风险与换手不同）。</li>
+<li><strong>执行约定</strong>：以收盘价更新保护线，<strong>下一根 bar 执行</strong>；回测禁止用信号当根收盘成交。</li>
+</ul>
+
+<h3 id="反模式">反模式</h3>
+
+<ul>
+<li>固定 7% / 10% 止盈、固定 −3% 止损作为唯一退出条件。</li>
+<li>对日波动 3~5% 的股票使用 1% 的跟踪间距。</li>
+<li>价格回落时下调保护线（违背棘轮）。</li>
+</ul>
+
+<hr />
+
+<h2 id="2-交易阶段不交易价格">2. 交易阶段，不交易价格</h2>
+
+<h3 id="原始原则-2">原始原则</h3>
+
+<blockquote>
+  <p>We are weak compared with giant institutions / big capital. They decide the trend of the price. A common observation is how many single investors are enrolled. Giant capital cheats these people by pulling up the price. When enough people bought, they start to pull the price up. A long period passes until people lose patience; giant capital pulls up a bit, then people sell the stocks at a price with less loss. We should detect this behaviour and the current stage: how many people and how much money buy in, who they are.</p>
+</blockquote>
+
+<h3 id="四阶段模型">四阶段模型</h3>
+
+<table>
+<thead>
+<tr>
+  <th>阶段</th>
+  <th>价格 / 量能</th>
+  <th>散户入场</th>
+  <th>大资金流向</th>
+  <th>关注度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>吸筹 Accumulation</strong></td>
+  <td>横盘/下跌，量低</td>
+  <td>股东户数下降（筹码集中）</td>
+  <td>净流入</td>
+  <td>低</td>
+</tr>
+<tr>
+  <td><strong>拉升 Markup</strong></td>
+  <td>上涨，量能放大</td>
+  <td>股东户数上升</td>
+  <td>持续流入</td>
+  <td>上升</td>
+</tr>
+<tr>
+  <td><strong>派发 Distribution</strong></td>
+  <td>滞涨、lower highs</td>
+  <td>股东户数高/仍升</td>
+  <td><strong>流出，散户仍在买</strong></td>
+  <td>峰值</td>
+</tr>
+<tr>
+  <td><strong>下跌 Markdown</strong></td>
+  <td>下跌</td>
+  <td>被套，户数仍高</td>
+  <td>流出，融资压力</td>
+  <td>衰减，偶有反弹</td>
+</tr>
+</tbody>
+</table>
+
+<p>最关键的是<strong>背离</strong>：价格不再创新高、关注度仍在高位、散户仍买入，但大单已净流出——这就是“足够多的人已经买了”的时刻。下跌阶段的反弹是 lower-high，是卖出/回避信号，不是买点。</p>
+
+<h3 id="观测代理">观测代理</h3>
+
+<ul>
+<li><strong>散户入场</strong>：股东户数变化、新增开户、小单净流入、龙虎榜散户席位。</li>
+<li><strong>大资金</strong>：主力/大单净流入、北向资金、机构席位、大宗交易、融资余额。</li>
+<li><strong>关注度</strong>：人气榜、雪球关注、新闻热度、换手率分位、涨停家数/宽度。</li>
+<li><strong>筹码</strong>：股东户数、户均持股、前十大流通股东变化。</li>
+</ul>
+
+<h3 id="约束">约束</h3>
+
+<ul>
+<li>股东户数是<strong>季度披露且有滞后</strong>，只能做背景/阶段判断，不能做择时。</li>
+<li>资金流 / 龙虎榜 / 热度历史可能不完整。<strong>没有历史数据就只做前向 paper trading，不假装有回测。</strong></li>
+<li>用“边际买盘/卖盘耗尽”替代不可观测的“主力意图”，避免把叙事当证据。</li>
+</ul>
+
+<hr />
+
+<h2 id="3-观察别人不预测价格">3. 观察别人，不预测价格</h2>
+
+<h3 id="原始原则-3">原始原则</h3>
+
+<blockquote>
+  <p>We cannot predict the price or assume the price is low enough that we should buy, or high enough that we are afraid to buy and should sell. We should observe others, observe the market, and predict other people's mood and action.</p>
+</blockquote>
+
+<h3 id="操作化-2">操作化</h3>
+
+<ul>
+<li><strong>状态 → 未来收益分布 → 仓位</strong>，而不是点预测。</li>
+<li><strong>反身性</strong>：价格 ↑ → 关注 ↑ → 资金 ↑ → 剩余买家变少。</li>
+<li><strong>买盘耗尽信号</strong>：放量不涨、市场宽度收窄、价格与资金背离、股东户数激增、融资余额见顶。</li>
+<li><strong>卖盘耗尽（镜像）</strong>：低关注 + 股东户数下降 + 大资金流入。</li>
+<li><strong>只做多时的用法</strong>：回避/退出拥挤的多头；在边际卖家耗尽时进入；markup 阶段用棘轮持有。</li>
+<li><strong>明确时间尺度</strong>（日 / 周 / 月）：不同阶段信号的滞后不同，不能混用而不声明。</li>
+</ul>
+
+<hr />
+
+<h2 id="4-先过滤上下文只和同类比较">4. 先过滤上下文，只和同类比较</h2>
+
+<h3 id="原始原则-4">原始原则</h3>
+
+<blockquote>
+  <p>Whether predicting tomorrow's up/down, or using trend_following / multi-factor / second-lowest strategies, we should filter the stocks by total capital, field (tech, agriculture, military, or some other topic), focus, hot, stage. From a whole-market view, data are all unique. We should filter out cases sharing the same pattern.</p>
+</blockquote>
+
+<h3 id="五维映射">五维映射</h3>
+
+<table>
+<thead>
+<tr>
+  <th>维度</th>
+  <th>操作定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>总资本 total capital</strong></td>
+  <td>市值桶（流通市值 = 流通股本 × close）</td>
+</tr>
+<tr>
+  <td><strong>领域 field</strong></td>
+  <td>行业 / 概念成员（point-in-time，不能用今天的分类回测过去）</td>
+</tr>
+<tr>
+  <td><strong>焦点 focus</strong></td>
+  <td>该题材占全市场成交 / 关注度的比例</td>
+</tr>
+<tr>
+  <td><strong>热度 hot</strong></td>
+  <td>关注度分位、换手率分位、涨停宽度</td>
+</tr>
+<tr>
+  <td><strong>阶段 stage</strong></td>
+  <td>原则 2 的四阶段</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="规则">规则</h3>
+
+<ul>
+<li>先过滤 universe，再产生信号；信号评估只在<strong>同一上下文桶</strong>内比较。</li>
+<li><strong>相关性去重</strong>：同一天、同一题材的 10 只股票是一个 bet，不是 10 个独立样本。统计按 <code>(date, theme, cap bucket)</code> 聚类，而不是只按 symbol。</li>
+<li>多因子在<strong>行业 / 市值桶内</strong>排序，不做全市场 global top-N。</li>
+<li>组合层面限制行业 / 题材集中度，避免“分散的持仓其实是同一个赌注”。</li>
+</ul>
+
+<hr />
+
+<h2 id="5-验证门槛不可绕过">5. 验证门槛（不可绕过）</h2>
+
+<ol>
+<li><strong>预注册</strong>：先写清假设、特征、阈值、时间尺度，再看结果。</li>
+<li><strong>Point-in-time</strong>：财报、股东户数按披露日，不按报告期；概念成员按当时快照。</li>
+<li><strong>看绝对胜率/收益</strong>，不只看相对基准的超额（基准变差也会制造“超额”）。</li>
+<li><strong>Walk-forward OOS</strong> + 时间切分 + 按 symbol/date/theme 聚类的稳健统计。</li>
+<li><strong>计入成本</strong>，执行用 next-bar / 盘中真实规则。</li>
+<li><strong>承认幸存者偏差</strong>：当前 cache 只有现存股票，买跌类 alpha 会被高估。</li>
+<li><strong>实盘前 paper trading 3–6 个月</strong>。</li>
+</ol>
+
+<blockquote>
+  <p><strong>双底教训</strong>：20 只样本内 70.8% → 扩到 413 只后 58.9% → walk-forward 失败。
+  故事很便宜，OOS 才是门槛。详见 <code>patterns/second_lowest/FINDINGS.md</code>。</p>
+</blockquote>
+
+<hr />
+
+<h2 id="6-当前代码-数据现状差距清单">6. 当前代码 / 数据现状（差距清单）</h2>
+
+<h3 id="退出逻辑">退出逻辑</h3>
+
+<ul>
+<li><code>trend_following.py</code>：有粗糙的“回吐 50% 峰值利润（峰值 &gt;5% 才激活）”，不是完整棘轮。</li>
+<li><code>hk_us_lead.py</code>：固定 7% / 10% 止盈、−3% 止损。</li>
+<li><code>multi_factor.py</code>：无价格止损，只有因子排名退出。</li>
+<li><code>backtest/engine.py</code>：只用收盘价、信号当根收盘成交、无盘中 high/low、无部分退出。</li>
+</ul>
+
+<h3 id="数据">数据</h3>
+
+<ul>
+<li><strong>已有</strong>：OHLCV、近期 <code>turnover_rate</code>、股本/市值（A 股）、A 股 5m。</li>
+<li><strong>缺失</strong>：股东户数历史、资金流、龙虎榜、北向、融资融券、概念成员、热度。</li>
+<li><strong>参考实现</strong>：<code>external/daily_stock_analysis</code> 中有 akshare 的资金流 / 龙虎榜 / 股东户数 / 热度调用，仅作设计参考，不是运行时依赖。</li>
+</ul>
+
+<h3 id="研究工具">研究工具</h3>
+
+<ul>
+<li><code>patterns/second_lowest/</code> 已有：三分位桶、共享分位边界、同桶超额比较、pre/post 时间切分、3y/6m walk-forward、按 symbol cluster bootstrap。</li>
+<li>缺口：真实市值 / 行业 / 题材 / 热度表；survivorship-aware universe；按 date/theme 的聚类统计。</li>
+</ul>
+
+<hr />
+
+<h2 id="7-待定决策">7. 待定决策</h2>
+
+<ul>
+<li>时间尺度与决策频率：日线收盘决策、持有数日~数周？还是部分 5m 盘中？</li>
+<li>阶段是<strong>纯上下文过滤器</strong>，还是同时作为<strong>进出场触发器</strong>？</li>
+<li>先做 A 股，还是 A + HK 代理？</li>
+<li>先用现有代理数据（换手/成交额/市值/价格结构/5m），还是等行为数据历史齐备？</li>
+<li>部分止盈 vs 一次性退出？</li>
+<li>旧策略迁移到新退出/上下文层，还是保留为 baseline、另建行为策略？</li>
+</ul>
+
+<hr />
+
+<h2 id="变更记录">变更记录</h2>
+
+<ul>
+<li><strong>2026-10-29</strong>：初版，整理自策略讨论（四条原则 + 操作化 + 验证门槛 + 现状差距）。</li>
+</ul>
+
+  </article>
+
+  <nav class="quant-pager" aria-label="Page navigation">
+    <a class="quant-pager__prev" href="08-exit-contract.html">&larr; 上一页</a>
+    <a class="quant-pager__index" href="index.html">目录</a>
+    <a class="quant-pager__next" href="10-exit-preregistration.html">下一页 &rarr;</a>
+  </nav>
+</main>
+
+<footer class="quant-footer">
+  <p>Quant Design Notes &middot; <a href="index.html">Design index</a></p>
+</footer>
+</body>
+</html>
